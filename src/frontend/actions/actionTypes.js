@@ -1,0 +1,10 @@
+export const SET_TURNS = "SET_TURNS";
+export const USER_SUBMIT = "USER_SUBMIT";
+
+export const ADD_USER_MOVE_HISTORY = "ADD_USER_MOVE_HISTORY";
+
+export const SET_MASTERMIND_CODE = "SET_MASTERMIND_CODE";
+
+export const GAMEOVER = "GAMEOVER";
+
+export const SET_DIFFICULTY = "SET_DIFFICULTY";
