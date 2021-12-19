@@ -15,7 +15,7 @@ function covertMillisecondsToMinutes(milli) {
 
 export function TimerComponent(props) {
   let { gameOver, endGame } = props;
-  let [time, updateTime] = useState(18000);
+  let [time, updateTime] = useState(180000);
   //time is three minutes
   useEffect(() => {
     let timer = setInterval(() => {

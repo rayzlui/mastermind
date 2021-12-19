@@ -17,12 +17,12 @@ export function SelectDifficultyComponent(props) {
           min="1"
           max="9"
           value={customDigits}
-          onChange={(e) => updateDigits(e.target.value)}
+          onChange={(e) => updateDigits(parseInt(e.target.value))}
         />
         <input
           type="text"
           value={customDigits}
-          onChange={(e) => updateDigits(e.target.value)}
+          onChange={(e) => updateDigits(parseInt(e.target.value))}
         />
         <label>Code Length</label>
         <input
@@ -30,12 +30,12 @@ export function SelectDifficultyComponent(props) {
           min="1"
           max="15"
           value={customCodeLength}
-          onChange={(e) => updateLength(e.target.value)}
+          onChange={(e) => updateLength(parseInt(e.target.value))}
         />
         <input
           type="input"
           value={customCodeLength}
-          onChange={(e) => updateLength(e.target.value)}
+          onChange={(e) => updateLength(parseInt(e.target.value))}
         />
         <SelectDifficultyButtonContainer
           toggleDifficulty={() => toggleDifficulty(false)}

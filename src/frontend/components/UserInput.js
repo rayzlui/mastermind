@@ -74,9 +74,11 @@ export function UserInput(props) {
   let showInputs = [];
   for (let i = 0; i < codeLength; i++) {
     let inputValue = userGuess[i];
-    let displayValue = inputValue === undefined ? "Empty" : inputValue;
+    let displayValue = inputValue === null ? "Fill" : inputValue;
     showInputs.push(
-      <button onClick={() => handleDirectIndexInput(i)}>{displayValue}</button>
+      <button key={`input${i}`} onClick={() => handleDirectIndexInput(i)}>
+        {displayValue}
+      </button>
     );
   }
 
