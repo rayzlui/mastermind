@@ -23,6 +23,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
   return {
     gameDifficulty,
     turnsRemaining,
+    code: mastermindCode?.nums,
     gameOver,
     submitGuess: (code) => {
       let checkCode = compareCode(code, mastermindCode);
