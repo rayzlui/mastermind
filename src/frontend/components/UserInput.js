@@ -21,7 +21,12 @@ export function UserInput(props) {
     let copyUserGuess = userGuess.slice();
     let value = keyCode - 48;
     if (value === -40) {
-      copyUserGuess.pop();
+      for (let i = copyUserGuess.length - 1; i >= 0; i--) {
+        if (copyUserGuess[i] !== null) {
+          copyUserGuess[i] = null;
+          break;
+        }
+      }
       updateGuess(copyUserGuess);
     } else if (value <= 9 && value >= 1 && value <= maxDigits) {
       if (directIndex !== null) {
