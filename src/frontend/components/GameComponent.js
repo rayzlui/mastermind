@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { UserInputContainer } from "../containers/UserInputContainer";
 import { PreviousMoveContainer } from "../containers/PreviousMoveContainer";
 import { SelectDifficultyComponent } from "./SelectDifficultyComponent";
+import { TimerContainer } from "../containers/TimerContainer";
 
 export function GameComponent(props) {
   //remove fetchcodecontainer when we set up game difficulty etc.
@@ -11,6 +12,7 @@ export function GameComponent(props) {
   }
   return (
     <>
+      <TimerContainer />
       <PreviousMoveContainer />
       <UserInputContainer />
     </>
