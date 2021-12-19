@@ -8,7 +8,7 @@ export function PreviousMoves(props) {
   for (let i = 0; i < moveHistory.length; i++) {
     let { move, redPeg, whitePeg } = moveHistory[i];
     let tableRow = (
-      <tr>
+      <tr key={`move${i + 1}`}>
         <td>{i + 1}</td>
         <td>{move}</td>
         <td>{redPeg}</td>

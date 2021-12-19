@@ -5,6 +5,7 @@ export function UserInput(props) {
   let { gameDifficulty, gameOver, submitGuess, turnsRemaining } = props;
   let { codeLength, maxDigits } = gameDifficulty;
   let [userGuess, updateGuess] = useState([]);
+  let [directIndex, updateIndex] = useState(null);
 
   if (turnsRemaining === 0) {
     return <h1>YOU LOSE HAHAHA</h1>;
@@ -22,30 +23,46 @@ export function UserInput(props) {
       copyUserGuess.pop();
       updateGuess(copyUserGuess);
     } else if (value <= 9 && value >= 0 && value <= maxDigits) {
-      if (userGuess.length >= codeLength) {
-        return;
+      if (directIndex) {
+        copyUserGuess[directIndex] = value;
+      } else {
+        if (userGuess.length >= codeLength) {
+          return;
+        }
+        copyUserGuess.push(value);
       }
-      copyUserGuess.push(value);
       updateGuess(copyUserGuess);
     }
     return null;
   }
 
   function handleClick(num) {
-    if (userGuess.length >= codeLength) {
-      return;
-    }
     let copyUserGuess = userGuess.slice();
-    copyUserGuess.push(num);
+    if (directIndex) {
+      copyUserGuess[directIndex] = num;
+      updateIndex(null);
+    } else {
+      if (userGuess.length >= codeLength) {
+        return;
+      }
+      copyUserGuess.push(num);
+    }
     updateGuess(copyUserGuess);
+    return null;
+  }
+
+  function handleDirectIndexInput(index) {
+    updateIndex(index);
     return null;
   }
 
   let showInputs = [];
   for (let i = 0; i < codeLength; i++) {
     let inputValue = userGuess[i];
-    let displayValue = inputValue === undefined ? null : inputValue;
-    showInputs.push(<div key={`inputs${i}`}>{displayValue}</div>);
+    let displayValue = inputValue === undefined ? "Empty" : inputValue;
+    showInputs.push(
+      <button onClick={() => handleDirectIndexInput(i)}>{displayValue}</button>
+    );
   }
 
   let clickEntries = [];
