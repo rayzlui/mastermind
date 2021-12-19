@@ -1,12 +1,15 @@
 import "./App.css";
 import React from "react";
-import { RootComponent } from "./frontend/components/RootComponent";
+import { GameComponent } from "./frontend/components/GameComponent";
+import { Provider } from "react-redux";
+import { configureStore } from "./frontend/configureStore";
 
 function App() {
+  let store = configureStore();
   return (
-    <div className="App">
-      <RootComponent />
-    </div>
+    <Provider store={store}>
+      <GameComponent />
+    </Provider>
   );
 }
 
