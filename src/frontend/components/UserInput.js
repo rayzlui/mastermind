@@ -20,7 +20,8 @@ export function UserInput(props) {
     let { keyCode } = event;
     let copyUserGuess = userGuess.slice();
     let value = keyCode - 48;
-    if (value === -40) {
+    const DELETE_KEY_CODE = -40;
+    if (value === DELETE_KEY_CODE) {
       for (let i = copyUserGuess.length - 1; i >= 0; i--) {
         if (copyUserGuess[i] !== null) {
           copyUserGuess[i] = null;
@@ -101,7 +102,7 @@ export function UserInput(props) {
   }
 
   function handleSubmit(userGuess) {
-    if (userGuess.length < codeLength) {
+    if (userGuess.some((x) => x === null)) {
       return;
     }
     submitGuess(userGuess);
