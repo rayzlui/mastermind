@@ -64,9 +64,8 @@ app.get("/game/pvp/:difficulty/:user", async (req, res) => {
   let difficulty = req.params.difficulty;
   let [codeLength, maxDigits] = values[difficulty];
   matching.addToThisQueue(difficulty, user);
-  console.log(user, matching);
   if (matching.getQueueFrom(difficulty).length < 2) {
-    return emitter.once("haveTwo", (newPvpMatch) => {
+    return emitter.once(`match${user}`, (newPvpMatch) => {
       res.send(newPvpMatch);
     });
   } else {
@@ -74,18 +73,40 @@ app.get("/game/pvp/:difficulty/:user", async (req, res) => {
     let [player1, player2] = players;
     let code = await generateCode(codeLength, maxDigits);
     let newPvpMatch = await new PvPModel({
-      player1,
-      player2,
+      player1: { name: player1, moves: 0 },
+      player2: { name: player2, moves: 0 },
       code,
-      player1Move: 0,
-      player2Move: 0,
       winner: "",
       gameover: false,
     });
-    emitter.emit("haveTwo", newPvpMatch);
-    console.log(matching);
+    emitter.emit(`match${player1}`, newPvpMatch);
+    newPvpMatch.save();
     res.send(newPvpMatch);
   }
+});
+
+app.get("/:gameid/:user", (req, res) => {
+  let gameid = `${req.params.gameid}`;
+  let userid = req.params.user;
+  PvPModel.findById(gameid, function (err, game) {
+    if (err) {
+      console.log(`Could not access database for game id: ${gameid}`);
+      res.send(err);
+    }
+    if (game === null) {
+      console.log(`Could not find game id: ${gameid}`);
+      res.sendStatus(404);
+    } else {
+      let { player1, player2 } = game;
+      if (player1.userid === userid) {
+        player1.moves++;
+      } else {
+        player2.moves++;
+      }
+      game.save();
+      res.json(game);
+    }
+  });
 });
 
 app.listen(port, console.log("Server connected"));
