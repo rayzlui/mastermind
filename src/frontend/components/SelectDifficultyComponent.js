@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { SelectDifficultyButtonContainer } from "../containers/SelectDifficultyButtonContainer";
+import { DifficultyButtonContainer } from "../containers/Buttons/DifficultyContainer";
 import PropTypes from "prop-types";
 
 export function SelectDifficultyComponent(props) {
-  let { toggleDifficulty } = props;
+  let { gameMode } = props;
   let [showCustom, toggleCustom] = useState(false);
   let [customDigits, updateDigits] = useState(4);
   let [customCodeLength, updateLength] = useState(7);
   let CustomDifficulty = null;
-  if (showCustom) {
+  if (showCustom && gameMode === "single") {
     CustomDifficulty = (
       <div className={"custom-difficulty-display"}>
         <label>Max Digits</label>
@@ -37,30 +37,32 @@ export function SelectDifficultyComponent(props) {
           value={customCodeLength}
           onChange={(e) => updateLength(parseInt(e.target.value))}
         />
-        <SelectDifficultyButtonContainer
-          toggleDifficulty={() => toggleDifficulty(false)}
+        <DifficultyButtonContainer
           length={customCodeLength}
           maxDigits={customDigits}
-          name={"Submit"}
+          difficulty={"Submit"}
         />
       </div>
     );
   }
+  let CustomButton =
+    gameMode === "single" ? (
+      <button onClick={() => toggleCustom(!showCustom)}>Custom</button>
+    ) : null;
+
+  let DifficultyButtons = ["easy", "normal", "hard"].map((diff) => {
+    return (
+      <DifficultyButtonContainer
+        key={`${diff} button`}
+        difficulty={`${diff}`}
+        gameMode={gameMode}
+      />
+    );
+  });
   return (
     <>
-      <SelectDifficultyButtonContainer
-        name={"Easy"}
-        toggleDifficulty={() => toggleDifficulty(false)}
-      />
-      <SelectDifficultyButtonContainer
-        name={"Normal"}
-        toggleDifficulty={() => toggleDifficulty(false)}
-      />
-      <SelectDifficultyButtonContainer
-        name={"Hard"}
-        toggleDifficulty={() => toggleDifficulty(false)}
-      />
-      <button onClick={() => toggleCustom(!showCustom)}>Custom</button>
+      {DifficultyButtons}
+      {CustomButton}
       {CustomDifficulty}
     </>
   );
@@ -68,4 +70,5 @@ export function SelectDifficultyComponent(props) {
 
 SelectDifficultyComponent.propTypes = {
   toggleDifficulty: PropTypes.func,
+  gameMode: PropTypes.string,
 };

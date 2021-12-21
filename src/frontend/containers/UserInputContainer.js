@@ -1,5 +1,10 @@
 import { connect } from "react-redux";
-import { addMoveToHistory, gameOver, userSubmit } from "../actions/actions";
+import {
+  addMoveToHistory,
+  gameOver,
+  updateDataBaseForPvP,
+  userSubmit,
+} from "../actions/actions";
 import { UserInput } from "../components/UserInput";
 import { compareCode } from "../gameLogic/compareCode";
 
@@ -13,13 +18,22 @@ function mapDispatchToProps(dispatch) {
     addTurnToHistory: (move, redPeg, whitePeg) =>
       dispatch(addMoveToHistory({ move, redPeg, whitePeg })),
     dispatchGameOver: () => dispatch(gameOver()),
+    updatePvP: (gameid, userid) =>
+      dispatch(updateDataBaseForPvP(gameid, userid)),
   };
 }
 
 function mergeProps(mapStateToProps, mapDispatchToProps) {
-  let { gameDifficulty, gameOver, mastermindCode, turnsRemaining } =
-    mapStateToProps;
-  let { updateTurns, addTurnToHistory, dispatchGameOver } = mapDispatchToProps;
+  let {
+    gameDifficulty,
+    gameOver,
+    mastermindCode,
+    turnsRemaining,
+    opponentData,
+  } = mapStateToProps;
+  let gameid = opponentData?._id;
+  let { updateTurns, addTurnToHistory, dispatchGameOver, updatePvP } =
+    mapDispatchToProps;
   return {
     gameDifficulty,
     turnsRemaining,
@@ -33,6 +47,9 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
       }
       updateTurns();
       addTurnToHistory(code, redPeg, whitePeg);
+      if (opponentData) {
+        updatePvP(gameid, "test");
+      }
     },
   };
 }
