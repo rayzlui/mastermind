@@ -3,10 +3,10 @@ import React from "react";
 import { SinglePlayerGameComponent } from "./frontend/components/SinglePlayerGameComponent";
 import { Provider } from "react-redux";
 import { configureStore } from "./frontend/configureStore";
-import { WelcomeScreen } from "./frontend/components/WelcomeComponent";
 import { CreateUserContainer } from "./frontend/containers/CreateUserContainer";
 import { LoginUserContainer } from "./frontend/containers/LoginUserContainer";
 import { WinnerPageContainer } from "./frontend/containers/WinnerPageContainer";
+import { WelcomeContainer } from "./frontend/containers/WelcomeContainer";
 
 function App() {
   let store = configureStore();
@@ -15,7 +15,7 @@ function App() {
       <WinnerPageContainer />
       <LoginUserContainer />
       <CreateUserContainer />
-      <WelcomeScreen />
+      <WelcomeContainer />
       <SinglePlayerGameComponent />
     </Provider>
   );
