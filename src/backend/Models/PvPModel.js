@@ -2,8 +2,7 @@ let mongoose = require("mongoose");
 let { Schema, model } = mongoose;
 
 let pvpSchema = new Schema({
-  player1: { name: String, userid: String, moves: Number },
-  player2: { name: String, userid: String, moves: Number },
+  players: {},
   code: Object,
   winner: String,
   ganeOver: Number,

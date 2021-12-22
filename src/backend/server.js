@@ -1,7 +1,7 @@
 let express = require("express");
 let mongoose = require("mongoose");
-let UserModel = require("./UserModel.js");
-let PvPModel = require("./PvPModel");
+let UserModel = require("./Models/UserModel.js");
+let PvPModel = require("./Models/PvPModel");
 let EventEmitter = require("events");
 let bodyParser = require("body-parser");
 let scramblePassword = require("./scramblePass");
@@ -67,27 +67,33 @@ let values = {};
 values["easy"] = [4, 4];
 values["normal"] = [4, 7];
 values["hard"] = [9, 9];
-app.get("/game/pvp/:difficulty/:user", async (req, res) => {
-  let user = req.params.user;
+app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
+  let name = req.params.name;
+  let id = req.params.id;
+  let user = { name, id };
   let difficulty = req.params.difficulty;
   let [codeLength, maxDigits] = values[difficulty];
   matching.addToThisQueue(difficulty, user);
+  console.log(matching);
   if (matching.getQueueFrom(difficulty).length < 2) {
     return emitter.once(`match${user}`, (newPvpMatch) => {
       res.send(newPvpMatch);
     });
   } else {
-    let players = matching.removeTwoFrom(difficulty);
-    let [player1, player2] = players;
+    let fromQueue = matching.removeTwoFrom(difficulty);
+    let playersMatched = fromQueue.reduce((acc, player) => {
+      let { id, name } = player;
+      acc[id] = { name, moves: 0, finish: false, time: 0 };
+      return acc;
+    }, {});
     let code = await generateCode(codeLength, maxDigits);
     let newPvpMatch = await new PvPModel({
-      player1: { name: player1, moves: 0 },
-      player2: { name: player2, moves: 0 },
+      players: playersMatched,
       code,
       winner: "",
       gameover: false,
     });
-    emitter.emit(`match${player1}`, newPvpMatch);
+    emitter.emit(`match${fromQueue[0]}`, newPvpMatch);
     newPvpMatch.save();
     res.send(newPvpMatch);
   }
@@ -105,14 +111,20 @@ app.get("/:gameid/:user", (req, res) => {
       console.log(`Could not find game id: ${gameid}`);
       res.sendStatus(404);
     } else {
-      let { player1, player2 } = game;
-      if (player1.userid === userid) {
-        player1.moves++;
-      } else {
-        player2.moves++;
-      }
-      game.save();
-      res.json(game);
+      console.log(game, userid);
+      let { players } = game;
+      console.log(players[userid].moves);
+      players[userid].moves = players[userid].moves + 1;
+      game[players] = players;
+      game.markModified("players");
+      game.save((err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("update success");
+          res.json(game);
+        }
+      });
     }
   });
 });
