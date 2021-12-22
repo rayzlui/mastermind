@@ -80,12 +80,10 @@ export function updateDataBaseForPvP(gameid, userid, isWinner) {
     });
     let data = await request.json();
     console.log(data);
-    let { players, winner } = await data;
-    console.log(players, winner);
+    let { players } = await data;
     dispatch(
       updateOpponent({
         players,
-        winner,
       })
     );
   };

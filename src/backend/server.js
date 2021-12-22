@@ -102,7 +102,6 @@ app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
 app.post("/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
   let { userid, winner } = req.body;
-  console.log(userid, winner);
   PvPModel.findById(gameid, function (err, game) {
     if (err) {
       console.log(`Could not access database for game id: ${gameid}`);
@@ -112,31 +111,29 @@ app.post("/game/:gameid", jsonParser, (req, res) => {
       console.log(`Could not find game id: ${gameid}`);
       res.sendStatus(404);
     } else {
-      console.log(game, userid);
-      let { players } = game;
-      console.log(players[userid].moves);
+      let { _id, players } = game;
       players[userid].moves = players[userid].moves + 1;
       players[userid].winner = winner;
       if (winner) {
         game.numCompletedGames++;
       }
-      if (numCompletedGames === players.length) {
-        PvPModel.deleteOne(gameId, (err, game) => {
+
+      game[players] = players;
+      game.markModified("players");
+      game.save((err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("update success");
+          res.json(game);
+        }
+      });
+      if (game.numCompletedGames === 2) {
+        PvPModel.deleteOne(_id, (err, game) => {
           if (err) {
             console.log("Unable to delete game");
           } else {
             console.log(`Game completed. Deleting ${game}`);
-          }
-        });
-      } else {
-        game[players] = players;
-        game.markModified("players");
-        game.save((err) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("update success");
-            res.json(game);
           }
         });
       }

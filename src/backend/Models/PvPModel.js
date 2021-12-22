@@ -4,7 +4,7 @@ let { Schema, model } = mongoose;
 let pvpSchema = new Schema({
   players: {},
   code: Object,
-  winner: String,
+  numCompletedGames: Number,
   ganeOver: Number,
 });
 
