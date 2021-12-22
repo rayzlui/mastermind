@@ -1,7 +1,7 @@
 import { generateCode } from "../gameLogic/generateCode";
 import {
   ADD_USER_MOVE_HISTORY,
-  GAMEOVER,
+  WINNER,
   LOGIN_USER,
   LOGOUT_USER,
   SET_DIFFICULTY,
@@ -26,8 +26,8 @@ export function setTurns(turns) {
   return { type: SET_TURNS, payload: turns };
 }
 
-export function gameOver() {
-  return { type: GAMEOVER, payload: true };
+export function weHaveAWinner() {
+  return { type: WINNER, payload: true };
 }
 
 export function setDifficulty(codeLength, maxDigits) {
@@ -75,12 +75,13 @@ export function updateDataBaseForPvP(gameid, userid, isWinner) {
       body: JSON.stringify({
         gameid,
         userid,
-        isWinner,
+        winner: isWinner,
       }),
     });
     let data = await request.json();
     console.log(data);
     let { players, winner } = await data;
+    console.log(players, winner);
     dispatch(
       updateOpponent({
         players,

@@ -6,11 +6,13 @@ import { configureStore } from "./frontend/configureStore";
 import { WelcomeScreen } from "./frontend/components/WelcomeComponent";
 import { CreateUserContainer } from "./frontend/containers/CreateUserContainer";
 import { LoginUserContainer } from "./frontend/containers/LoginUserContainer";
+import { WinnerPageContainer } from "./frontend/containers/WinnerPageContainer";
 
 function App() {
   let store = configureStore();
   return (
     <Provider store={store}>
+      <WinnerPageContainer />
       <LoginUserContainer />
       <CreateUserContainer />
       <WelcomeScreen />

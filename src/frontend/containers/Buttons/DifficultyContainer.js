@@ -14,7 +14,10 @@ import {
 } from "../../actions/actionTypes";
 
 function mapStateToProps(state) {
-  let { _id, username } = state?.currentUser;
+  if (state.currentUser === null) {
+    return {};
+  }
+  let { _id, username } = state.currentUser;
   return { id: _id, name: username };
 }
 

@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import { gameDifficultyReducer } from "./gameDifficultyReducer";
-import { gameOverReducer } from "./gameOverReducer";
+import { isWinnerReducer } from "./isWinnerReducerReducer";
 import { gameTypeReducer } from "./gameTypeReducer";
 import { mastermindCodeReducer } from "./mastermindCodeReducer";
 import { moveHistoryReducer } from "./moveHistoryReducer";
@@ -12,7 +12,7 @@ import { currentUserReducer } from "./currentUserReducer";
 export const rootReducer = combineReducers({
   moveHistory: moveHistoryReducer,
   mastermindCode: mastermindCodeReducer,
-  gameOver: gameOverReducer,
+  isWinner: isWinnerReducer,
   turnsRemaining: turnsRemainingReducer,
   gameDifficulty: gameDifficultyReducer,
   gameType: gameTypeReducer,

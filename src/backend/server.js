@@ -46,23 +46,23 @@ app.get("/user/:name", (req, res) => {
   });
 });
 
-function MatchMaking() {
+function SinglePlayerMatchMaking() {
   this.easy = [];
   this.normal = [];
   this.hard = [];
 }
-MatchMaking.prototype.addToThisQueue = function (diff, id) {
+SinglePlayerMatchMaking.prototype.addToThisQueue = function (diff, id) {
   this[diff] = [...this[diff], id];
 };
-MatchMaking.prototype.getQueueFrom = function (diff) {
+SinglePlayerMatchMaking.prototype.getQueueFrom = function (diff) {
   return this[diff];
 };
 
-MatchMaking.prototype.removeTwoFrom = function (diff) {
+SinglePlayerMatchMaking.prototype.removeTwoFrom = function (diff) {
   return this[diff].splice(0, 2);
 };
 let emitter = new EventEmitter();
-let matching = new MatchMaking();
+let matching = new SinglePlayerMatchMaking();
 let values = {};
 values["easy"] = [4, 4];
 values["normal"] = [4, 7];
@@ -90,7 +90,7 @@ app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
     let newPvpMatch = await new PvPModel({
       players: playersMatched,
       code,
-      winner: "",
+      numCompletedGames: 0,
       gameover: false,
     });
     emitter.emit(`match${fromQueue[0]}`, newPvpMatch);
@@ -102,6 +102,7 @@ app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
 app.post("/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
   let { userid, winner } = req.body;
+  console.log(userid, winner);
   PvPModel.findById(gameid, function (err, game) {
     if (err) {
       console.log(`Could not access database for game id: ${gameid}`);
@@ -116,16 +117,29 @@ app.post("/game/:gameid", jsonParser, (req, res) => {
       console.log(players[userid].moves);
       players[userid].moves = players[userid].moves + 1;
       players[userid].winner = winner;
-      game[players] = players;
-      game.markModified("players");
-      game.save((err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("update success");
-          res.json(game);
-        }
-      });
+      if (winner) {
+        game.numCompletedGames++;
+      }
+      if (numCompletedGames === players.length) {
+        PvPModel.deleteOne(gameId, (err, game) => {
+          if (err) {
+            console.log("Unable to delete game");
+          } else {
+            console.log(`Game completed. Deleting ${game}`);
+          }
+        });
+      } else {
+        game[players] = players;
+        game.markModified("players");
+        game.save((err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("update success");
+            res.json(game);
+          }
+        });
+      }
     }
   });
 });

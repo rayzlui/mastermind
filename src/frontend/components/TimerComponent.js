@@ -14,28 +14,22 @@ function covertMillisecondsToMinutes(milli) {
 }
 
 export function TimerComponent(props) {
-  let { gameOver, endGame, gameType } = props;
-  let startTime = gameType === "single" ? 180000 : 0;
-  //time is three minutes for single player, we count up if its multiplayer and save time.
-  let [time, updateTime] = useState(startTime);
+  let { gameOver, endGame } = props;
+  let [time, updateTime] = useState(180000);
+  //time is three minutes
   useEffect(() => {
-    let countDirection = 1;
-    if (gameType === "single") {
-      countDirection = -1;
-      if (time <= 0) {
-        endGame();
-        clearInterval(timer);
-      }
-    }
     let timer = setInterval(() => {
-      updateTime(time + 1000 * countDirection);
+      updateTime(time - 1000);
     }, 1000);
+    if (time <= 0) {
+      endGame();
+      clearInterval(timer);
+    }
     if (gameOver) {
       clearInterval(timer);
     }
     return () => clearInterval(timer);
   }, [time, gameOver]);
-
   let { minutes, seconds } = covertMillisecondsToMinutes(time);
   return <p>Time Remaining: {`${minutes}:${seconds}`}</p>;
 }
@@ -43,5 +37,4 @@ export function TimerComponent(props) {
 TimerComponent.propTypes = {
   gameOver: PropTypes.bool,
   endGame: PropTypes.func,
-  gameType: PropTypes.string,
 };

@@ -5,7 +5,7 @@ export const ADD_USER_MOVE_HISTORY = "ADD_USER_MOVE_HISTORY";
 
 export const SET_MASTERMIND_CODE = "SET_MASTERMIND_CODE";
 
-export const GAMEOVER = "GAMEOVER";
+export const WINNER = "WINNER";
 
 export const SET_DIFFICULTY = "SET_DIFFICULTY";
 export const SET_SINGLE_PLAYER = "SET_SINGLE_PLAYER";
