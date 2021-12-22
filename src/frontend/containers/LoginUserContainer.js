@@ -1,7 +1,12 @@
 import { connect } from "react-redux";
 import { UserPage } from "../components/User";
 import { LoginUser } from "../actions/actions";
-import { scramblePassword } from "../../scrambleString";
+
+function mapStateToProps() {
+  return {
+    type: "Login",
+  };
+}
 
 function mapDispatchToProps(dispatch) {
   return {
@@ -11,4 +16,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export const LoginUserContainer = connect(null, mapDispatchToProps)(UserPage);
+export const LoginUserContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UserPage);

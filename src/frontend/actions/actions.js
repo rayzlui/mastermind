@@ -44,46 +44,47 @@ export function updateOpponent(data) {
   return { type: UPDATE_OPPONENT, payload: data };
 }
 
-export function requestPvpMatch(difficulty, name) {
-  console.log(difficulty, name);
+export function requestPvpMatch(difficulty, user) {
+  console.log(difficulty, user);
+  let { name, id } = user;
   return async (dispatch) => {
     let request = await fetch(
-      `http://localhost:3001/game/pvp/${difficulty}/${name}`
+      `http://localhost:3001/game/pvp/${difficulty}/${name}/${id}`
     );
     let data = await request.json();
     console.log(data);
-    let { player1, player2, code, _id, winner, player1Moves, player2Moves } =
-      await data;
+    let { players, code, _id, winner } = await data;
     dispatch(setMastermindCode(code));
     dispatch(
       updateOpponent({
-        player1,
-        player2,
+        players,
         _id,
         winner,
-        player1Moves,
-        player2Moves,
       })
     );
   };
 }
 
-export function updateDataBaseForPvP(gameid, userid) {
+export function updateDataBaseForPvP(gameid, userid, isWinner) {
   return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/${gameid}/${userid}`);
+    let request = await fetch(`http://localhost:3001/game/${gameid}`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        gameid,
+        userid,
+        isWinner,
+      }),
+    });
     let data = await request.json();
     console.log(data);
-    let { player1, player2, code, _id, winner, player1Moves, player2Moves } =
-      await data;
-    dispatch(setMastermindCode(code));
+    let { players, winner } = await data;
     dispatch(
       updateOpponent({
-        player1,
-        player2,
-        _id,
+        players,
         winner,
-        player1Moves,
-        player2Moves,
       })
     );
   };

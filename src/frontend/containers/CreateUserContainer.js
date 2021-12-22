@@ -3,6 +3,12 @@ import { UserPage } from "../components/User";
 import { createUser } from "../actions/actions";
 import { casearCypher } from "../../scrambleString";
 
+function mapStateToProps() {
+  return {
+    type: "Create Account",
+  };
+}
+
 function mapDispatchToProps(dispatch) {
   return {
     userAction: (username, password) => {
@@ -13,4 +19,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export const CreateUserContainer = connect(null, mapDispatchToProps)(UserPage);
+export const CreateUserContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UserPage);

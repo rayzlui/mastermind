@@ -1,6 +1,6 @@
 import "./App.css";
 import React from "react";
-import { GameComponent } from "./frontend/components/GameComponent";
+import { SinglePlayerGameComponent } from "./frontend/components/SinglePlayerGameComponent";
 import { Provider } from "react-redux";
 import { configureStore } from "./frontend/configureStore";
 import { WelcomeScreen } from "./frontend/components/WelcomeComponent";
@@ -14,7 +14,7 @@ function App() {
       <LoginUserContainer />
       <CreateUserContainer />
       <WelcomeScreen />
-      <GameComponent />
+      <SinglePlayerGameComponent />
     </Provider>
   );
 }

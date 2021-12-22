@@ -13,8 +13,13 @@ import {
   TRY_MATCHMAKING,
 } from "../../actions/actionTypes";
 
+function mapStateToProps(state) {
+  let { _id, username } = state?.currentUser;
+  return { id: _id, name: username };
+}
+
 function mapDispatchToProps(dispatch, ownProps) {
-  let { difficulty, gameMode, length, maxDigits, userInfo } = ownProps;
+  let { difficulty, gameMode, length, maxDigits } = ownProps;
   let codeLength;
   let maxDigit;
   switch (difficulty) {
@@ -37,7 +42,7 @@ function mapDispatchToProps(dispatch, ownProps) {
       break;
   }
   return {
-    buttonAction: () => {
+    buttonAction: (currentUser = null) => {
       switch (gameMode) {
         case "single":
           dispatch(generateMastermindCode(codeLength, maxDigit));
@@ -47,7 +52,7 @@ function mapDispatchToProps(dispatch, ownProps) {
         case "pvp":
           dispatch({ type: SET_PVP });
           dispatch({ type: TRY_MATCHMAKING });
-          dispatch(requestPvpMatch(difficulty, userInfo));
+          dispatch(requestPvpMatch(difficulty, currentUser));
           dispatch(setDifficulty(codeLength, maxDigit));
           break;
         default:
@@ -59,7 +64,18 @@ function mapDispatchToProps(dispatch, ownProps) {
   };
 }
 
+function mergeProps(mapStateToProps, mapDispatchToProps, ownProps) {
+  let { difficulty } = ownProps;
+  let currentUser = mapStateToProps;
+  let { buttonAction } = mapDispatchToProps;
+  return {
+    difficulty,
+    buttonAction: () => buttonAction(currentUser),
+  };
+}
+
 export const DifficultyButtonContainer = connect(
-  null,
-  mapDispatchToProps
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
 )(Button);

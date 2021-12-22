@@ -30,8 +30,10 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     mastermindCode,
     turnsRemaining,
     opponentData,
+    currentUser,
   } = mapStateToProps;
   let gameid = opponentData?._id;
+  let userid = currentUser?._id;
   let { updateTurns, addTurnToHistory, dispatchGameOver, updatePvP } =
     mapDispatchToProps;
   return {
@@ -42,13 +44,14 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     submitGuess: (code) => {
       let checkCode = compareCode(code, mastermindCode);
       let { redPeg, whitePeg } = checkCode;
-      if (redPeg === code.length) {
+      let winner = redPeg === code.length;
+      if (winner) {
         dispatchGameOver();
       }
       updateTurns();
       addTurnToHistory(code, redPeg, whitePeg);
       if (opponentData) {
-        updatePvP(gameid, "test");
+        updatePvP(gameid, userid, winner);
       }
     },
   };

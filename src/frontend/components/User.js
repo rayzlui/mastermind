@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 export function UserPage(props) {
-  let { userAction } = props;
+  let { userAction, type } = props;
   let [userName, updateUserName] = useState();
   let [password, updatePassword] = useState();
   return (
     <>
       <form>
+        <label>{type}</label>
         <label>Username</label>
         <input
           type={"text"}
@@ -31,4 +32,4 @@ export function UserPage(props) {
   );
 }
 
-UserPage.propTypes = { userAction: PropTypes.func };
+UserPage.propTypes = { userAction: PropTypes.func, type: PropTypes.string };

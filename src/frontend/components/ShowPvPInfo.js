@@ -6,7 +6,9 @@ export function ShowPVPInfo(props) {
   if (opponentData === null) {
     return null;
   }
-  let { player1, player2 } = opponentData;
+  let { players } = opponentData;
+  let values = Object.values(players);
+  let [player1, player2] = values;
 
   return (
     <div>

@@ -83,7 +83,7 @@ app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
     let fromQueue = matching.removeTwoFrom(difficulty);
     let playersMatched = fromQueue.reduce((acc, player) => {
       let { id, name } = player;
-      acc[id] = { name, moves: 0, finish: false, time: 0 };
+      acc[id] = { name, moves: 0, finish: false, time: 0, winner: false };
       return acc;
     }, {});
     let code = await generateCode(codeLength, maxDigits);
@@ -99,9 +99,9 @@ app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
   }
 });
 
-app.get("/:gameid/:user", (req, res) => {
+app.post("/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
-  let userid = req.params.user;
+  let { userid, winner } = req.body;
   PvPModel.findById(gameid, function (err, game) {
     if (err) {
       console.log(`Could not access database for game id: ${gameid}`);
@@ -115,6 +115,7 @@ app.get("/:gameid/:user", (req, res) => {
       let { players } = game;
       console.log(players[userid].moves);
       players[userid].moves = players[userid].moves + 1;
+      players[userid].winner = winner;
       game[players] = players;
       game.markModified("players");
       game.save((err) => {

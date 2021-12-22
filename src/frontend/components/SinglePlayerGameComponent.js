@@ -4,7 +4,7 @@ import { PreviousMoveContainer } from "../containers/PreviousMoveContainer";
 import { ShowPVPContainer } from "../containers/ShowPVPContainer";
 import { TimerContainer } from "../containers/TimerContainer";
 
-export function GameComponent(props) {
+export function SinglePlayerGameComponent(props) {
   return (
     <>
       <ShowPVPContainer />
