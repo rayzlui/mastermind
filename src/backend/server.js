@@ -3,12 +3,15 @@ let mongoose = require("mongoose");
 let UserModel = require("./UserModel.js");
 let PvPModel = require("./PvPModel");
 let EventEmitter = require("events");
-let generateCode = require("./generateCodeFromBackend.js");
+let bodyParser = require("body-parser");
+let scramblePassword = require("./scramblePass");
+let generateCode = require("./generateCodeFromBackend");
 
 let app = express();
 let port = 3001;
 let mongoDB = "mongodb://127.0.0.1:27017/mastermind";
 
+const jsonParser = bodyParser.json();
 mongoose.connect(mongoDB, { useNewUrlParser: true }, function (err) {
   if (err) return console.log(err);
   console.log("Database connection successful");
@@ -16,6 +19,11 @@ mongoose.connect(mongoDB, { useNewUrlParser: true }, function (err) {
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    " X-Requested-With, Origin, Content-Type, Accept"
+  );
   next();
 });
 
@@ -105,6 +113,63 @@ app.get("/:gameid/:user", (req, res) => {
       }
       game.save();
       res.json(game);
+    }
+  });
+});
+
+app.post("/user/create", jsonParser, (req, res) => {
+  let { username, password, key } = req.body;
+  UserModel.findOne({ name: username }, (err, user) => {
+    if (err) {
+      console.log("Error accessing data");
+      res.send(404);
+    } else {
+      if (user === null) {
+        let newUser = new UserModel({
+          name: username,
+          passwordHash: password,
+          coolstring: key,
+          gameHistory: [],
+        });
+        newUser.save((error) => {
+          if (error) {
+            console.log(`Unable to create new user ${error}`);
+            res.send(error);
+          } else {
+            console.log(`Success, created new user ${username}`);
+            let { _id, gameHistory } = newUser;
+            res.send({ username, _id, gameHistory });
+          }
+        });
+      } else {
+        res.status(418).send("Username taken");
+      }
+    }
+  });
+});
+
+app.post("/user/login", jsonParser, (req, res) => {
+  let { username, password } = req.body;
+  console.log(username, password);
+  UserModel.findOne({ name: username }, (err, user) => {
+    console.log(user);
+    if (err) {
+      console.log("Error accessing data");
+      res.send(404);
+    } else {
+      if (user === null) {
+        console.log("Unable to find account");
+        res.status(418).send("Please create an account");
+      } else {
+        console.log("Found account");
+        let { coolstring, passwordHash, _id, gameHistory } = user;
+        let scramble = scramblePassword(password, coolstring);
+        if (passwordHash === scramble) {
+          res.send({ username, _id, gameHistory });
+        } else {
+          res.status(403).send("Unable to find username + account combo");
+        }
+      }
     }
   });
 });

@@ -69,7 +69,6 @@ export function requestPvpMatch(difficulty, name) {
 }
 
 export function updateDataBaseForPvP(gameid, userid) {
-  console.log(`http://localhost:3001/${gameid}/${userid}`);
   return async (dispatch) => {
     let request = await fetch(`http://localhost:3001/${gameid}/${userid}`);
     let data = await request.json();
@@ -96,4 +95,54 @@ export function loginUser(data) {
 
 export function logoutUser() {
   return { type: LOGOUT_USER };
+}
+
+export function createUser(username, password, key) {
+  return async (dispatch) => {
+    let request = await fetch(`http://localhost:3001/user/create`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+        key,
+      }),
+    });
+    console.log(request);
+    if (request.status === 200) {
+      let userData = await request.json();
+      dispatch(loginUser(userData));
+    } else {
+      //unable to create user, they gotta do it again
+      if (request.status === 418) {
+      }
+      //need to redo recreate account
+    }
+  };
+}
+
+export function LoginUser(username, password) {
+  return async (dispatch) => {
+    let request = await fetch(`http://localhost:3001/user/login`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    });
+    if (request.status === 200) {
+      let userData = await request.json();
+      dispatch(loginUser(userData));
+    } else {
+      //unable to create user, they gotta do it again
+      if (request.status === 418) {
+      }
+      //need to redo recreate account
+    }
+  };
 }

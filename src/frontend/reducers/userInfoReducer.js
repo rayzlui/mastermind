@@ -1,3 +1,5 @@
+import { LOGIN_USER, LOGOUT_USER } from "../actions/actionTypes";
+
 export function userInfoReducer(state = null, action) {
   let { type, payload } = action;
   switch (type) {
