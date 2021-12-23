@@ -55,12 +55,15 @@ function mapDispatchToProps(dispatch, ownProps) {
         case "pvp":
           dispatch({ type: SET_PVP });
           dispatch({ type: TRY_MATCHMAKING });
-          dispatch(requestPvpMatch(difficulty, currentUser));
+          dispatch(requestPvpMatch(difficulty, "pvp", currentUser));
           dispatch(setDifficulty(codeLength, maxDigit));
           break;
         default:
           //for tournament if we get there.
           dispatch({ type: SET_TOURNAMENT });
+          dispatch({ type: TRY_MATCHMAKING });
+          dispatch(requestPvpMatch(difficulty, "tournament", currentUser));
+          dispatch(setDifficulty(codeLength, maxDigit));
           break;
       }
     },

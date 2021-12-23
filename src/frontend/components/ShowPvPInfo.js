@@ -7,16 +7,23 @@ export function ShowPVPInfo(props) {
     return null;
   }
   let { players } = opponentData;
-  let values = Object.values(players);
-  let [player1, player2] = values;
+  let arrayOfPlayers = Object.values(players);
+  let display = [];
+  arrayOfPlayers.forEach((data) => {
+    let { name, moves } = data;
+
+    display.push(
+      <>
+        <h3>{name}</h3>
+        <p>Moves {moves}</p>
+      </>
+    );
+  });
 
   return (
     <div>
       <h1>PvP Mode !1</h1>
-      <h3>{player1.name}</h3>
-      <p>Moves {player1.moves}</p>
-      <h3>{player2.name}</h3>
-      <p>Moves {player2.moves}</p>
+      {display}
     </div>
   );
 }

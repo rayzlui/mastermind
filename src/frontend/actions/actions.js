@@ -45,12 +45,11 @@ export function updateOpponent(data) {
   return { type: UPDATE_OPPONENT, payload: data };
 }
 
-export function requestPvpMatch(difficulty, user) {
-  console.log(difficulty, user);
+export function requestPvpMatch(difficulty, type, user) {
   let { name, id } = user;
   return async (dispatch) => {
     let request = await fetch(
-      `http://localhost:3001/game/pvp/${difficulty}/${name}/${id}`
+      `http://localhost:3001/game/${type}/${difficulty}/${name}/${id}`
     );
     let data = await request.json();
     console.log(data);

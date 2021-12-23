@@ -67,37 +67,43 @@ let values = {};
 values["easy"] = [4, 4];
 values["normal"] = [4, 7];
 values["hard"] = [9, 9];
+
 app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
   let name = req.params.name;
   let id = req.params.id;
   let user = { name, id };
   let difficulty = req.params.difficulty;
-  let [codeLength, maxDigits] = values[difficulty];
   matching.addToThisQueue(difficulty, user);
-  console.log(matching);
   if (matching.getQueueFrom(difficulty).length < 2) {
     return emitter.once(`match${user}`, (newPvpMatch) => {
       res.send(newPvpMatch);
     });
   } else {
     let fromQueue = matching.removeTwoFrom(difficulty);
-    let playersMatched = fromQueue.reduce((acc, player) => {
-      let { id, name } = player;
-      acc[id] = { name, moves: 0, finish: false, time: 0, winner: false };
-      return acc;
-    }, {});
-    let code = await generateCode(codeLength, maxDigits);
-    let newPvpMatch = await new PvPModel({
-      players: playersMatched,
-      code,
-      numCompletedGames: 0,
-      gameover: false,
-    });
-    emitter.emit(`match${fromQueue[0]}`, newPvpMatch);
-    newPvpMatch.save();
-    res.send(newPvpMatch);
+    let newMatch = await createMatch(fromQueue, difficulty);
+    emitter.emit(`match${fromQueue[0]}`, newMatch);
+    res.send(newMatch);
   }
 });
+
+async function createMatch(players, difficulty) {
+  let playersMatched = players.reduce((acc, player) => {
+    let { id, name } = player;
+    acc[id] = { name, moves: 0, finish: false, time: 0, winner: false };
+    return acc;
+  }, {});
+
+  let [codeLength, maxDigits] = values[difficulty];
+  let code = await generateCode(codeLength, maxDigits);
+  let newPvpMatch = await new PvPModel({
+    players: playersMatched,
+    code,
+    numCompletedGames: 0,
+    gameover: false,
+  });
+  newPvpMatch.save();
+  return newPvpMatch;
+}
 
 app.post("/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
@@ -213,6 +219,42 @@ app.post("/user/login", jsonParser, (req, res) => {
         }
       }
     }
+  });
+});
+
+function MutliplayerMatchMaker() {
+  this.easy = [];
+  this.normal = [];
+  this.hard = [];
+}
+
+MutliplayerMatchMaker.prototype.addToThisQueue = function (difficulty, user) {
+  this[difficulty].push(user);
+};
+
+let multiplayerMatchMaking = new MutliplayerMatchMaker();
+
+setInterval(() => {
+  console.log(multiplayerMatchMaking);
+  let queueDifficultyKeys = Object.keys(multiplayerMatchMaking);
+  queueDifficultyKeys.forEach(async (difficulty) => {
+    let queue = multiplayerMatchMaking[difficulty];
+    if (queue.length > 2) {
+      let newMatch = await createMatch(queue, difficulty);
+      emitter.emit("tournament start", newMatch);
+      multiplayerMatchMaking[difficulty] = [];
+    }
+  });
+}, 15000);
+
+app.get("/game/tournament/:difficulty/:name/:id", (req, res) => {
+  let name = req.params.name;
+  let id = req.params.id;
+  let user = { name, id };
+  let difficulty = req.params.difficulty;
+  multiplayerMatchMaking.addToThisQueue(difficulty, user);
+  return emitter.once("tournament start", (newMatch) => {
+    res.send(newMatch);
   });
 });
 
