@@ -16,3 +16,6 @@ export const FINISH_MATCHMAKING = "FINISH_MATCHMAKING";
 export const UPDATE_OPPONENT = "UPDATE_OPPONENT";
 export const LOGIN_USER = "LOGIN_USER";
 export const LOGOUT_USER = "LOGOUT_USER";
+export const SAVE_COMPLETE = "SAVE_COMPLETE";
+export const UNABLE_TO_SAVE = "UNABLE_TO_SAVE";
+export const SET_WIN_TIME = "SET_WIN_TIME";

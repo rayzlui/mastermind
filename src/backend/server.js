@@ -4,8 +4,8 @@ let UserModel = require("./Models/UserModel.js");
 let PvPModel = require("./Models/PvPModel");
 let EventEmitter = require("events");
 let bodyParser = require("body-parser");
-let scramblePassword = require("./scramblePass");
 let generateCode = require("./generateCodeFromBackend");
+const LeaderboardModel = require("./Models/LeaderboardModel.js");
 
 let app = express();
 let port = 3001;
@@ -27,7 +27,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get("/user/:name", (req, res) => {
+app.get("/api/user/:name", (req, res) => {
   let name = req.params.name;
   UserModel.find({ name }, (err, data) => {
     if (err) {
@@ -68,7 +68,7 @@ values["easy"] = [4, 4];
 values["normal"] = [4, 7];
 values["hard"] = [9, 9];
 
-app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
+app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
   let name = req.params.name;
   let id = req.params.id;
   let user = { name, id };
@@ -89,7 +89,7 @@ app.get("/game/pvp/:difficulty/:name/:id", async (req, res) => {
 async function createMatch(players, difficulty) {
   let playersMatched = players.reduce((acc, player) => {
     let { id, name } = player;
-    acc[id] = { name, moves: 0, finish: false, time: 0, winner: false };
+    acc[id] = { name, moves: 0, time: 0, finished: false };
     return acc;
   }, {});
 
@@ -100,14 +100,15 @@ async function createMatch(players, difficulty) {
     code,
     numCompletedGames: 0,
     gameover: false,
+    numOfPlayers: players.length,
   });
   newPvpMatch.save();
   return newPvpMatch;
 }
 
-app.post("/game/:gameid", jsonParser, (req, res) => {
+app.post("/api/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
-  let { userid, winner } = req.body;
+  let { userid, finished } = req.body;
   PvPModel.findById(gameid, function (err, game) {
     if (err) {
       console.log(`Could not access database for game id: ${gameid}`);
@@ -119,8 +120,8 @@ app.post("/game/:gameid", jsonParser, (req, res) => {
     } else {
       let { _id, players } = game;
       players[userid].moves = players[userid].moves + 1;
-      players[userid].winner = winner;
-      if (winner) {
+      players[userid].finished = finished;
+      if (finished) {
         game.numCompletedGames++;
       }
 
@@ -134,7 +135,7 @@ app.post("/game/:gameid", jsonParser, (req, res) => {
           res.json(game);
         }
       });
-      if (game.numCompletedGames === 2) {
+      if (game.numCompletedGames === game.numOfPlayers) {
         PvPModel.deleteOne(_id, (err, game) => {
           if (err) {
             console.log("Unable to delete game");
@@ -147,7 +148,7 @@ app.post("/game/:gameid", jsonParser, (req, res) => {
   });
 });
 
-app.post("/user/create", jsonParser, (req, res) => {
+app.post("/api/user/create", jsonParser, (req, res) => {
   let { username, password, key } = req.body;
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
@@ -178,9 +179,8 @@ app.post("/user/create", jsonParser, (req, res) => {
   });
 });
 
-app.get(`/getKey/login/:username`, (req, res) => {
+app.get(`/api/getKey/login/:username`, (req, res) => {
   let username = req.params.username;
-  console.log(username);
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
       console.log("Error accessing database");
@@ -197,7 +197,7 @@ app.get(`/getKey/login/:username`, (req, res) => {
   });
 });
 
-app.post("/user/login", jsonParser, (req, res) => {
+app.post("/api/user/login", jsonParser, (req, res) => {
   let { username, password } = req.body;
   console.log(username, password);
   UserModel.findOne({ name: username }, (err, user) => {
@@ -235,7 +235,6 @@ MutliplayerMatchMaker.prototype.addToThisQueue = function (difficulty, user) {
 let multiplayerMatchMaking = new MutliplayerMatchMaker();
 
 setInterval(() => {
-  console.log(multiplayerMatchMaking);
   let queueDifficultyKeys = Object.keys(multiplayerMatchMaking);
   queueDifficultyKeys.forEach(async (difficulty) => {
     let queue = multiplayerMatchMaking[difficulty];
@@ -247,7 +246,7 @@ setInterval(() => {
   });
 }, 15000);
 
-app.get("/game/tournament/:difficulty/:name/:id", (req, res) => {
+app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
   let name = req.params.name;
   let id = req.params.id;
   let user = { name, id };
@@ -255,6 +254,52 @@ app.get("/game/tournament/:difficulty/:name/:id", (req, res) => {
   multiplayerMatchMaking.addToThisQueue(difficulty, user);
   return emitter.once("tournament start", (newMatch) => {
     res.send(newMatch);
+  });
+});
+
+app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
+  let userid = req.params.id;
+  //send back code, time, moves?
+  //dont care about moves, because you can lose if moves gone. better just store time.
+  let { code, time } = req.body;
+  console.log(code, time);
+  UserModel.findOne({ _id: userid }, (err, user) => {
+    if (err) {
+      console.log(`Unable to access user ${userid}`);
+    }
+    user.gameHistory.push({ code, time });
+    console.log(user.gameHistory);
+    user.save((err) => {
+      if (err) {
+        console.log("Unable to save user history");
+        res.status(404).send("Unable to save");
+      } else {
+        console.log(`Saved data to ${user._id}`);
+        res.status(200).send("Saved");
+      }
+    });
+  });
+});
+
+app.post("/api/leaderboard/", jsonParser, (req, res) => {
+  let { user, time, code, difficulty } = req.body;
+  console.log(req.body);
+  let { _id, name } = user;
+  //on leaderboard page will show user name + time, but clicking user name => go to user page, clicking time => try and beat the code
+  let entryToLeaderboard = new LeaderboardModel({
+    name,
+    difficulty,
+    userid: _id,
+    time,
+    code,
+  });
+  entryToLeaderboard.save((err) => {
+    if (err) {
+      console.log("Unable to save time");
+      res.status(404).send("Unable to save time");
+    } else {
+      res.status(200).send(`Saved to leaderboard ${entryToLeaderboard}`);
+    }
   });
 });
 

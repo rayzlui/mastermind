@@ -1,14 +1,15 @@
 import { connect } from "react-redux";
-import { setTurns } from "../actions/actions";
+import { setTurns, setWinTime } from "../actions/actions";
 import { TimerComponent } from "../components/TimerComponent";
 
 function mapStateToProps(state) {
-  let { gameOver } = state;
-  return { gameOver };
+  let { isWinner } = state;
+  return { isWinner };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    setWinTime: (time) => dispatch(setWinTime(time)),
     endGame: () => dispatch(setTurns(0)),
   };
 }

@@ -5,7 +5,7 @@ let pvpSchema = new Schema({
   players: {},
   code: Object,
   numCompletedGames: Number,
-  ganeOver: Number,
+  numOfPlayers: Number,
 });
 
 let PvPModel = model("PvP", pvpSchema);

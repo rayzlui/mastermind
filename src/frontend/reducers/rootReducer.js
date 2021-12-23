@@ -8,6 +8,7 @@ import { opponentDataReducer } from "./opponentData";
 import { showMatchMakingReducer } from "./showMatchMakingReducer";
 import { turnsRemainingReducer } from "./turnsRemainingReducer";
 import { currentUserReducer } from "./currentUserReducer";
+import { winTimeReducer } from "./winTimeReducer";
 
 export const rootReducer = combineReducers({
   moveHistory: moveHistoryReducer,
@@ -19,4 +20,5 @@ export const rootReducer = combineReducers({
   displayLoading: showMatchMakingReducer,
   opponentData: opponentDataReducer,
   currentUser: currentUserReducer,
+  winTime: winTimeReducer,
 });

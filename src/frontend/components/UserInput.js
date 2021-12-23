@@ -4,18 +4,17 @@ import PropTypes from "prop-types";
 export function UserInput(props) {
   let { gameDifficulty, gameOver, code, submitGuess, turnsRemaining } = props;
   let { codeLength, maxDigits } = gameDifficulty;
-  let [userGuess, updateGuess] = useState(new Array(codeLength).fill(null));
+  let [userGuess, updateGuess] = useState([]);
   let [directIndex, updateIndex] = useState(null);
   let [hint, toggleHint] = useState(false);
 
-  if (turnsRemaining === 0) {
+  if (turnsRemaining <= 0) {
     return <h1>YOU LOSE HAHAHA</h1>;
   }
 
   if (gameOver) {
     return <h1>You Win</h1>;
   }
-
   function handleKeyPress(event) {
     let { keyCode } = event;
     let copyUserGuess = userGuess.slice();
@@ -74,7 +73,13 @@ export function UserInput(props) {
   let showInputs = [];
   for (let i = 0; i < codeLength; i++) {
     let inputValue = userGuess[i];
-    let displayValue = inputValue === null ? "Fill" : inputValue;
+    let displayValue;
+    if (inputValue === undefined) {
+      displayValue = "Fill";
+      userGuess[i] = null;
+    } else {
+      displayValue = inputValue;
+    }
     showInputs.push(
       <button key={`input${i}`} onClick={() => handleDirectIndexInput(i)}>
         {displayValue}

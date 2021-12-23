@@ -10,10 +10,17 @@ import {
   SET_TURNS,
   UPDATE_OPPONENT,
   USER_SUBMIT,
+  SET_WIN_TIME,
+  SAVE_COMPLETE,
+  UNABLE_TO_SAVE,
 } from "./actionTypes";
 
 function setMastermindCode(code) {
   return { type: SET_MASTERMIND_CODE, payload: code };
+}
+
+export function setWinTime(time) {
+  return { type: SET_WIN_TIME, payload: time };
 }
 
 export function userSubmit() {
@@ -31,8 +38,11 @@ export function weHaveAWinner() {
   return { type: WINNER, payload: true };
 }
 
-export function setDifficulty(codeLength, maxDigits) {
-  return { type: SET_DIFFICULTY, payload: { codeLength, maxDigits } };
+export function setDifficulty(codeLength, maxDigits, name) {
+  return {
+    type: SET_DIFFICULTY,
+    payload: { codeLength, maxDigits, name: name },
+  };
 }
 export function generateMastermindCode(codeLength, maxDigits) {
   return async (dispatch) => {
@@ -49,7 +59,7 @@ export function requestPvpMatch(difficulty, type, user) {
   let { name, id } = user;
   return async (dispatch) => {
     let request = await fetch(
-      `http://localhost:3001/game/${type}/${difficulty}/${name}/${id}`
+      `http://localhost:3001/api/game/${type}/${difficulty}/${name}/${id}`
     );
     let data = await request.json();
     console.log(data);
@@ -65,9 +75,48 @@ export function requestPvpMatch(difficulty, type, user) {
   };
 }
 
-export function updateDataBaseForPvP(gameid, userid, isWinner) {
+export function logUserHistory(user, code, time, difficulty) {
+  let { _id } = user;
+  return async function (dispatch) {
+    let putToUserHistory = await fetch(
+      `http://localhost:3001/api/userhistory/add/${_id}`,
+      {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          time,
+        }),
+      }
+    );
+    let postToLeaderBoard = await fetch(
+      `http://localhost:3001/api/leaderboard/`,
+      {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user,
+          code,
+          time,
+          difficulty,
+        }),
+      }
+    );
+    if (putToUserHistory.status !== 200 || postToLeaderBoard.status !== 200) {
+      dispatch({ type: UNABLE_TO_SAVE });
+    } else {
+      dispatch({ type: SAVE_COMPLETE });
+    }
+  };
+}
+
+export function updateDataBaseForPvP(gameid, userid, finished) {
   return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/game/${gameid}`, {
+    let request = await fetch(`http://localhost:3001/api/game/${gameid}`, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +124,7 @@ export function updateDataBaseForPvP(gameid, userid, isWinner) {
       body: JSON.stringify({
         gameid,
         userid,
-        winner: isWinner,
+        finished: finished,
       }),
     });
     let data = await request.json();
@@ -99,7 +148,7 @@ export function logoutUser() {
 
 export function createUser(username, password, key) {
   return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/user/create`, {
+    let request = await fetch(`http://localhost:3001/api/user/create`, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -126,12 +175,12 @@ export function createUser(username, password, key) {
 export function LoginUser(username, password) {
   return async (dispatch) => {
     let requestKey = await fetch(
-      `http://localhost:3001/getKey/login/${username}`
+      `http://localhost:3001/api/getKey/login/${username}`
     );
     if (requestKey.status === 200) {
       let key = await requestKey.json();
       let scrambled = await scramblePassword(password, key);
-      let request = await fetch(`http://localhost:3001/user/login`, {
+      let request = await fetch(`http://localhost:3001/api/user/login`, {
         method: "post",
         headers: {
           "Content-Type": "application/json",

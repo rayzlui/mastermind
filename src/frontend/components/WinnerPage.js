@@ -4,11 +4,18 @@ import { CreateUserContainer } from "../containers/CreateUserContainer";
 import PropTypes from "prop-types";
 
 export function WinnerPage(props) {
-  let { opponentData, currentUser, gameType, uploadTime, playAgain, isWinner } =
-    props;
+  let {
+    opponentData,
+    currentUser,
+    gameType,
+    uploadGameInfo,
+    playAgain,
+    isWinner,
+  } = props;
   if (!isWinner) {
     return null;
   }
+  console.log(props);
   let input;
   if (gameType === "single") {
     if (currentUser === null) {
@@ -25,7 +32,7 @@ export function WinnerPage(props) {
       input = (
         <>
           <h3>Upload Time To Leaderboard?</h3>
-          <button onClick={() => uploadTime()}>Yes</button>
+          <button onClick={() => uploadGameInfo()}>Yes</button>
         </>
       );
     }
@@ -33,7 +40,7 @@ export function WinnerPage(props) {
     let { players } = opponentData;
     let playersData = Object.values(players);
     let amountOfWinners = playersData.reduce((acc, curr) => {
-      if (curr["winner"]) {
+      if (curr["finished"]) {
         acc++;
       }
       return acc;
@@ -61,7 +68,7 @@ WinnerPage.propTypes = {
   currentUser: PropTypes.object,
   gameInfo: PropTypes.object,
   gameType: PropTypes.string,
-  uploadTime: PropTypes.func,
+  uploadGameInfo: PropTypes.func,
   playAgain: PropTypes.func,
   isWinner: PropTypes.bool,
 };

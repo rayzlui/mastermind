@@ -49,21 +49,21 @@ function mapDispatchToProps(dispatch, ownProps) {
       switch (gameMode) {
         case "single":
           dispatch(generateMastermindCode(codeLength, maxDigit));
-          dispatch(setDifficulty(codeLength, maxDigit));
+          dispatch(setDifficulty(codeLength, maxDigit, difficulty));
           dispatch({ type: SET_SINGLE_PLAYER });
           break;
         case "pvp":
           dispatch({ type: SET_PVP });
           dispatch({ type: TRY_MATCHMAKING });
           dispatch(requestPvpMatch(difficulty, "pvp", currentUser));
-          dispatch(setDifficulty(codeLength, maxDigit));
+          dispatch(setDifficulty(codeLength, maxDigit, difficulty));
           break;
         default:
           //for tournament if we get there.
           dispatch({ type: SET_TOURNAMENT });
           dispatch({ type: TRY_MATCHMAKING });
           dispatch(requestPvpMatch(difficulty, "tournament", currentUser));
-          dispatch(setDifficulty(codeLength, maxDigit));
+          dispatch(setDifficulty(codeLength, maxDigit, difficulty));
           break;
       }
     },
