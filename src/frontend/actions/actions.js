@@ -1,3 +1,4 @@
+import scramblePassword from "../../backend/scramblePass";
 import { generateCode } from "../gameLogic/generateCode";
 import {
   ADD_USER_MOVE_HISTORY,
@@ -125,24 +126,34 @@ export function createUser(username, password, key) {
 
 export function LoginUser(username, password) {
   return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/user/login`, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    });
-    if (request.status === 200) {
-      let userData = await request.json();
-      dispatch(loginUser(userData));
-    } else {
-      //unable to create user, they gotta do it again
-      if (request.status === 418) {
+    let requestKey = await fetch(
+      `http://localhost:3001/getKey/login/${username}`
+    );
+    if (requestKey.status === 200) {
+      let key = await requestKey.json();
+      let scrambled = await scramblePassword(password, key);
+      let request = await fetch(`http://localhost:3001/user/login`, {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password: scrambled,
+        }),
+      });
+      await console.log(request);
+      if (request.status === 200) {
+        let userData = await request.json();
+        dispatch(loginUser(userData));
+      } else {
+        //unable to create user, they gotta do it again
+        if (request.status === 418) {
+        }
+        //need to redo recreate account
       }
-      //need to redo recreate account
+    } else {
+      //user not found
     }
   };
 }

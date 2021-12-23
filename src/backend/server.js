@@ -40,7 +40,7 @@ app.get("/user/:name", (req, res) => {
         res.send();
       } else {
         console.log(`Found user: ${data}`);
-        res.json(data);
+        res.status(200).send(data);
       }
     }
   });
@@ -172,6 +172,25 @@ app.post("/user/create", jsonParser, (req, res) => {
   });
 });
 
+app.get(`/getKey/login/:username`, (req, res) => {
+  let username = req.params.username;
+  console.log(username);
+  UserModel.findOne({ name: username }, (err, user) => {
+    if (err) {
+      console.log("Error accessing database");
+      res.status(404).send("Unable to find user");
+    } else {
+      if (user === null) {
+        res.status(404).send("Unable to find user");
+      } else {
+        let { coolstring } = user;
+        console.log("Found user, sending key");
+        res.json(coolstring);
+      }
+    }
+  });
+});
+
 app.post("/user/login", jsonParser, (req, res) => {
   let { username, password } = req.body;
   console.log(username, password);
@@ -186,9 +205,8 @@ app.post("/user/login", jsonParser, (req, res) => {
         res.status(418).send("Please create an account");
       } else {
         console.log("Found account");
-        let { coolstring, passwordHash, _id, gameHistory } = user;
-        let scramble = scramblePassword(password, coolstring);
-        if (passwordHash === scramble) {
+        let { passwordHash, _id, gameHistory } = user;
+        if (passwordHash === password) {
           res.send({ username, _id, gameHistory });
         } else {
           res.status(403).send("Unable to find username + account combo");
