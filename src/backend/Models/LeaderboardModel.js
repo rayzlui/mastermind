@@ -6,7 +6,7 @@ let leaderboardSchema = new Schema({
   difficulty: String,
   userid: String,
   time: Number,
-  code: Array,
+  code: {},
 });
 
 let LeaderboardModel = model("Leaderboard", leaderboardSchema);

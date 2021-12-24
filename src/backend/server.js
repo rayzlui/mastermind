@@ -5,6 +5,7 @@ let PvPModel = require("./Models/PvPModel");
 let EventEmitter = require("events");
 let bodyParser = require("body-parser");
 let generateCode = require("./generateCodeFromBackend");
+let binaryInsert = require("./binaryInsert");
 const LeaderboardModel = require("./Models/LeaderboardModel.js");
 
 let app = express();
@@ -262,13 +263,11 @@ app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
   //send back code, time, moves?
   //dont care about moves, because you can lose if moves gone. better just store time.
   let { code, time } = req.body;
-  console.log(code, time);
   UserModel.findOne({ _id: userid }, (err, user) => {
     if (err) {
       console.log(`Unable to access user ${userid}`);
     }
     user.gameHistory.push({ code, time });
-    console.log(user.gameHistory);
     user.save((err) => {
       if (err) {
         console.log("Unable to save user history");
@@ -283,11 +282,10 @@ app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
 
 app.post("/api/leaderboard/", jsonParser, (req, res) => {
   let { user, time, code, difficulty } = req.body;
-  console.log(req.body);
-  let { _id, name } = user;
+  let { _id, username } = user;
   //on leaderboard page will show user name + time, but clicking user name => go to user page, clicking time => try and beat the code
   let entryToLeaderboard = new LeaderboardModel({
-    name,
+    name: username,
     difficulty,
     userid: _id,
     time,
@@ -299,6 +297,26 @@ app.post("/api/leaderboard/", jsonParser, (req, res) => {
       res.status(404).send("Unable to save time");
     } else {
       res.status(200).send(`Saved to leaderboard ${entryToLeaderboard}`);
+    }
+  });
+});
+
+app.get("/api/leaderboard", (req, res) => {
+  LeaderboardModel.find({}, (err, leaderboard) => {
+    if (err) {
+      res.status(404).status("Unable to get leaderboard");
+    } else {
+      let store = { easy: [], normal: [], hard: [] };
+      leaderboard.forEach((data, index) => {
+        let { name, userid, code, time, difficulty } = data;
+        let sortedByTime = binaryInsert(store[difficulty], {
+          user: { name, userid, time },
+          code,
+          time,
+        });
+        store[difficulty] = sortedByTime;
+      });
+      res.json(store);
     }
   });
 });

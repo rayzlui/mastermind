@@ -7,11 +7,13 @@ import { CreateUserContainer } from "./frontend/containers/CreateUserContainer";
 import { LoginUserContainer } from "./frontend/containers/LoginUserContainer";
 import { WinnerPageContainer } from "./frontend/containers/WinnerPageContainer";
 import { WelcomeContainer } from "./frontend/containers/WelcomeContainer";
+import { ViewLeaderboard } from "./frontend/components/ViewLeaderboard";
 
 function App() {
   let store = configureStore();
   return (
     <Provider store={store}>
+      <ViewLeaderboard />
       <WinnerPageContainer />
       <LoginUserContainer />
       <CreateUserContainer />

@@ -1,5 +1,8 @@
-export function binaryInsert(array, input) {
+function binaryInsert(array, input) {
   //array contain objects as {name, time}
+  if (array.length === 0) {
+    return [input];
+  }
   let left = 0;
   let right = array.length - 1;
   let { time } = input;
@@ -22,3 +25,5 @@ export function binaryInsert(array, input) {
   }
   return array;
 }
+
+module.exports = binaryInsert;

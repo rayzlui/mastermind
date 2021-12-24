@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
-function covertMillisecondsToMinutes(milli) {
+export function covertMillisecondsToMinutes(milli) {
   let totalSeconds = milli / 1000;
   let minutes = Math.floor(totalSeconds / 60);
   let seconds =
