@@ -28,20 +28,21 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get("/api/user/:name", (req, res) => {
+app.get("/api/users/:name", (req, res) => {
   let name = req.params.name;
   UserModel.find({ name }, (err, data) => {
     if (err) {
       console.log(`Error searching database for User Model params: ${name}`);
-      res.send(err);
+      res.status(404).send("Unable to find user");
     } else {
       if (data.length < 1) {
         console.log(`Unable to find user ${name}`);
         res.status(404);
         res.send();
       } else {
-        console.log(`Found user: ${data}`);
-        res.status(200).send(data);
+        console.log(`Found user: ${name}`);
+        let { gameHistory } = data[0];
+        res.status(200).send({ name, gameHistory });
       }
     }
   });
@@ -120,10 +121,11 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
       res.sendStatus(404);
     } else {
       let { _id, players } = game;
-      players[userid].moves = players[userid].moves + 1;
-      players[userid].finished = finished;
       if (finished) {
         game.numCompletedGames++;
+        players[userid].finished = finished;
+      } else {
+        players[userid].moves = players[userid].moves + 1;
       }
 
       game[players] = players;
@@ -151,6 +153,9 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
 
 app.post("/api/user/create", jsonParser, (req, res) => {
   let { username, password, key } = req.body;
+  if (username === undefined || password === undefined) {
+    res.send(404).send("Need valid info");
+  }
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
       console.log("Error accessing data");
@@ -262,12 +267,12 @@ app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
   let userid = req.params.id;
   //send back code, time, moves?
   //dont care about moves, because you can lose if moves gone. better just store time.
-  let { code, time } = req.body;
+  let { code, time, difficulty } = req.body;
   UserModel.findOne({ _id: userid }, (err, user) => {
     if (err) {
       console.log(`Unable to access user ${userid}`);
     }
-    user.gameHistory.push({ code, time });
+    user.gameHistory.push({ code, time, difficulty });
     user.save((err) => {
       if (err) {
         console.log("Unable to save user history");

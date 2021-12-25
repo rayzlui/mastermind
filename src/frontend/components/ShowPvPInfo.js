@@ -10,12 +10,13 @@ export function ShowPVPInfo(props) {
   let arrayOfPlayers = Object.values(players);
   let display = [];
   arrayOfPlayers.forEach((data) => {
-    let { name, moves } = data;
-
+    let { name, moves, finished } = data;
+    let playerFinished = finished ? <p>Player has finished</p> : null;
     display.push(
       <>
         <h3>{name}</h3>
         <p>Moves {moves}</p>
+        {playerFinished}
       </>
     );
   });

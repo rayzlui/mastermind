@@ -13,6 +13,7 @@ import {
   SET_WIN_TIME,
   SAVE_COMPLETE,
   UNABLE_TO_SAVE,
+  USER_FOUND,
 } from "./actionTypes";
 
 function setMastermindCode(code) {
@@ -75,6 +76,21 @@ export function requestPvpMatch(difficulty, type, user) {
   };
 }
 
+export function searchUser(username) {
+  return async (dispatch) => {
+    let request = await fetch(`http://localhost:3001/api/users/${username}`);
+    if (request.status === 200) {
+      let data = await request.json();
+      dispatch(foundUser(data));
+    } else {
+      alert("Unable to find user");
+    }
+  };
+}
+function foundUser(data) {
+  return { type: USER_FOUND, payload: data };
+}
+
 export function logUserHistory(user, code, time, difficulty) {
   let { _id } = user;
   return async function (dispatch) {
@@ -88,6 +104,7 @@ export function logUserHistory(user, code, time, difficulty) {
         body: JSON.stringify({
           code,
           time,
+          difficulty,
         }),
       }
     );

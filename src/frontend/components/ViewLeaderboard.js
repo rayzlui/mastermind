@@ -35,7 +35,6 @@ export function ViewLeaderboard(props) {
   if (leaderboard === null) {
     return <h1>Retrieving leaderboard</h1>;
   } else {
-    console.log(leaderboard);
     let keysForDifficulty = Object.keys(leaderboard);
     display = keysForDifficulty.reduce((acc, diff) => {
       acc[diff] = leaderboard[diff].map((player) => {

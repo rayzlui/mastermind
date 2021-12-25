@@ -19,3 +19,5 @@ export const LOGOUT_USER = "LOGOUT_USER";
 export const SAVE_COMPLETE = "SAVE_COMPLETE";
 export const UNABLE_TO_SAVE = "UNABLE_TO_SAVE";
 export const SET_WIN_TIME = "SET_WIN_TIME";
+export const USER_FOUND = "USER_FOUND";
+export const UNABLE_TO_FIND_USER = "UNABLE_TO_FIND_USER";

@@ -14,7 +14,7 @@ export function covertMillisecondsToMinutes(milli) {
 }
 
 export function TimerComponent(props) {
-  let { isWinner, endGame, setWinTime } = props;
+  let { isWinner, endGame, userLost, setWinTime } = props;
   let [time, updateTime] = useState(180000);
   //time is three minutes
   useEffect(() => {
@@ -23,14 +23,17 @@ export function TimerComponent(props) {
     }, 1000);
     if (time <= 0) {
       endGame();
+      userLost();
       clearInterval(timer);
     }
     if (isWinner) {
       setWinTime(time);
-      console.log(time);
       clearInterval(timer);
     }
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      userLost();
+    };
   }, [time, isWinner]);
   let { minutes, seconds } = covertMillisecondsToMinutes(time);
   return <p>Time Remaining: {`${minutes}:${seconds}`}</p>;
@@ -40,4 +43,5 @@ TimerComponent.propTypes = {
   isWinner: PropTypes.bool,
   endGame: PropTypes.func,
   setWinTime: PropTypes.func,
+  userLost: PropTypes.func,
 };

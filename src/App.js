@@ -8,11 +8,15 @@ import { LoginUserContainer } from "./frontend/containers/LoginUserContainer";
 import { WinnerPageContainer } from "./frontend/containers/WinnerPageContainer";
 import { WelcomeContainer } from "./frontend/containers/WelcomeContainer";
 import { ViewLeaderboard } from "./frontend/components/ViewLeaderboard";
+import { SearchUserContainer } from "./frontend/containers/SearchUserContainer";
+import { ShowThisUserContainer } from "./frontend/containers/ShowThisUserContainer";
 
 function App() {
   let store = configureStore();
   return (
     <Provider store={store}>
+      <SearchUserContainer />
+      <ShowThisUserContainer />
       <ViewLeaderboard />
       <WinnerPageContainer />
       <LoginUserContainer />
