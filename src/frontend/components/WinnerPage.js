@@ -1,7 +1,6 @@
-import React from "react";
-import { LoginUserContainer } from "../containers/LoginUserContainer";
-import { CreateUserContainer } from "../containers/CreateUserContainer";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
 
 export function WinnerPage(props) {
   let {
@@ -11,30 +10,47 @@ export function WinnerPage(props) {
     uploadGameInfo,
     playAgain,
     isWinner,
+    toggleLogin,
   } = props;
+  let [saved, confirmSave] = useState(null);
   if (!isWinner) {
     return null;
   }
-  console.log(props);
   let input;
-  if (gameType === "single") {
+  if (gameType === SET_SINGLE_PLAYER) {
     if (currentUser === null) {
       input = (
         <>
           <h3>
             Login or create an account to upload your time to leader board
           </h3>
-          <LoginUserContainer />
-          <CreateUserContainer />
+          <button onClick={() => toggleLogin()}>Login</button>
         </>
       );
     } else {
-      input = (
-        <>
-          <h3>Upload Time To Leaderboard?</h3>
-          <button onClick={() => uploadGameInfo()}>Yes</button>
-        </>
-      );
+      switch (saved) {
+        case true:
+          input = <h3>Saved!</h3>;
+          break;
+        case false:
+          input = (
+            <>
+              <h3>Unable To Save</h3>
+              <button onClick={() => uploadGameInfo(confirmSave)}>
+                Try Again?
+              </button>
+            </>
+          );
+          break;
+        default:
+          input = (
+            <>
+              <h3>Upload Time To Leaderboard?</h3>
+              <button onClick={() => uploadGameInfo(confirmSave)}>Yes</button>
+            </>
+          );
+          break;
+      }
     }
   } else {
     let { players } = opponentData;
@@ -71,4 +87,5 @@ WinnerPage.propTypes = {
   uploadGameInfo: PropTypes.func,
   playAgain: PropTypes.func,
   isWinner: PropTypes.bool,
+  toggleLogin: PropTypes.func,
 };

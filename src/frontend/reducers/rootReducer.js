@@ -10,6 +10,8 @@ import { turnsRemainingReducer } from "./turnsRemainingReducer";
 import { currentUserReducer } from "./currentUserReducer";
 import { winTimeReducer } from "./winTimeReducer";
 import { searchedUserReducer } from "./searchedUserReducer";
+import { pageNavigatorReducer } from "./pageNavigatorReducer";
+import { showLoginReducer } from "./showLoginReducer";
 
 export const rootReducer = combineReducers({
   moveHistory: moveHistoryReducer,
@@ -23,4 +25,6 @@ export const rootReducer = combineReducers({
   currentUser: currentUserReducer,
   winTime: winTimeReducer,
   searchedUser: searchedUserReducer,
+  displayingPage: pageNavigatorReducer,
+  showLogin: showLoginReducer,
 });

@@ -4,15 +4,15 @@ const {
   SET_SINGLE_PLAYER,
 } = require("../actions/actionTypes");
 
-export function gameTypeReducer(state = "single", action) {
+export function gameTypeReducer(state = SET_SINGLE_PLAYER, action) {
   let { type } = action;
   switch (type) {
     case SET_SINGLE_PLAYER:
-      return "single";
+      return SET_SINGLE_PLAYER;
     case SET_PVP:
-      return "pvp";
+      return SET_PVP;
     case SET_TOURNAMENT:
-      return "tournament";
+      return SET_TOURNAMENT;
     default:
       return state;
   }
