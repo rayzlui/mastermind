@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
-export function UserPage(props) {
-  let { userAction, type } = props;
+export function LoginOrCreateUserPage(props) {
+  let { userAction, type, currentUser } = props;
+  if (currentUser) {
+    return null;
+  }
+
   let [userName, updateUserName] = useState();
   let [password, updatePassword] = useState();
+  let [feedback, toggleFeedback] = useState(null);
   return (
     <>
+      {feedback}
       <form>
         <label>{type}</label>
         <label>Username</label>
@@ -23,7 +29,7 @@ export function UserPage(props) {
         <input
           type={"submit"}
           onClick={(e) => {
-            userAction(userName, password);
+            userAction(userName, password, toggleFeedback);
             e.preventDefault();
           }}
         ></input>
@@ -32,4 +38,9 @@ export function UserPage(props) {
   );
 }
 
-UserPage.propTypes = { userAction: PropTypes.func, type: PropTypes.string };
+LoginOrCreateUserPage.propTypes = {
+  userAction: PropTypes.func,
+  type: PropTypes.string,
+  displayingPage: PropTypes.string,
+  currentUser: PropTypes.object,
+};

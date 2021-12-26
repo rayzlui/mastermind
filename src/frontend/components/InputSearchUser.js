@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
-export function SearchUser(props) {
+export function InputSearchUser(props) {
   let [searchInput, updateSearchInput] = useState();
   let { searchUser } = props;
 
@@ -18,6 +18,6 @@ export function SearchUser(props) {
   );
 }
 
-SearchUser.propTypes = {
+InputSearchUser.propTypes = {
   searchUser: PropTypes.func,
 };

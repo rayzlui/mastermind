@@ -11,21 +11,23 @@ function mapDispatchToProps(dispatch) {
   return {
     setWinTime: (time) => dispatch(setWinTime(time)),
     endGame: () => dispatch(setTurns(0)),
-    userLostPvp: (gameid, userid) =>
-      dispatch(updateDataBaseForPvP(gameid, userid, true)),
+    updateDataBaseForPvP: (gameid, userid, time) => {
+      console.log((gameid, userid, time));
+      dispatch(updateDataBaseForPvP(gameid, userid, true, time));
+    },
   };
 }
 
 function mergeProps(mapStateToProps, mapDispatchToProps) {
   let { currentUser, opponentData, isWinner } = mapStateToProps;
-  let { setWinTime, endGame, userLostPvp } = mapDispatchToProps;
+  let { setWinTime, endGame, updateDataBaseForPvP } = mapDispatchToProps;
 
   return {
     isWinner,
     setWinTime,
     endGame,
-    userLost: opponentData
-      ? () => userLostPvp(opponentData._id, currentUser._id)
+    updateDataBaseForPvP: opponentData
+      ? (time) => updateDataBaseForPvP(opponentData._id, currentUser._id, time)
       : () => null,
   };
 }

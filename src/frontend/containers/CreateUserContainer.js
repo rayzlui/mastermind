@@ -1,11 +1,13 @@
 import { connect } from "react-redux";
-import { UserPage } from "../components/User";
+import { LoginOrCreateUserPage } from "../components/LoginOrCreateUserPage";
 import { createUser } from "../actions/actions";
 import { casearCypher } from "../../scrambleString";
 
-function mapStateToProps() {
+function mapStateToProps(state) {
+  let { currentUser } = state;
   return {
     type: "Create Account",
+    currentUser,
   };
 }
 
@@ -22,4 +24,4 @@ function mapDispatchToProps(dispatch) {
 export const CreateUserContainer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(UserPage);
+)(LoginOrCreateUserPage);

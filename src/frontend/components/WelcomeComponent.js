@@ -1,50 +1,50 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { SelectDifficultyComponent } from "./SelectDifficultyComponent";
-import { LoginUserContainer } from "../containers/LoginUserContainer";
-import { CreateUserContainer } from "../containers/CreateUserContainer";
+import {
+  SELECT_DIFFICULTY,
+  SET_PVP,
+  SET_SINGLE_PLAYER,
+  SET_TOURNAMENT,
+} from "../actions/actionTypes";
 
 export function WelcomeScreen(props) {
-  let { currentUser } = props;
-  let [gameMode, selectGameMode] = useState(null);
+  let { currentUser, displayingPage, gameType, selectGameType, toggleLogin } =
+    props;
   let [showGameDiff, toggleGameDiff] = useState(false);
-  let [showLogin, toggleLogin] = useState(false);
-
-  let GameDiff = showGameDiff ? (
-    <SelectDifficultyComponent gameMode={gameMode} />
-  ) : null;
-
-  let Login = showLogin ? (
-    <>
-      <LoginUserContainer />
-      <CreateUserContainer />
-    </>
-  ) : null;
-
-  if (showLogin && currentUser) {
-    toggleLogin(!showLogin);
+  if (displayingPage !== SELECT_DIFFICULTY) {
+    return null;
   }
 
+  let GameDiff = showGameDiff ? (
+    <SelectDifficultyComponent gameType={gameType} />
+  ) : null;
+
   function handleClick(select) {
-    if (select !== "single" && currentUser === null) {
+    if (select !== SET_SINGLE_PLAYER && currentUser === null) {
       alert("Login to play online");
       toggleLogin(true);
       return;
     }
-    selectGameMode(select);
+    selectGameType(select);
     toggleGameDiff(true);
   }
   return (
     <div>
-      <button onClick={() => handleClick("single")}>Single Player</button>
-      <button onClick={() => handleClick("pvp")}>One on One</button>
-      <button onClick={() => handleClick("tournament")}>Tournament</button>
+      <button onClick={() => handleClick(SET_SINGLE_PLAYER)}>
+        Single Player
+      </button>
+      <button onClick={() => handleClick(SET_PVP)}>One on One</button>
+      <button onClick={() => handleClick(SET_TOURNAMENT)}>Tournament</button>
       {GameDiff}
-      {Login}
     </div>
   );
 }
 
 WelcomeScreen.propTypes = {
   currentUser: PropTypes.object,
+  displayingPage: PropTypes.string,
+  gameType: PropTypes.string,
+  selectGameType: PropTypes.func,
+  toggleLogin: PropTypes.func,
 };

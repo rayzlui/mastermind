@@ -2,14 +2,17 @@ import {
   setDifficulty,
   generateMastermindCode,
   requestPvpMatch,
+  changePageTo,
+  hideLogin,
+  reset,
 } from "../../actions/actions";
 import { Button } from "../../components/ButtonComponent";
 import { connect } from "react-redux";
 
 import {
+  PLAY_GAME,
   SET_PVP,
   SET_SINGLE_PLAYER,
-  SET_TOURNAMENT,
   TRY_MATCHMAKING,
 } from "../../actions/actionTypes";
 
@@ -17,12 +20,11 @@ function mapStateToProps(state) {
   if (state.currentUser === null) {
     return {};
   }
-  let { _id, username } = state.currentUser;
-  return { id: _id, name: username };
+  return state.currentUser;
 }
 
 function mapDispatchToProps(dispatch, ownProps) {
-  let { difficulty, gameMode, length, maxDigits } = ownProps;
+  let { difficulty, gameType, length, maxDigits } = ownProps;
   let codeLength;
   let maxDigit;
   switch (difficulty) {
@@ -46,26 +48,26 @@ function mapDispatchToProps(dispatch, ownProps) {
   }
   return {
     buttonAction: (currentUser = null) => {
-      switch (gameMode) {
-        case "single":
+      dispatch(reset());
+      switch (gameType) {
+        case SET_SINGLE_PLAYER:
           dispatch(generateMastermindCode(codeLength, maxDigit));
-          dispatch(setDifficulty(codeLength, maxDigit, difficulty));
-          dispatch({ type: SET_SINGLE_PLAYER });
           break;
-        case "pvp":
-          dispatch({ type: SET_PVP });
+        case SET_PVP:
           dispatch({ type: TRY_MATCHMAKING });
           dispatch(requestPvpMatch(difficulty, "pvp", currentUser));
-          dispatch(setDifficulty(codeLength, maxDigit, difficulty));
+
           break;
         default:
-          //for tournament if we get there.
-          dispatch({ type: SET_TOURNAMENT });
           dispatch({ type: TRY_MATCHMAKING });
           dispatch(requestPvpMatch(difficulty, "tournament", currentUser));
-          dispatch(setDifficulty(codeLength, maxDigit, difficulty));
+
           break;
       }
+
+      dispatch(setDifficulty(codeLength, maxDigit, difficulty));
+      dispatch(changePageTo(PLAY_GAME));
+      dispatch(hideLogin());
     },
   };
 }
@@ -76,7 +78,9 @@ function mergeProps(mapStateToProps, mapDispatchToProps, ownProps) {
   let { buttonAction } = mapDispatchToProps;
   return {
     difficulty,
-    buttonAction: () => buttonAction(currentUser),
+    buttonAction: () => {
+      buttonAction(currentUser);
+    },
   };
 }
 

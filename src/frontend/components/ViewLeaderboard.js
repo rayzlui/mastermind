@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { covertMillisecondsToMinutes } from "./TimerComponent";
+import { VIEW_LEADERBOARD } from "../actions/actionTypes";
 
 function TableForLeaderBoard(props) {
   let { difficulty } = props;
@@ -18,6 +19,10 @@ function TableForLeaderBoard(props) {
 }
 
 export function ViewLeaderboard(props) {
+  let { displayingPage } = props;
+  if (displayingPage !== VIEW_LEADERBOARD) {
+    return null;
+  }
   let [leaderboard, setLeaderboard] = useState(null);
   let [showDifficulty, changeDifficulty] = useState("normal");
   useEffect(async () => {
@@ -65,4 +70,8 @@ export function ViewLeaderboard(props) {
 
 TableForLeaderBoard.propTypes = {
   difficulty: PropTypes.array,
+};
+
+ViewLeaderboard.propTypes = {
+  displayingPage: PropTypes.string,
 };

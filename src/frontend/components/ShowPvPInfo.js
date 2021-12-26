@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { covertMillisecondsToMinutes } from "./TimerComponent";
 
 export function ShowPVPInfo(props) {
   let { opponentData } = props;
@@ -11,7 +12,12 @@ export function ShowPVPInfo(props) {
   let display = [];
   arrayOfPlayers.forEach((data) => {
     let { name, moves, finished } = data;
-    let playerFinished = finished ? <p>Player has finished</p> : null;
+    let { minutes, seconds } = covertMillisecondsToMinutes(finished);
+    let playerFinished = finished ? (
+      <p>
+        Player has finished in {minutes}: {seconds}
+      </p>
+    ) : null;
     display.push(
       <>
         <h3>{name}</h3>

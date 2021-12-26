@@ -2,6 +2,7 @@ import scramblePassword from "../../backend/scramblePass";
 import { generateCode } from "../gameLogic/generateCode";
 import {
   ADD_USER_MOVE_HISTORY,
+  RESET,
   WINNER,
   LOGIN_USER,
   LOGOUT_USER,
@@ -14,6 +15,10 @@ import {
   SAVE_COMPLETE,
   UNABLE_TO_SAVE,
   USER_FOUND,
+  DISPLAY_USER,
+  DISPLAY_CURRENT_USER,
+  SHOW_LOGIN,
+  HIDE_LOGIN,
 } from "./actionTypes";
 
 function setMastermindCode(code) {
@@ -22,6 +27,10 @@ function setMastermindCode(code) {
 
 export function setWinTime(time) {
   return { type: SET_WIN_TIME, payload: time };
+}
+
+export function displayCurrentUser() {
+  return { type: DISPLAY_CURRENT_USER };
 }
 
 export function userSubmit() {
@@ -33,6 +42,10 @@ export function addMoveToHistory(move) {
 
 export function setTurns(turns) {
   return { type: SET_TURNS, payload: turns };
+}
+
+export function reset() {
+  return { type: RESET };
 }
 
 export function weHaveAWinner() {
@@ -48,6 +61,7 @@ export function setDifficulty(codeLength, maxDigits, name) {
 export function generateMastermindCode(codeLength, maxDigits) {
   return async (dispatch) => {
     let code = await generateCode(codeLength, maxDigits);
+    console.log(code);
     dispatch(setMastermindCode(code));
   };
 }
@@ -57,13 +71,12 @@ export function updateOpponent(data) {
 }
 
 export function requestPvpMatch(difficulty, type, user) {
-  let { name, id } = user;
+  let { username } = user;
   return async (dispatch) => {
     let request = await fetch(
-      `http://localhost:3001/api/game/${type}/${difficulty}/${name}/${id}`
+      `http://localhost:3001/api/game/${type}/${difficulty}/${username}/${user._id}`
     );
     let data = await request.json();
-    console.log(data);
     let { players, code, _id, winner } = await data;
     dispatch(setMastermindCode(code));
     dispatch(
@@ -81,17 +94,18 @@ export function searchUser(username) {
     let request = await fetch(`http://localhost:3001/api/users/${username}`);
     if (request.status === 200) {
       let data = await request.json();
-      dispatch(foundUser(data));
+      dispatch(showThisUser(data));
+      dispatch(changePageTo(DISPLAY_USER));
     } else {
       alert("Unable to find user");
     }
   };
 }
-function foundUser(data) {
+export function showThisUser(data) {
   return { type: USER_FOUND, payload: data };
 }
 
-export function logUserHistory(user, code, time, difficulty) {
+export function logUserHistory(user, code, time, difficulty, callback) {
   let { _id } = user;
   return async function (dispatch) {
     let putToUserHistory = await fetch(
@@ -125,13 +139,15 @@ export function logUserHistory(user, code, time, difficulty) {
     );
     if (putToUserHistory.status !== 200 || postToLeaderBoard.status !== 200) {
       dispatch({ type: UNABLE_TO_SAVE });
+      callback(false);
     } else {
       dispatch({ type: SAVE_COMPLETE });
+      callback(true);
     }
   };
 }
 
-export function updateDataBaseForPvP(gameid, userid, finished) {
+export function updateDataBaseForPvP(gameid, userid, finished, time) {
   return async (dispatch) => {
     let request = await fetch(`http://localhost:3001/api/game/${gameid}`, {
       method: "post",
@@ -142,10 +158,10 @@ export function updateDataBaseForPvP(gameid, userid, finished) {
         gameid,
         userid,
         finished: finished,
+        time: time,
       }),
     });
     let data = await request.json();
-    console.log(data);
     let { players } = await data;
     dispatch(
       updateOpponent({
@@ -155,7 +171,7 @@ export function updateDataBaseForPvP(gameid, userid, finished) {
   };
 }
 
-export function loginUser(data) {
+export function setCurrentUser(data) {
   return { type: LOGIN_USER, payload: data };
 }
 
@@ -179,7 +195,7 @@ export function createUser(username, password, key) {
     console.log(request);
     if (request.status === 200) {
       let userData = await request.json();
-      dispatch(loginUser(userData));
+      dispatch(setCurrentUser(userData));
     } else {
       //unable to create user, they gotta do it again
       if (request.status === 418) {
@@ -189,7 +205,14 @@ export function createUser(username, password, key) {
   };
 }
 
-export function LoginUser(username, password) {
+export function showLogin() {
+  return { type: SHOW_LOGIN };
+}
+
+export function hideLogin() {
+  return { type: HIDE_LOGIN };
+}
+export function loginUser(username, password, callback) {
   return async (dispatch) => {
     let requestKey = await fetch(
       `http://localhost:3001/api/getKey/login/${username}`
@@ -207,18 +230,23 @@ export function LoginUser(username, password) {
           password: scrambled,
         }),
       });
-      await console.log(request);
       if (request.status === 200) {
         let userData = await request.json();
-        dispatch(loginUser(userData));
+        dispatch(setCurrentUser(userData));
       } else {
         //unable to create user, they gotta do it again
         if (request.status === 418) {
+          callback("Unable to find username, password combination");
         }
         //need to redo recreate account
       }
     } else {
       //user not found
+      callback("Unable to find username");
     }
   };
+}
+
+export function changePageTo(page) {
+  return { type: page };
 }

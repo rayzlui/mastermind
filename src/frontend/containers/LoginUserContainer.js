@@ -1,17 +1,19 @@
 import { connect } from "react-redux";
-import { UserPage } from "../components/User";
-import { LoginUser } from "../actions/actions";
+import { LoginOrCreateUserPage } from "../components/LoginOrCreateUserPage";
+import { loginUser } from "../actions/actions";
 
-function mapStateToProps() {
+function mapStateToProps(state) {
+  let { displayingPage, currentUser } = state;
   return {
     type: "Login",
+    currentUser,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    userAction: (username, password) => {
-      dispatch(LoginUser(username, password));
+    userAction: (username, password, confirmLogin) => {
+      dispatch(loginUser(username, password, confirmLogin));
     },
   };
 }
@@ -19,4 +21,4 @@ function mapDispatchToProps(dispatch) {
 export const LoginUserContainer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(UserPage);
+)(LoginOrCreateUserPage);

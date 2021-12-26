@@ -1,14 +1,9 @@
 import { connect } from "react-redux";
-import { searchUser } from "../actions/actions";
-import { SearchUser } from "../components/SearchUser";
+import { SearchUserDisplay } from "../components/SearchUserDisplay";
 
-function mapDispatchToProps(dispatch) {
-  return {
-    searchUser: (username) => dispatch(searchUser(username)),
-  };
+function mapStateToProps(state) {
+  let { displayingPage, searchedUser } = state;
+  return { displayingPage, searchedUser };
 }
 
-export const SearchUserContainer = connect(
-  null,
-  mapDispatchToProps
-)(SearchUser);
+export const SearchUserContainer = connect(mapStateToProps)(SearchUserDisplay);

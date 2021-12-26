@@ -8,7 +8,7 @@ function HideUntilClick(props) {
   if (show) {
     return <p>{afterClick}</p>;
   }
-  return <p onClick={() => toggleClick(true)}>{beforeClick}</p>;
+  return <p onClick={() => toggleShow(true)}>{beforeClick}</p>;
 }
 HideUntilClick.propTypes = {
   beforeClick: PropTypes.string,

@@ -18,8 +18,8 @@ function mapDispatchToProps(dispatch) {
     addTurnToHistory: (move, redPeg, whitePeg) =>
       dispatch(addMoveToHistory({ move, redPeg, whitePeg })),
     dispatchWeHaveAWinner: () => dispatch(weHaveAWinner()),
-    updatePvP: (gameid, userid, winner) =>
-      dispatch(updateDataBaseForPvP(gameid, userid, winner)),
+    updatePvP: (gameid, userid, winner, time) =>
+      dispatch(updateDataBaseForPvP(gameid, userid, winner, time)),
   };
 }
 
@@ -31,6 +31,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     turnsRemaining,
     opponentData,
     currentUser,
+    winTime,
   } = mapStateToProps;
   let gameid = opponentData?._id;
   let userid = currentUser?._id;
@@ -47,11 +48,13 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
       let winner = redPeg === code.length;
       updateTurns();
       addTurnToHistory(code, redPeg, whitePeg);
-      if (opponentData) {
-        updatePvP(gameid, userid, winner);
-      }
       if (winner) {
         dispatchWeHaveAWinner();
+        //the winTime we have here is from when we called it in mapStateToProps, dispatchweHaveAWinner updates it after we've called it before.
+      } else {
+        if (opponentData) {
+          updatePvP(gameid, userid, false, winTime);
+        }
       }
     },
   };

@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { DifficultyButtonContainer } from "../containers/Buttons/DifficultyContainer";
 import PropTypes from "prop-types";
+import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
 
 export function SelectDifficultyComponent(props) {
-  let { gameMode } = props;
+  let { gameType } = props;
   let [showCustom, toggleCustom] = useState(false);
   let [customDigits, updateDigits] = useState(4);
   let [customCodeLength, updateLength] = useState(7);
   let CustomDifficulty = null;
-  if (showCustom && gameMode === "single") {
+  if (showCustom && gameType === SET_SINGLE_PLAYER) {
     CustomDifficulty = (
       <div className={"custom-difficulty-display"}>
         <label>Max Digits</label>
@@ -46,7 +47,7 @@ export function SelectDifficultyComponent(props) {
     );
   }
   let CustomButton =
-    gameMode === "single" ? (
+    gameType === SET_SINGLE_PLAYER ? (
       <button onClick={() => toggleCustom(!showCustom)}>Custom</button>
     ) : null;
 
@@ -55,7 +56,7 @@ export function SelectDifficultyComponent(props) {
       <DifficultyButtonContainer
         key={`${diff} button`}
         difficulty={`${diff}`}
-        gameMode={gameMode}
+        gameType={gameType}
       />
     );
   });
@@ -70,5 +71,5 @@ export function SelectDifficultyComponent(props) {
 
 SelectDifficultyComponent.propTypes = {
   toggleDifficulty: PropTypes.func,
-  gameMode: PropTypes.string,
+  gameType: PropTypes.string,
 };
