@@ -33,7 +33,7 @@ export function WinnerPage(props) {
     return (
       <div>
         <h1>YOU LOSE HAHAHA</h1>
-        {PlayAgainButton}
+        {PlayAgainButton()}
       </div>
     );
   }
