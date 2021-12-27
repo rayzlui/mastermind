@@ -110,7 +110,7 @@ async function createMatch(players, difficulty) {
 
 app.post("/api/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
-  let { userid, finished } = req.body;
+  let { userid, finished, time } = req.body;
   PvPModel.findById(gameid, function (err, game) {
     if (err) {
       console.log(`Could not access database for game id: ${gameid}`);
@@ -120,12 +120,12 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
       console.log(`Could not find game id: ${gameid}`);
       res.sendStatus(404);
     } else {
+      console.log(req.body);
       let { _id, players } = game;
+      players[userid].moves = players[userid].moves + 1;
       if (finished) {
         game.numCompletedGames++;
-        players[userid].finished = finished;
-      } else {
-        players[userid].moves = players[userid].moves + 1;
+        players[userid].finished = time;
       }
 
       game[players] = players;
