@@ -14,7 +14,7 @@ function mapStateToProps(state) {
     opponentData,
     currentUser,
     mastermindCode,
-    winTime,
+    time,
     isWinner,
     gameType,
     gameDifficulty,
@@ -23,7 +23,7 @@ function mapStateToProps(state) {
     opponentData,
     currentUser,
     mastermindCode,
-    winTime,
+    time,
     isWinner,
     gameDifficulty,
     gameType,
@@ -50,7 +50,7 @@ function mapDispatchToProps(dispatch) {
     uploadTime: (userid, code, time, diff, confirmSave) => {
       dispatch(logUserHistory(userid, code, time, diff, confirmSave));
     },
-    toggleLogin: () => dispatch(showLogin()),
+    toggleLogin: () => dispatch(showLogin("Login")),
   };
 }
 
@@ -59,7 +59,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     opponentData,
     currentUser,
     mastermindCode,
-    winTime,
+    time,
     isWinner,
     gameType,
     gameDifficulty,
@@ -70,7 +70,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     opponentData,
     isWinner,
     currentUser,
-    winTime,
+    time,
     gameType,
     toggleLogin,
     playAgain: () => {
@@ -80,7 +80,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
       uploadTime(
         currentUser,
         mastermindCode,
-        winTime,
+        time,
         gameDifficulty.name,
         confirmSave
       );

@@ -12,8 +12,8 @@ export function SearchUserDisplay(props) {
 
   return (
     <>
-      <InputSearchUserContainer />;
-      <ShowThisUser searchedUser={searchedUser} />;
+      <InputSearchUserContainer />
+      <ShowThisUser searchedUser={searchedUser} />
     </>
   );
 }

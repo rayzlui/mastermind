@@ -1,12 +1,14 @@
-import { WINNER, RESET } from "../actions/actionTypes";
+import { WINNER, RESET, LOSER } from "../actions/actionTypes";
 
-export function isWinnerReducer(state = false, action) {
+export function isWinnerReducer(state = null, action) {
   let { type } = action;
   switch (type) {
     case RESET:
-      return false;
+      return null;
     case WINNER:
       return true;
+    case LOSER:
+      return false;
     default:
       return state;
   }

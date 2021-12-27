@@ -31,3 +31,4 @@ export const SELECT_DIFFICULTY = "SELECT_DIFFICULTY";
 export const SHOW_LOGIN = "SHOW_LOGIN";
 export const HIDE_LOGIN = "HIDE_LOGIN";
 export const RESET = "RESET";
+export const LOSER = "LOSER";

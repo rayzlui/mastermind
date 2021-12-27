@@ -1,33 +1,39 @@
 import { connect } from "react-redux";
-import { setTurns, setWinTime, updateDataBaseForPvP } from "../actions/actions";
+import {
+  weHaveALoser,
+  setWinTime,
+  updateDataBaseForPvP,
+} from "../actions/actions";
 import { TimerComponent } from "../components/TimerComponent";
 
 function mapStateToProps(state) {
-  let { isWinner, currentUser, opponentData } = state;
-  return { isWinner, currentUser, opponentData };
+  let { isWinner, currentUser, opponentData, time } = state;
+  return { isWinner, currentUser, opponentData, time };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    setWinTime: (time) => dispatch(setWinTime(time)),
-    endGame: () => dispatch(setTurns(0)),
+    setWinTime: (gameTimer) => dispatch(setWinTime(gameTimer)),
+    endGame: () => dispatch(weHaveALoser()),
     updateDataBaseForPvP: (gameid, userid, time) => {
-      console.log((gameid, userid, time));
       dispatch(updateDataBaseForPvP(gameid, userid, true, time));
     },
   };
 }
 
 function mergeProps(mapStateToProps, mapDispatchToProps) {
-  let { currentUser, opponentData, isWinner } = mapStateToProps;
+  let { currentUser, opponentData, isWinner, time } = mapStateToProps;
   let { setWinTime, endGame, updateDataBaseForPvP } = mapDispatchToProps;
 
   return {
     isWinner,
+    time,
     setWinTime,
     endGame,
     updateDataBaseForPvP: opponentData
-      ? (time) => updateDataBaseForPvP(opponentData._id, currentUser._id, time)
+      ? (gameTimer) => {
+          updateDataBaseForPvP(opponentData._id, currentUser._id, gameTimer);
+        }
       : () => null,
   };
 }

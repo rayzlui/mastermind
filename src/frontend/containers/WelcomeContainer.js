@@ -13,7 +13,7 @@ function mapDispatchToProps(dispatch) {
       dispatch({ type: type });
     },
     toggleLogin: () => {
-      dispatch(showLogin());
+      dispatch(showLogin("Login"));
     },
   };
 }

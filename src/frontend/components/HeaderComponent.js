@@ -1,14 +1,10 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { DISPLAY_USER } from "../actions/actionTypes";
-import { LoginUserContainer } from "../containers/LoginUserContainer";
-import { CreateUserContainer } from "../containers/CreateUserContainer";
 
 export function HeaderComponent(props) {
-  let { changePageTo, currentUser, showThisUser, logOut } = props;
+  let { changePageTo, currentUser, showThisUser, logOut, toggleLogin } = props;
   let [showLoggedInOptions, toggleLoggedIn] = useState(false);
-  let [showLogin, toggleLogin] = useState(false);
-  let [showCreate, toggleCreate] = useState(false);
   let loggedInOptions = showLoggedInOptions ? (
     <>
       <button
@@ -41,22 +37,18 @@ export function HeaderComponent(props) {
     <>
       <button
         onClick={() => {
-          toggleLogin(!showLogin);
-          toggleCreate(false);
+          toggleLogin("Login");
         }}
       >
         Login
       </button>
       <button
         onClick={() => {
-          toggleCreate(!showCreate);
-          toggleLogin(false);
+          toggleLogin("Create an account");
         }}
       >
         Create an account
       </button>
-      {showCreate ? <CreateUserContainer /> : null}
-      {showLogin ? <LoginUserContainer /> : null}
     </>
   );
   return (
@@ -71,4 +63,5 @@ HeaderComponent.propTypes = {
   currentUser: PropTypes.object,
   logOut: PropTypes.func,
   showThisUser: PropTypes.func,
+  toggleLogin: PropTypes.func,
 };

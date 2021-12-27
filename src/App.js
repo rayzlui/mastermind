@@ -1,28 +1,31 @@
 import "./App.css";
 import React from "react";
-import { SinglePlayerGameComponent } from "./frontend/components/SinglePlayerGameComponent";
 import { Provider } from "react-redux";
 import { configureStore } from "./frontend/configureStore";
-import { CreateUserContainer } from "./frontend/containers/CreateUserContainer";
-import { LoginUserContainer } from "./frontend/containers/LoginUserContainer";
-import { WinnerPageContainer } from "./frontend/containers/WinnerPageContainer";
+import { ViewLeaderboardContainer } from "./frontend/containers/ViewLeaderboardContainer";
+import { PlayGameContainer } from "./frontend/containers/PlayGameContainer";
 import { WelcomeContainer } from "./frontend/containers/WelcomeContainer";
-import { ViewLeaderboard } from "./frontend/components/ViewLeaderboard";
+
+import {
+  NavBarContainer,
+  HeaderContainer,
+} from "./frontend/containers/NavContainer";
 import { SearchUserContainer } from "./frontend/containers/SearchUserContainer";
-import { ShowThisUserContainer } from "./frontend/containers/ShowThisUserContainer";
+import { UserPageContainer } from "./frontend/containers/UserPageContainer";
+import { LoginOrCreateUserContainer } from "./frontend/containers/LoginOrCreateUserContainer";
 
 function App() {
   let store = configureStore();
   return (
     <Provider store={store}>
+      <HeaderContainer />
+      <NavBarContainer />
+      <LoginOrCreateUserContainer />
+      <UserPageContainer />
       <SearchUserContainer />
-      <ShowThisUserContainer />
-      <ViewLeaderboard />
-      <WinnerPageContainer />
-      <LoginUserContainer />
-      <CreateUserContainer />
       <WelcomeContainer />
-      <SinglePlayerGameComponent />
+      <ViewLeaderboardContainer />
+      <PlayGameContainer />
     </Provider>
   );
 }

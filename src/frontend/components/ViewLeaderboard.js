@@ -24,7 +24,8 @@ export function ViewLeaderboard(props) {
     return null;
   }
   let [leaderboard, setLeaderboard] = useState(null);
-  let [showDifficulty, changeDifficulty] = useState("normal");
+  let [showDifficulty, toggleDifficulty] = useState("normal");
+  console.log(leaderboard);
   useEffect(async () => {
     let request = await fetch(`http://localhost:3001/api/leaderboard`);
     let data = await request.json();
@@ -63,6 +64,9 @@ export function ViewLeaderboard(props) {
   return (
     <>
       <h1>Leaderboard {showDifficulty}</h1>
+      <button onClick={() => toggleDifficulty("easy")}>Easy</button>
+      <button onClick={() => toggleDifficulty("normal")}>Normal</button>
+      <button onClick={() => toggleDifficulty("hard")}>Hard</button>
       <TableForLeaderBoard difficulty={display[showDifficulty]} />
     </>
   );

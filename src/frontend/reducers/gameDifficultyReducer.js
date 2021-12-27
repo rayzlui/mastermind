@@ -6,7 +6,7 @@ export function gameDifficultyReducer(state = intialState, action) {
   let { type, payload } = action;
   switch (type) {
     case SET_DIFFICULTY:
-      return payload;
+      return Object.assign({}, state, payload);
     default:
       return state;
   }

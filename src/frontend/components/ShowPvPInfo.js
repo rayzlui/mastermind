@@ -10,11 +10,11 @@ export function ShowPVPInfo(props) {
   let { players } = opponentData;
   let arrayOfPlayers = Object.values(players);
   let display = [];
-  arrayOfPlayers.forEach((data) => {
+  arrayOfPlayers.forEach((data, index) => {
     let { name, moves, finished } = data;
     let { minutes, seconds } = covertMillisecondsToMinutes(finished);
     let playerFinished = finished ? (
-      <p>
+      <p key={`player${index}`}>
         Player has finished in {minutes}: {seconds}
       </p>
     ) : null;

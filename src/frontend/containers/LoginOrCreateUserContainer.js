@@ -1,27 +1,30 @@
 import { connect } from "react-redux";
 import { LoginOrCreateUserPage } from "../components/LoginOrCreateUserPage";
-import { createUser } from "../actions/actions";
+import { createUser, loginUser } from "../actions/actions";
 import { casearCypher } from "../../scrambleString";
 
 function mapStateToProps(state) {
-  let { currentUser } = state;
+  let { currentUser, showLogin } = state;
   return {
-    type: "Create Account",
+    showLogin,
     currentUser,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    userAction: (username, password) => {
+    createUserAction: (username, password, callback) => {
       let scramble = casearCypher(password);
       let [string, key] = scramble;
-      dispatch(createUser(username, string, key));
+      dispatch(createUser(username, string, key, callback));
+    },
+    loginAction: (username, password, confirmLogin) => {
+      dispatch(loginUser(username, password, confirmLogin));
     },
   };
 }
 
-export const CreateUserContainer = connect(
+export const LoginOrCreateUserContainer = connect(
   mapStateToProps,
   mapDispatchToProps
 )(LoginOrCreateUserPage);

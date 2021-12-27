@@ -14,28 +14,31 @@ export function covertMillisecondsToMinutes(milli) {
 }
 
 export function TimerComponent(props) {
-  let { isWinner, endGame, updateDataBaseForPvP, setWinTime } = props;
-  let [time, updateTime] = useState(180000);
+  let { isWinner, endGame, updateDataBaseForPvP, time, setWinTime } = props;
+  let [gameTimer, updateGameTimer] = useState(time);
   //time is three minutes
   useEffect(() => {
-    let timer = setInterval(() => {
-      updateTime(time - 1000);
+    updateGameTimer(time);
+  }, [time]);
+  useEffect(() => {
+    let countdown = setInterval(() => {
+      updateGameTimer(gameTimer - 1000);
     }, 1000);
-    if (time <= 0) {
+    if (gameTimer <= 0) {
       endGame();
-      userLost();
-      clearInterval(timer);
+      updateDataBaseForPvP();
+      clearInterval(countdown);
     }
-    if (isWinner) {
-      setWinTime(time);
-      updateDataBaseForPvP(time);
-      clearInterval(timer);
+    if (isWinner !== null) {
+      setWinTime(gameTimer);
+      updateDataBaseForPvP(gameTimer);
+      clearInterval(countdown);
     }
     return () => {
-      clearInterval(timer);
+      clearInterval(countdown);
     };
-  }, [time, isWinner]);
-  let { minutes, seconds } = covertMillisecondsToMinutes(time);
+  }, [gameTimer, isWinner]);
+  let { minutes, seconds } = covertMillisecondsToMinutes(gameTimer);
   return <p>Time Remaining: {`${minutes}:${seconds}`}</p>;
 }
 
@@ -44,4 +47,5 @@ TimerComponent.propTypes = {
   endGame: PropTypes.func,
   setWinTime: PropTypes.func,
   updateDataBaseForPvP: PropTypes.func,
+  time: PropTypes.number,
 };

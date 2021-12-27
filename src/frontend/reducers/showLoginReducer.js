@@ -1,12 +1,12 @@
 import { SHOW_LOGIN, HIDE_LOGIN } from "../actions/actionTypes";
 
-export function showLoginReducer(state = false, action) {
-  let { type } = action;
+export function showLoginReducer(state = null, action) {
+  let { type, payload } = action;
   switch (type) {
     case SHOW_LOGIN:
-      return true;
+      return payload;
     case HIDE_LOGIN:
-      return false;
+      return null;
     default:
       return state;
   }

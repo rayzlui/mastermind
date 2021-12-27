@@ -1,4 +1,5 @@
 async function fetchNumbers(codeLength, maxDigit) {
+  console.log(codeLength, maxDigit);
   let request = await fetch(
     `https://www.random.org/integers/?num=${codeLength}&min=1&max=${maxDigit}&col=1&base=10&format=plain&rnd=new`
   );

@@ -4,6 +4,7 @@ import {
   ADD_USER_MOVE_HISTORY,
   RESET,
   WINNER,
+  LOSER,
   LOGIN_USER,
   LOGOUT_USER,
   SET_DIFFICULTY,
@@ -179,7 +180,7 @@ export function logoutUser() {
   return { type: LOGOUT_USER };
 }
 
-export function createUser(username, password, key) {
+export function createUser(username, password, key, callback) {
   return async (dispatch) => {
     let request = await fetch(`http://localhost:3001/api/user/create`, {
       method: "post",
@@ -192,21 +193,24 @@ export function createUser(username, password, key) {
         key,
       }),
     });
-    console.log(request);
+
+    let response = await request.json();
     if (request.status === 200) {
-      let userData = await request.json();
-      dispatch(setCurrentUser(userData));
+      dispatch(setCurrentUser(response));
+      dispatch(hideLogin());
+      sessionStorage.setItem("currentUser", JSON.stringify(response));
     } else {
       //unable to create user, they gotta do it again
       if (request.status === 418) {
+        callback(await response.error);
       }
       //need to redo recreate account
     }
   };
 }
 
-export function showLogin() {
-  return { type: SHOW_LOGIN };
+export function showLogin(type) {
+  return { type: SHOW_LOGIN, payload: type };
 }
 
 export function hideLogin() {
@@ -217,9 +221,10 @@ export function loginUser(username, password, callback) {
     let requestKey = await fetch(
       `http://localhost:3001/api/getKey/login/${username}`
     );
+
+    let keyResponse = await requestKey.json();
     if (requestKey.status === 200) {
-      let key = await requestKey.json();
-      let scrambled = await scramblePassword(password, key);
+      let scrambled = await scramblePassword(password, keyResponse);
       let request = await fetch(`http://localhost:3001/api/user/login`, {
         method: "post",
         headers: {
@@ -230,23 +235,25 @@ export function loginUser(username, password, callback) {
           password: scrambled,
         }),
       });
+      let response = await request.json();
       if (request.status === 200) {
-        let userData = await request.json();
-        dispatch(setCurrentUser(userData));
+        dispatch(setCurrentUser(response));
+        sessionStorage.setItem("currentUser", JSON.stringify(response));
+        dispatch(hideLogin());
       } else {
-        //unable to create user, they gotta do it again
-        if (request.status === 418) {
-          callback("Unable to find username, password combination");
-        }
-        //need to redo recreate account
+        callback(response.error);
       }
     } else {
       //user not found
-      callback("Unable to find username");
+      callback(keyResponse.error);
     }
   };
 }
 
 export function changePageTo(page) {
   return { type: page };
+}
+
+export function weHaveALoser() {
+  return { type: LOSER };
 }

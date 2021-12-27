@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.popup-login {
+  position: absolute;
+  left: 40%;
+  top: 40%;
+  width: 20%;
+  height: 40%;
+  border: black solid 2px;
+}

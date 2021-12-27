@@ -1,61 +1,66 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+const BACKSPACE = "BACKSPACE";
 
 export function UserInput(props) {
-  let { gameDifficulty, gameOver, code, submitGuess, turnsRemaining } = props;
+  let { gameDifficulty, code, submitGuess, turnsRemaining } = props;
   let { codeLength, maxDigits } = gameDifficulty;
   let [userGuess, updateGuess] = useState([]);
   let [directIndex, updateIndex] = useState(null);
   let [hint, toggleHint] = useState(false);
-
-  if (turnsRemaining <= 0) {
-    return <h1>YOU LOSE HAHAHA</h1>;
+  if (turnsRemaining < 1) {
+    return null;
   }
 
-  if (gameOver) {
-    return <h1>You Win</h1>;
+  function backSpace(arr) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+      if (arr[i] !== null) {
+        arr[i] = null;
+        break;
+      }
+    }
+    return arr;
   }
+
+  function addToCode(arr, val) {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === null) {
+        arr[i] = val;
+        break;
+      }
+    }
+    return arr;
+  }
+
   function handleKeyPress(event) {
     let { keyCode } = event;
     let copyUserGuess = userGuess.slice();
     let value = keyCode - 48;
     const DELETE_KEY_CODE = -40;
     if (value === DELETE_KEY_CODE) {
-      for (let i = copyUserGuess.length - 1; i >= 0; i--) {
-        if (copyUserGuess[i] !== null) {
-          copyUserGuess[i] = null;
-          break;
-        }
-      }
-      updateGuess(copyUserGuess);
+      copyUserGuess = backSpace(copyUserGuess);
     } else if (value <= 9 && value >= 1 && value <= maxDigits) {
       if (directIndex !== null) {
         copyUserGuess[directIndex] = value;
       } else {
-        for (let i = 0; i < copyUserGuess.length; i++) {
-          if (copyUserGuess[i] === null) {
-            copyUserGuess[i] = value;
-            break;
-          }
-        }
+        copyUserGuess = addToCode(copyUserGuess, value);
       }
-      updateGuess(copyUserGuess);
     }
+    updateGuess(copyUserGuess);
     updateIndex(null);
     toggleHint(false);
     return null;
   }
 
-  function handleClick(num) {
+  function handleClick(input) {
     let copyUserGuess = userGuess.slice();
-    if (directIndex !== null) {
-      copyUserGuess[directIndex] = num;
+    if (input === BACKSPACE) {
+      copyUserGuess = backSpace(copyUserGuess);
     } else {
-      for (let i = 0; i < copyUserGuess.length; i++) {
-        if (copyUserGuess[i] === null) {
-          copyUserGuess[i] = num;
-          break;
-        }
+      if (directIndex !== null) {
+        copyUserGuess[directIndex] = input;
+      } else {
+        copyUserGuess = addToCode(copyUserGuess, input);
       }
     }
     updateIndex(null);
@@ -74,7 +79,7 @@ export function UserInput(props) {
   for (let i = 0; i < codeLength; i++) {
     let inputValue = userGuess[i];
     let displayValue;
-    if (inputValue === undefined) {
+    if (!inputValue) {
       displayValue = "Fill";
       userGuess[i] = null;
     } else {
@@ -137,11 +142,15 @@ export function UserInput(props) {
       className="user_input"
       tabIndex={0}
       onKeyDown={(e) => handleKeyPress(e)}
+      autoFocus={true}
     >
       <p>Turns Remaining: {turnsRemaining}</p>
       <div>{showInputs}</div>
 
-      <div>{clickEntries}</div>
+      <div>
+        {clickEntries}
+        <button onClick={() => handleClick(BACKSPACE)}>Delete Previous</button>
+      </div>
 
       <div>
         {submitButton}
@@ -156,6 +165,5 @@ UserInput.propTypes = {
   submitGuess: PropTypes.func,
   gameDifficulty: PropTypes.object,
   turnsRemaining: PropTypes.number,
-  gameOver: PropTypes.bool,
   code: PropTypes.array,
 };

@@ -1,10 +1,10 @@
 import { SET_TURNS, USER_SUBMIT, RESET } from "../actions/actionTypes";
 
-export function turnsRemainingReducer(state = 8, action) {
+export function turnsRemainingReducer(state = 10, action) {
   let { type, payload } = action;
   switch (type) {
     case RESET:
-      return 8;
+      return 10;
     case SET_TURNS:
       return payload;
     case USER_SUBMIT:

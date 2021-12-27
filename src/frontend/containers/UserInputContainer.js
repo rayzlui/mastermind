@@ -4,6 +4,7 @@ import {
   updateDataBaseForPvP,
   userSubmit,
   weHaveAWinner,
+  weHaveALoser,
 } from "../actions/actions";
 import { UserInput } from "../components/UserInput";
 import { compareCode } from "../gameLogic/compareCode";
@@ -20,13 +21,15 @@ function mapDispatchToProps(dispatch) {
     dispatchWeHaveAWinner: () => dispatch(weHaveAWinner()),
     updatePvP: (gameid, userid, winner, time) =>
       dispatch(updateDataBaseForPvP(gameid, userid, winner, time)),
+    dispatchWeHaveALoser: () => {
+      dispatch(weHaveALoser());
+    },
   };
 }
 
 function mergeProps(mapStateToProps, mapDispatchToProps) {
   let {
     gameDifficulty,
-    gameOver,
     mastermindCode,
     turnsRemaining,
     opponentData,
@@ -35,17 +38,22 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
   } = mapStateToProps;
   let gameid = opponentData?._id;
   let userid = currentUser?._id;
-  let { updateTurns, addTurnToHistory, dispatchWeHaveAWinner, updatePvP } =
-    mapDispatchToProps;
+  let {
+    updateTurns,
+    addTurnToHistory,
+    dispatchWeHaveAWinner,
+    updatePvP,
+    dispatchWeHaveALoser,
+  } = mapDispatchToProps;
   return {
     gameDifficulty,
     turnsRemaining,
     code: mastermindCode?.nums,
-    gameOver,
     submitGuess: (code) => {
       let checkCode = compareCode(code, mastermindCode);
       let { redPeg, whitePeg } = checkCode;
       let winner = redPeg === code.length;
+      //handle no turns remaining here.
       updateTurns();
       addTurnToHistory(code, redPeg, whitePeg);
       if (winner) {
@@ -54,6 +62,9 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
       } else {
         if (opponentData) {
           updatePvP(gameid, userid, false, winTime);
+        }
+        if (turnsRemaining <= 1) {
+          dispatchWeHaveALoser();
         }
       }
     },

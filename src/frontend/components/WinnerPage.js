@@ -13,8 +13,29 @@ export function WinnerPage(props) {
     toggleLogin,
   } = props;
   let [saved, confirmSave] = useState(null);
-  if (!isWinner) {
+
+  function PlayAgainButton() {
+    return (
+      <button
+        onClick={() => {
+          confirmSave(null);
+          playAgain();
+        }}
+      >
+        Play Again?
+      </button>
+    );
+  }
+  if (isWinner == null) {
     return null;
+  }
+  if (isWinner === false) {
+    return (
+      <div>
+        <h1>YOU LOSE HAHAHA</h1>
+        {PlayAgainButton}
+      </div>
+    );
   }
   let input;
   if (gameType === SET_SINGLE_PLAYER) {
@@ -74,7 +95,7 @@ export function WinnerPage(props) {
     <div>
       <h1>Congratulations! You broke the code</h1>
       {input}
-      <button onClick={() => playAgain()}>Play Again?</button>
+      <PlayAgainButton />
     </div>
   );
 }

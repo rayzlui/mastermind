@@ -122,10 +122,12 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
     } else {
       console.log(req.body);
       let { _id, players } = game;
-      players[userid].moves = players[userid].moves + 1;
+
       if (finished) {
         game.numCompletedGames++;
         players[userid].finished = time;
+      } else {
+        players[userid].moves = players[userid].moves + 1;
       }
 
       game[players] = players;
@@ -179,7 +181,7 @@ app.post("/api/user/create", jsonParser, (req, res) => {
           }
         });
       } else {
-        res.status(418).send("Username taken");
+        res.status(418).send({ error: "Username taken" });
       }
     }
   });
@@ -190,10 +192,10 @@ app.get(`/api/getKey/login/:username`, (req, res) => {
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
       console.log("Error accessing database");
-      res.status(404).send("Unable to find user");
+      res.status(404).send({ error: "Unable to find user" });
     } else {
       if (user === null) {
-        res.status(404).send("Unable to find user");
+        res.status(404).send({ error: "Unable to find user" });
       } else {
         let { coolstring } = user;
         console.log("Found user, sending key");
@@ -214,14 +216,16 @@ app.post("/api/user/login", jsonParser, (req, res) => {
     } else {
       if (user === null) {
         console.log("Unable to find account");
-        res.status(418).send("Please create an account");
+        res.status(418).send({ error: "Please create an account" });
       } else {
         console.log("Found account");
         let { passwordHash, _id, gameHistory } = user;
         if (passwordHash === password) {
           res.send({ username, _id, gameHistory });
         } else {
-          res.status(403).send("Unable to find username + account combo");
+          res
+            .status(403)
+            .send({ error: "Unable to find username + account combo" });
         }
       }
     }

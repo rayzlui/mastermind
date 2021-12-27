@@ -4,7 +4,7 @@ export function searchedUserReducer(state = null, action) {
   let { type, payload } = action;
   switch (type) {
     case USER_FOUND:
-      return payload;
+      return Object.assign({}, state, payload);
     default:
       return state;
   }

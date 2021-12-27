@@ -1,9 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { PLAY_GAME, SET_SINGLE_PLAYER } from "../actions/actionTypes";
-
 import { WinnerPageContainer } from "../containers/WinnerPageContainer";
-import { SinglePlayerGameComponent } from "../components/SinglePlayerGameComponent";
+import { UserInputContainer } from "../containers/UserInputContainer";
+import { PreviousMoveContainer } from "../containers/PreviousMoveContainer";
+import { ShowPVPContainer } from "../containers/ShowPVPContainer";
+import { TimerContainer } from "../containers/TimerContainer";
 
 export function PlayGame(props) {
   let { displayingPage, gameType, opponentData } = props;
@@ -17,7 +19,10 @@ export function PlayGame(props) {
   return (
     <>
       <WinnerPageContainer />
-      <SinglePlayerGameComponent />
+      <ShowPVPContainer />
+      <TimerContainer />
+      <PreviousMoveContainer />
+      <UserInputContainer />
     </>
   );
 }

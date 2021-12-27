@@ -15,7 +15,7 @@ export function SelectDifficultyComponent(props) {
         <label>Max Digits</label>
         <input
           type="range"
-          min="1"
+          min="2"
           max="9"
           value={customDigits}
           onChange={(e) => updateDigits(parseInt(e.target.value))}
@@ -41,6 +41,7 @@ export function SelectDifficultyComponent(props) {
         <DifficultyButtonContainer
           length={customCodeLength}
           maxDigits={customDigits}
+          gameType={gameType}
           difficulty={"Submit"}
         />
       </div>
