@@ -28,135 +28,38 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get("/api/users/:name", (req, res) => {
-  let username = req.params.name;
-  UserModel.findOne({ name: username }, (err, data) => {
-    if (err) {
-      console.log(
-        `Error searching database for User Model params: ${username}`
-      );
-      res.status(404).send("Unable to find user");
-    } else {
-      if (data.length < 1) {
-        console.log(`Unable to find user ${username}`);
-        res.status(404);
-        res.send();
-      } else {
-        console.log(`Found user: ${data}`);
-        let { gameHistory, dateJoined } = data;
-        res.status(200).send({ username, gameHistory, dateJoined });
-      }
-    }
-  });
-});
+function matchMakerWithCodeGenerator(codeGenerator) {
+  return async (players, difficulty) => {
+    let difficultyTranslateValues = {};
+    difficultyTranslateValues["easy"] = [4, 4];
+    difficultyTranslateValues["normal"] = [4, 7];
+    difficultyTranslateValues["hard"] = [7, 9];
 
-function SinglePlayerMatchMaking() {
-  this.easy = [];
-  this.normal = [];
-  this.hard = [];
-}
-SinglePlayerMatchMaking.prototype.addToThisQueue = function (diff, id) {
-  this[diff] = [...this[diff], id];
-};
-SinglePlayerMatchMaking.prototype.getQueueFrom = function (diff) {
-  return this[diff];
-};
+    let playersMatched = players.reduce((acc, player) => {
+      let { id, name } = player;
+      acc[id] = { name, moves: 0, time: 0, isWinner: null };
+      return acc;
+    }, {});
 
-SinglePlayerMatchMaking.prototype.removeTwoFrom = function (diff) {
-  return this[diff].splice(0, 2);
-};
-let emitter = new EventEmitter();
-let matching = new SinglePlayerMatchMaking();
-let values = {};
-values["easy"] = [4, 4];
-values["normal"] = [4, 7];
-values["hard"] = [9, 9];
-
-app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
-  let name = req.params.name;
-  let id = req.params.id;
-  let user = { name, id };
-  let difficulty = req.params.difficulty;
-  matching.addToThisQueue(difficulty, user);
-  if (matching.getQueueFrom(difficulty).length < 2) {
-    return emitter.once(`match${user}`, (newPvpMatch) => {
-      res.send(newPvpMatch);
+    let [codeLength, maxDigits] = difficultyTranslateValues[difficulty];
+    let code = await codeGenerator(codeLength, maxDigits);
+    let newPvpMatch = await new PvPModel({
+      players: playersMatched,
+      code,
+      numCompletedGames: 0,
+      gameover: false,
+      numOfPlayers: players.length,
     });
-  } else {
-    let fromQueue = matching.removeTwoFrom(difficulty);
-    let newMatch = await createMatch(fromQueue, difficulty);
-    emitter.emit(`match${fromQueue[0]}`, newMatch);
-    res.send(newMatch);
-  }
-});
-
-async function createMatch(players, difficulty) {
-  let playersMatched = players.reduce((acc, player) => {
-    let { id, name } = player;
-    acc[id] = { name, moves: 0, time: 0, finished: null };
-    return acc;
-  }, {});
-
-  let [codeLength, maxDigits] = values[difficulty];
-  let code = await generateCode(codeLength, maxDigits);
-  let newPvpMatch = await new PvPModel({
-    players: playersMatched,
-    code,
-    numCompletedGames: 0,
-    gameover: false,
-    numOfPlayers: players.length,
-  });
-  newPvpMatch.save();
-  return newPvpMatch;
+    newPvpMatch.save();
+    return newPvpMatch;
+  };
 }
 
-app.post("/api/game/:gameid", jsonParser, (req, res) => {
-  let gameid = `${req.params.gameid}`;
-  let { userid, finished, time } = req.body;
-  PvPModel.findById(gameid, function (err, game) {
-    if (err) {
-      console.log(`Could not access database for game id: ${gameid}`);
-      res.send(err);
-    }
-    if (game === null) {
-      console.log(`Could not find game id: ${gameid}`);
-      res.sendStatus(404);
-    } else {
-      console.log(req.body);
-      let { _id, players } = game;
+const createMatch = matchMakerWithCodeGenerator(generateCode);
 
-      if (finished !== null) {
-        game.numCompletedGames++;
-        if (finished) {
-          players[userid].finished = time;
-        }
-      } else {
-        players[userid].moves = players[userid].moves + 1;
-      }
+//User routes
 
-      game[players] = players;
-      game.markModified("players");
-      game.save((err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("update success");
-          res.json(game);
-        }
-      });
-      if (game.numCompletedGames === game.numOfPlayers) {
-        PvPModel.deleteOne(_id, (err, game) => {
-          if (err) {
-            console.log("Unable to delete game");
-          } else {
-            console.log(`Game completed. Deleting ${game}`);
-          }
-        });
-      }
-    }
-  });
-});
-
+//create
 app.post("/api/user/create", jsonParser, (req, res) => {
   let { username, password, key } = req.body;
   if (username === undefined || password === undefined) {
@@ -164,7 +67,7 @@ app.post("/api/user/create", jsonParser, (req, res) => {
   }
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
-      console.log("Error accessing data");
+      console.log(`Error finding user: ${username}`);
       res.send(404);
     } else {
       if (user === null) {
@@ -179,7 +82,7 @@ app.post("/api/user/create", jsonParser, (req, res) => {
         newUser.save((error) => {
           if (error) {
             console.log(`Unable to create new user ${error}`);
-            res.send(error);
+            res.status(418).send("Unable to create account");
           } else {
             console.log(`Success, created new user ${newUser}`);
             let { _id, gameHistory } = newUser;
@@ -193,6 +96,7 @@ app.post("/api/user/create", jsonParser, (req, res) => {
   });
 });
 
+//request key for login
 app.get(`/api/getKey/login/:username`, (req, res) => {
   let username = req.params.username;
   UserModel.findOne({ name: username }, (err, user) => {
@@ -211,14 +115,13 @@ app.get(`/api/getKey/login/:username`, (req, res) => {
   });
 });
 
+//login
 app.post("/api/user/login", jsonParser, (req, res) => {
   let { username, password } = req.body;
-  console.log(username, password);
   UserModel.findOne({ name: username }, (err, user) => {
-    console.log(user);
     if (err) {
       console.log("Error accessing data");
-      res.send(404);
+      res.status(404).send({ error: "User not found" });
     } else {
       if (user === null) {
         console.log("Unable to find account");
@@ -238,45 +141,9 @@ app.post("/api/user/login", jsonParser, (req, res) => {
   });
 });
 
-function MutliplayerMatchMaker() {
-  this.easy = [];
-  this.normal = [];
-  this.hard = [];
-}
-
-MutliplayerMatchMaker.prototype.addToThisQueue = function (difficulty, user) {
-  this[difficulty].push(user);
-};
-
-let multiplayerMatchMaking = new MutliplayerMatchMaker();
-
-setInterval(() => {
-  let queueDifficultyKeys = Object.keys(multiplayerMatchMaking);
-  queueDifficultyKeys.forEach(async (difficulty) => {
-    let queue = multiplayerMatchMaking[difficulty];
-    if (queue.length > 2) {
-      let newMatch = await createMatch(queue, difficulty);
-      emitter.emit("tournament start", newMatch);
-      multiplayerMatchMaking[difficulty] = [];
-    }
-  });
-}, 15000);
-
-app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
-  let name = req.params.name;
-  let id = req.params.id;
-  let user = { name, id };
-  let difficulty = req.params.difficulty;
-  multiplayerMatchMaking.addToThisQueue(difficulty, user);
-  return emitter.once("tournament start", (newMatch) => {
-    res.send(newMatch);
-  });
-});
-
+//update user game history
 app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
   let userid = req.params.id;
-  //send back code, time, moves?
-  //dont care about moves, because you can lose if moves gone. better just store time.
   let { code, time, difficulty } = req.body;
   UserModel.findOne({ _id: userid }, (err, user) => {
     if (err) {
@@ -295,6 +162,163 @@ app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
   });
 });
 
+//find
+app.get("/api/users/:name", (req, res) => {
+  let username = req.params.name;
+  UserModel.findOne({ name: username }, (err, data) => {
+    if (err) {
+      console.log(
+        `Error searching database for User Model params: ${username}`
+      );
+      res.status(404).send("Unable to find user");
+    } else {
+      if (data.length < 1) {
+        console.log(`Unable to find user ${username}`);
+        res.status(404).send({ error: "Unable to save game" });
+      } else {
+        console.log(`Found user: ${data}`);
+        let { gameHistory, dateJoined } = data;
+        res.status(200).send({ username, gameHistory, dateJoined });
+      }
+    }
+  });
+});
+
+//matchmaking
+function OneOnOneMatchMaker() {
+  this.easy = [];
+  this.normal = [];
+  this.hard = [];
+}
+OneOnOneMatchMaker.prototype.addToThisQueue = function (diff, id) {
+  this[diff] = [...this[diff], id];
+};
+OneOnOneMatchMaker.prototype.getQueueFrom = function (diff) {
+  return this[diff];
+};
+
+OneOnOneMatchMaker.prototype.removeTwoFrom = function (diff) {
+  return this[diff].splice(0, 2);
+};
+let emitter = new EventEmitter();
+let oneOnOneMatchMaking = new OneOnOneMatchMaker();
+
+app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
+  let name = req.params.name;
+  let id = req.params.id;
+  let user = { name, id };
+  let difficulty = req.params.difficulty;
+  oneOnOneMatchMaking.addToThisQueue(difficulty, user);
+  if (oneOnOneMatchMaking.getQueueFrom(difficulty).length < 2) {
+    return emitter.once(`match${user}`, (newPvpMatch) => {
+      res.send(newPvpMatch);
+    });
+  } else {
+    let fromQueue = oneOnOneMatchMaking.removeTwoFrom(difficulty);
+    let newMatch = await createMatch(fromQueue, difficulty);
+    emitter.emit(`match${fromQueue[0]}`, newMatch);
+    res.send(newMatch);
+  }
+});
+
+//Tournament Match Making
+
+function TournamentQueue() {
+  this.easy = [];
+  this.normal = [];
+  this.hard = [];
+}
+
+TournamentQueue.prototype.addToThisQueue = function (difficulty, user) {
+  this[difficulty].push(user);
+};
+
+let tournamentMatchMakingQueue = new TournamentQueue();
+
+//server checks every 10 seconds to see if we can make a tournament match.
+
+async function tournamentMatchMaker(
+  matchMakingQueue,
+  emitter,
+  createMatchCallBack
+) {
+  for (let difficulty in matchMakingQueue) {
+    let queue = matchMakingQueue[difficulty];
+    if (queue.length > 2) {
+      let newMatch = await createMatchCallBack(queue, difficulty);
+      emitter.emit("tournament start", newMatch);
+      matchMakingQueue[difficulty] = [];
+    }
+  }
+}
+setInterval(
+  () => tournamentMatchMaker(tournamentMatchMakingQueue, emitter, createMatch),
+  10000
+);
+
+app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
+  let name = req.params.name;
+  let id = req.params.id;
+  let user = { name, id };
+  let difficulty = req.params.difficulty;
+  tournamentMatchMakingQueue.addToThisQueue(difficulty, user);
+  return emitter.once("tournament start", (newMatch) => {
+    res.send(newMatch);
+  });
+});
+
+//Handler for all active online matches
+app.post("/api/game/:gameid", jsonParser, (req, res) => {
+  let gameid = `${req.params.gameid}`;
+  let { userid, isWinner, time } = req.body;
+  PvPModel.findById(gameid, function (err, game) {
+    if (err) {
+      console.log(`Could not access database for game id: ${gameid}`);
+      res.send(err);
+    }
+    if (game === null) {
+      console.log(`Could not find game id: ${gameid}`);
+      res.sendStatus(404);
+    } else {
+      let { _id, players } = game;
+      //isWinner will have three states. true === player has won, false === player has lost, null === game is still active
+      if (isWinner !== null) {
+        game.numCompletedGames++;
+        if (isWinner) {
+          players[userid].time = time;
+        }
+      } else {
+        players[userid].moves = players[userid].moves + 1;
+      }
+      //if everyone has finished server deletes the game
+      if (game.numCompletedGames === game.numOfPlayers) {
+        PvPModel.deleteOne(_id, (err, game) => {
+          if (err) {
+            console.log("Unable to delete game");
+          } else {
+            console.log(`Game completed. Deleting ${game}`);
+          }
+        });
+      } else {
+        //if game still active server responds with updated info
+        game[players] = players;
+        game.markModified("players");
+        game.save((err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("update success");
+            res.json(game);
+          }
+        });
+      }
+    }
+  });
+});
+
+//Leaderboard
+
+//add to leaderboard
 app.post("/api/leaderboard/", jsonParser, (req, res) => {
   let { user, time, code, difficulty } = req.body;
   let { _id, username } = user;
@@ -316,22 +340,34 @@ app.post("/api/leaderboard/", jsonParser, (req, res) => {
   });
 });
 
+//request leaderboard
+
+function organizeLeaderboardByTimeAndDifficulty(
+  leaderboardData,
+  binaryInsertCallBack
+) {
+  let hashedLeaderboard = { easy: [], normal: [], hard: [] };
+  leaderboardData.forEach((data) => {
+    let { name, userid, code, time, difficulty } = data;
+    let sortedByTime = binaryInsertCallBack(hashedLeaderboard[difficulty], {
+      user: { name, userid, time },
+      code,
+      time,
+    });
+    hashedLeaderboard[difficulty] = sortedByTime;
+  });
+  return hashedLeaderboard;
+}
 app.get("/api/leaderboard", (req, res) => {
-  LeaderboardModel.find({}, (err, leaderboard) => {
+  LeaderboardModel.find({}, (err, data) => {
     if (err) {
       res.status(404).status("Unable to get leaderboard");
     } else {
-      let store = { easy: [], normal: [], hard: [] };
-      leaderboard.forEach((data, index) => {
-        let { name, userid, code, time, difficulty } = data;
-        let sortedByTime = binaryInsert(store[difficulty], {
-          user: { name, userid, time },
-          code,
-          time,
-        });
-        store[difficulty] = sortedByTime;
-      });
-      res.json(store);
+      let organizedData = organizeLeaderboardByTimeAndDifficulty(
+        data,
+        binaryInsert
+      );
+      res.json(organizedData);
     }
   });
 });
