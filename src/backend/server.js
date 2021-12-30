@@ -93,7 +93,7 @@ app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
 async function createMatch(players, difficulty) {
   let playersMatched = players.reduce((acc, player) => {
     let { id, name } = player;
-    acc[id] = { name, moves: 0, time: 0, finished: false };
+    acc[id] = { name, moves: 0, time: 0, finished: null };
     return acc;
   }, {});
 
@@ -125,9 +125,11 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
       console.log(req.body);
       let { _id, players } = game;
 
-      if (finished) {
+      if (finished !== null) {
         game.numCompletedGames++;
-        players[userid].finished = time;
+        if (finished) {
+          players[userid].finished = time;
+        }
       } else {
         players[userid].moves = players[userid].moves + 1;
       }

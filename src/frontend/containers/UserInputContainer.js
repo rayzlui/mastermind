@@ -61,9 +61,11 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
       if (winner) {
         dispatchWeHaveAWinner();
         //the winTime we have here is from when we called it in mapStateToProps, dispatchweHaveAWinner updates it after we've called it before.
+        //updatePvP(gameid, userid, true, winTime);
+        //WHY IS THE TIMER COMPONENT THE ONE TELLING THE SERVER WHO WON....
       } else {
         if (opponentData) {
-          updatePvP(gameid, userid, false, winTime);
+          updatePvP(gameid, userid, null, winTime);
         }
         if (turnsRemaining <= 1) {
           dispatchWeHaveALoser();

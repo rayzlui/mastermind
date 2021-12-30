@@ -148,6 +148,8 @@ export function logUserHistory(user, code, time, difficulty, callback) {
 }
 
 export function updateDataBaseForPvP(gameid, userid, finished, time) {
+  console.log(gameid, userid, finished, time);
+
   return async (dispatch) => {
     let request = await fetch(`http://localhost:3001/api/game/${gameid}`, {
       method: "post",

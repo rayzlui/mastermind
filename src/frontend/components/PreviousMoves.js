@@ -26,11 +26,9 @@ export function PreviousMoves(props) {
       <table className="mt-8 w-full">
         <thead>
           <tr>
-            <td>
+            <th>
               <Tooltip.Root delayDuration={0}>
-                <Tooltip.Trigger>
-                  <th>Move</th>
-                </Tooltip.Trigger>
+                <Tooltip.Trigger>Move</Tooltip.Trigger>
                 <Tooltip.Content
                   sideOffset={5}
                   className="text-sm font-normal bg-white"
@@ -38,12 +36,10 @@ export function PreviousMoves(props) {
                   This is the order of your moves{" "}
                 </Tooltip.Content>
               </Tooltip.Root>
-            </td>
-            <td>
+            </th>
+            <th>
               <Tooltip.Root delayDuration={0}>
-                <Tooltip.Trigger>
-                  <th>Code</th>
-                </Tooltip.Trigger>
+                <Tooltip.Trigger>Code</Tooltip.Trigger>
                 <Tooltip.Content
                   sideOffset={5}
                   className="text-sm font-normal bg-white"
@@ -51,12 +47,10 @@ export function PreviousMoves(props) {
                   This is the code you guessed{" "}
                 </Tooltip.Content>
               </Tooltip.Root>
-            </td>
-            <td>
+            </th>
+            <th>
               <Tooltip.Root delayDuration={0}>
-                <Tooltip.Trigger>
-                  <th>Red</th>
-                </Tooltip.Trigger>
+                <Tooltip.Trigger>Red</Tooltip.Trigger>
                 <Tooltip.Content
                   sideOffset={5}
                   className="text-sm font-normal bg-white"
@@ -64,12 +58,10 @@ export function PreviousMoves(props) {
                   This is the amount of numbers you got correct.
                 </Tooltip.Content>
               </Tooltip.Root>
-            </td>
-            <td>
+            </th>
+            <th>
               <Tooltip.Root delayDuration={0}>
-                <Tooltip.Trigger>
-                  <th>White</th>
-                </Tooltip.Trigger>
+                <Tooltip.Trigger>White</Tooltip.Trigger>
                 <Tooltip.Content
                   sideOffset={5}
                   className="text-sm font-normal bg-white w-1/4"
@@ -78,7 +70,7 @@ export function PreviousMoves(props) {
                   wrong spot.
                 </Tooltip.Content>
               </Tooltip.Root>
-            </td>
+            </th>
           </tr>
         </thead>
         <tbody>{previousMoves}</tbody>

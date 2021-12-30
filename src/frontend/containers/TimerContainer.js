@@ -15,8 +15,8 @@ function mapDispatchToProps(dispatch) {
   return {
     setWinTime: (gameTimer) => dispatch(setWinTime(gameTimer)),
     endGame: () => dispatch(weHaveALoser()),
-    updateDataBaseForPvP: (gameid, userid, time) => {
-      dispatch(updateDataBaseForPvP(gameid, userid, true, time));
+    updateDataBaseForPvP: (gameid, userid, isWinner, time) => {
+      dispatch(updateDataBaseForPvP(gameid, userid, isWinner, time));
     },
   };
 }
@@ -32,7 +32,12 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     endGame,
     updateDataBaseForPvP: opponentData
       ? (gameTimer) => {
-          updateDataBaseForPvP(opponentData._id, currentUser._id, gameTimer);
+          updateDataBaseForPvP(
+            opponentData._id,
+            currentUser._id,
+            isWinner,
+            gameTimer
+          );
         }
       : () => null,
   };
