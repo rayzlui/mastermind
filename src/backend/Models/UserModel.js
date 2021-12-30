@@ -6,6 +6,7 @@ let userSchema = new Schema({
   passwordHash: String,
   coolstring: Number,
   gameHistory: Array,
+  dateJoined: Date,
 });
 
 const UserModel = model("User", userSchema);

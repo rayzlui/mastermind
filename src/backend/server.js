@@ -29,20 +29,22 @@ app.use(function (req, res, next) {
 });
 
 app.get("/api/users/:name", (req, res) => {
-  let name = req.params.name;
-  UserModel.find({ name }, (err, data) => {
+  let username = req.params.name;
+  UserModel.findOne({ name: username }, (err, data) => {
     if (err) {
-      console.log(`Error searching database for User Model params: ${name}`);
+      console.log(
+        `Error searching database for User Model params: ${username}`
+      );
       res.status(404).send("Unable to find user");
     } else {
       if (data.length < 1) {
-        console.log(`Unable to find user ${name}`);
+        console.log(`Unable to find user ${username}`);
         res.status(404);
         res.send();
       } else {
-        console.log(`Found user: ${name}`);
-        let { gameHistory } = data[0];
-        res.status(200).send({ name, gameHistory });
+        console.log(`Found user: ${data}`);
+        let { gameHistory, dateJoined } = data;
+        res.status(200).send({ username, gameHistory, dateJoined });
       }
     }
   });
@@ -164,18 +166,20 @@ app.post("/api/user/create", jsonParser, (req, res) => {
       res.send(404);
     } else {
       if (user === null) {
+        let rightNowThisMoment = Date();
         let newUser = new UserModel({
           name: username,
           passwordHash: password,
           coolstring: key,
           gameHistory: [],
+          dateJoined: rightNowThisMoment,
         });
         newUser.save((error) => {
           if (error) {
             console.log(`Unable to create new user ${error}`);
             res.send(error);
           } else {
-            console.log(`Success, created new user ${username}`);
+            console.log(`Success, created new user ${newUser}`);
             let { _id, gameHistory } = newUser;
             res.send({ username, _id, gameHistory });
           }

@@ -1,8 +1,8 @@
-import { binaryInsert } from "./binaryInsert";
+let binaryInsert = require("./binaryInsert");
 
 describe("binaryInsert", () => {
   let mockData = [];
-  for (let i = 5; i < 88; i += 3) {
+  for (let i = 88; i >= 5; i -= 3) {
     mockData.push({ name: `paul ${i}`, time: i });
   }
   it("should insert it in correct location", () => {
