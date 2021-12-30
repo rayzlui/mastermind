@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-
+import {
+  Button,
+  Input,
+  FormControl,
+  FormLabel,
+  RequiredIndicator,
+} from "@vechaiui/react";
+import { Dialog } from "@headlessui/react";
 export function LoginOrCreateUserPage(props) {
-  let { loginAction, createUserAction, currentUser, showLogin } = props;
+  let { loginAction, createUserAction, currentUser, showLogin, hideLogin } =
+    props;
   if (currentUser || !showLogin) {
     return null;
   }
@@ -21,35 +29,62 @@ export function LoginOrCreateUserPage(props) {
     userAction = createUserAction;
   }
   return (
-    <div className={"popup-login"} tabIndex={0}>
-      <button onClick={() => toggleLogin("Login")}>Login</button>
-      <button onClick={() => toggleLogin("Create an account")}>
-        Create An Account
-      </button>
-      {feedback}
-      <h4>{type}</h4>
-      <form>
-        <label>Username</label>
-        <input
-          type={"text"}
-          defaultValue={userName}
-          onChange={(e) => updateUserName(e.target.value)}
-        ></input>
-        <label>Password</label>
-        <input
-          type={"password"}
-          onChange={(e) => updatePassword(e.target.value)}
-        ></input>
-        <input
-          type={"submit"}
-          value={type}
-          onClick={(e) => {
-            userAction(userName, password, toggleFeedback);
-            e.preventDefault();
-          }}
-        ></input>
-      </form>
-    </div>
+    <Dialog
+      as="div"
+      open={!!showLogin}
+      onClose={hideLogin}
+      className="fixed z-modal inset-0 h-2/4 w-2/4 left-1/4 top-1/4 right-1/4 border rounded"
+    >
+      <Dialog.Overlay className="fixed top-0 left-0 w-screen h-screen bg-blackAlpha-800" />
+
+      <div className="relative p-4 flex flex-col w-full rounded bg-white border">
+        <div className="mb-2">
+          <Button variant="ghost" onClick={() => toggleLogin("Login")}>
+            Login
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => toggleLogin("Create an account")}
+          >
+            Create An Account
+          </Button>
+        </div>
+        <Dialog.Title className="text-lg font-semibold">{type}</Dialog.Title>
+        <Dialog.Description className="m-2">{feedback}</Dialog.Description>
+        <form>
+          <FormControl>
+            <FormLabel>
+              Username
+              <RequiredIndicator />
+            </FormLabel>
+            <Input
+              type={"text"}
+              className="text-black"
+              onChange={(e) => updateUserName(e.target.value)}
+            ></Input>
+            <FormLabel>
+              Password
+              <RequiredIndicator />
+            </FormLabel>
+            <Input
+              className="text-black"
+              type={"password"}
+              onChange={(e) => updatePassword(e.target.value)}
+            ></Input>
+          </FormControl>
+          <Button
+            className="mt-4"
+            variant="ghost"
+            onClick={(e) => {
+              userAction(userName, password, toggleFeedback);
+              e.preventDefault();
+            }}
+          >
+            {type}
+          </Button>
+        </form>
+      </div>
+    </Dialog>
   );
 }
 
@@ -60,4 +95,5 @@ LoginOrCreateUserPage.propTypes = {
   displayingPage: PropTypes.string,
   currentUser: PropTypes.object,
   showLogin: PropTypes.string,
+  hideLogin: PropTypes.func,
 };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
+import { Button } from "@vechaiui/react";
 
 export function WinnerPage(props) {
   let {
@@ -16,14 +17,15 @@ export function WinnerPage(props) {
 
   function PlayAgainButton() {
     return (
-      <button
+      <Button
+        variant="ghost"
         onClick={() => {
           confirmSave(null);
           playAgain();
         }}
       >
         Play Again?
-      </button>
+      </Button>
     );
   }
   if (isWinner == null) {
@@ -31,9 +33,9 @@ export function WinnerPage(props) {
   }
   if (isWinner === false) {
     return (
-      <div>
-        <h1>YOU LOSE HAHAHA</h1>
-        {PlayAgainButton()}
+      <div className="flex flex-col items-center justify-center">
+        <h1 className="text-xl font-bold">YOU LOSE HAHAHA</h1>
+        <PlayAgainButton />
       </div>
     );
   }
@@ -45,7 +47,9 @@ export function WinnerPage(props) {
           <h3>
             Login or create an account to upload your time to leader board
           </h3>
-          <button onClick={() => toggleLogin()}>Login</button>
+          <Button variant="ghost" onClick={() => toggleLogin()}>
+            Login
+          </Button>
         </>
       );
     } else {
@@ -57,9 +61,12 @@ export function WinnerPage(props) {
           input = (
             <>
               <h3>Unable To Save</h3>
-              <button onClick={() => uploadGameInfo(confirmSave)}>
+              <Button
+                variant="ghost"
+                onClick={() => uploadGameInfo(confirmSave)}
+              >
                 Try Again?
-              </button>
+              </Button>
             </>
           );
           break;
@@ -67,7 +74,12 @@ export function WinnerPage(props) {
           input = (
             <>
               <h3>Upload Time To Leaderboard?</h3>
-              <button onClick={() => uploadGameInfo(confirmSave)}>Yes</button>
+              <Button
+                variant="ghost"
+                onClick={() => uploadGameInfo(confirmSave)}
+              >
+                Yes
+              </Button>
             </>
           );
           break;
@@ -92,8 +104,8 @@ export function WinnerPage(props) {
   }
 
   return (
-    <div>
-      <h1>Congratulations! You broke the code</h1>
+    <div className="flex flex-col items-center justify items">
+      <h1 className="text-xl font-bold">Congratulations! You broke the code</h1>
       {input}
       <PlayAgainButton />
     </div>

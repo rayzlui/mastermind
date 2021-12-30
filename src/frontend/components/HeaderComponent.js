@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { DISPLAY_USER } from "../actions/actionTypes";
+import { Button } from "@vechaiui/react";
 
 export function HeaderComponent(props) {
   let { changePageTo, currentUser, showThisUser, logOut, toggleLogin } = props;
   let [showLoggedInOptions, toggleLoggedIn] = useState(false);
   let loggedInOptions = showLoggedInOptions ? (
     <>
-      <button
+      <Button
+        variant="light"
         onClick={() => {
           showThisUser(currentUser);
           changePageTo(DISPLAY_USER);
@@ -15,47 +17,53 @@ export function HeaderComponent(props) {
         }}
       >
         {currentUser.username}
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="light"
         onClick={() => {
           logOut();
           toggleLoggedIn(false);
         }}
       >
         Logout
-      </button>
+      </Button>
     </>
   ) : null;
   let sideHeader = currentUser ? (
     <>
-      <button onClick={() => toggleLoggedIn(!showLoggedInOptions)}>
+      <Button
+        variant="light"
+        onClick={() => toggleLoggedIn(!showLoggedInOptions)}
+      >
         Hi {currentUser.username}!
-      </button>
+      </Button>
       {loggedInOptions}
     </>
   ) : (
     <>
-      <button
+      <Button
+        variant="light"
         onClick={() => {
           toggleLogin("Login");
         }}
       >
         Login
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="light"
         onClick={() => {
           toggleLogin("Create an account");
         }}
       >
         Create an account
-      </button>
+      </Button>
     </>
   );
   return (
-    <div className={"header"}>
-      <h1>Mastermind</h1>
-      <div className={"side-header"}>{sideHeader}</div>
-    </div>
+    <>
+      <header className="font-sans font-bold text-3xl">Mastermind</header>
+      <div className="absolute right-0 top-0 flex flex-col">{sideHeader}</div>
+    </>
   );
 }
 HeaderComponent.propTypes = {

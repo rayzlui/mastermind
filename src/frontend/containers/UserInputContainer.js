@@ -31,10 +31,11 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
   let {
     gameDifficulty,
     mastermindCode,
-    turnsRemaining,
+    isWinner,
     opponentData,
     currentUser,
     winTime,
+    turnsRemaining,
   } = mapStateToProps;
   let gameid = opponentData?._id;
   let userid = currentUser?._id;
@@ -48,6 +49,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
   return {
     gameDifficulty,
     turnsRemaining,
+    isWinner,
     code: mastermindCode?.nums,
     submitGuess: (code) => {
       let checkCode = compareCode(code, mastermindCode);

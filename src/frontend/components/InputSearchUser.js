@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { Input, Button } from "@vechaiui/react";
 
 export function InputSearchUser(props) {
   let [searchInput, updateSearchInput] = useState();
   let { searchUser } = props;
 
   return (
-    <>
-      <label>Search User</label>
-      <input
+    <div className="flex justify-center">
+      <Input
+        className="w-60"
         type="text"
         onChange={(e) => updateSearchInput(e.target.value)}
-        defaultValue={searchInput}
       />
-      <button onClick={() => searchUser(searchInput)}>Search</button>
-    </>
+      <Button variant="light" onClick={() => searchUser(searchInput)}>
+        Search
+      </Button>
+    </div>
   );
 }
 

@@ -6,25 +6,36 @@ import { UserInputContainer } from "../containers/UserInputContainer";
 import { PreviousMoveContainer } from "../containers/PreviousMoveContainer";
 import { ShowPVPContainer } from "../containers/ShowPVPContainer";
 import { TimerContainer } from "../containers/TimerContainer";
+import { TurnsRemaining } from "./TurnsRemaining";
 
 export function PlayGame(props) {
   let { displayingPage, gameType, opponentData } = props;
   if (displayingPage !== PLAY_GAME) {
     return null;
   }
-
+  let display;
   if (gameType !== SET_SINGLE_PLAYER && opponentData === null) {
-    return <h1>Matching...</h1>;
+    display = <h1>Matching...</h1>;
+  } else {
+    display = (
+      <>
+        <div className="border-r-2 h-full w-1/5">
+          <PreviousMoveContainer />
+        </div>
+        <div className="w-3/5 h-full">
+          <ShowPVPContainer />
+          <WinnerPageContainer />
+          <UserInputContainer />
+        </div>
+        <div className="w-1/5 border-l-2 flex flex-col justify-items items-center">
+          <h1 className="mb-8 font-bold text-xl">Remaining</h1>
+          <TurnsRemaining />
+          <TimerContainer />
+        </div>
+      </>
+    );
   }
-  return (
-    <>
-      <WinnerPageContainer />
-      <ShowPVPContainer />
-      <TimerContainer />
-      <PreviousMoveContainer />
-      <UserInputContainer />
-    </>
-  );
+  return <div className="flex h-full">{display}</div>;
 }
 
 PlayGame.propTypes = {

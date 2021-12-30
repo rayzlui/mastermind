@@ -39,7 +39,16 @@ export function TimerComponent(props) {
     };
   }, [gameTimer, isWinner]);
   let { minutes, seconds } = covertMillisecondsToMinutes(gameTimer);
-  return <p>Time Remaining: {`${minutes}:${seconds}`}</p>;
+  return (
+    <div className="flex mt-10 flex-col items-center">
+      <p className="font-bold text-md">Time:</p>
+      <p
+        className={`font-bold text-sm ${
+          gameTimer < 120000 && gameTimer > 60000 ? "text-yellow-500" : ""
+        } ${gameTimer <= 60000 ? "text-red-500" : ""}`}
+      >{`${minutes}:${seconds}`}</p>
+    </div>
+  );
 }
 
 TimerComponent.propTypes = {

@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { Button } from "@vechaiui/react";
 const BACKSPACE = "BACKSPACE";
 
 export function UserInput(props) {
-  let { gameDifficulty, code, submitGuess, turnsRemaining } = props;
-  let { codeLength, maxDigits } = gameDifficulty;
+  let { gameDifficulty, code, submitGuess, isWinner } = props;
+  let { codeLength, maxDigit } = gameDifficulty;
   let [userGuess, updateGuess] = useState([]);
   let [directIndex, updateIndex] = useState(null);
   let [hint, toggleHint] = useState(false);
-  if (turnsRemaining < 1) {
+  if (isWinner !== null) {
     return null;
   }
 
@@ -39,7 +40,7 @@ export function UserInput(props) {
     const DELETE_KEY_CODE = -40;
     if (value === DELETE_KEY_CODE) {
       copyUserGuess = backSpace(copyUserGuess);
-    } else if (value <= 9 && value >= 1 && value <= maxDigits) {
+    } else if (value <= 9 && value >= 1 && value <= maxDigit) {
       if (directIndex !== null) {
         copyUserGuess[directIndex] = value;
       } else {
@@ -86,18 +87,28 @@ export function UserInput(props) {
       displayValue = inputValue;
     }
     showInputs.push(
-      <button key={`input${i}`} onClick={() => handleDirectIndexInput(i)}>
+      <Button
+        size="xl"
+        variant="ghost"
+        key={`input${i}`}
+        className="border"
+        onClick={() => handleDirectIndexInput(i)}
+      >
         {displayValue}
-      </button>
+      </Button>
     );
   }
-
+  let DeleteButton = (
+    <Button variant="ghost" onClick={() => handleClick(BACKSPACE)}>
+      Delete Previous
+    </Button>
+  );
   let clickEntries = [];
-  for (let i = 1; i <= maxDigits; i++) {
+  for (let i = 1; i <= maxDigit; i++) {
     clickEntries.push(
-      <button key={`click${i}`} onClick={() => handleClick(i)}>
+      <Button variant="ghost" key={`click${i}`} onClick={() => handleClick(i)}>
         {i}
-      </button>
+      </Button>
     );
   }
   if (hint) {
@@ -128,33 +139,36 @@ export function UserInput(props) {
     return null;
   }
 
-  let submitButton = (
-    <button onClick={() => handleSubmit(userGuess)}>Submit Guess</button>
+  let SubmitButton = (
+    <Button variant="ghost" onClick={() => handleSubmit(userGuess)}>
+      Submit Guess
+    </Button>
   );
 
-  let hintButton = null;
+  let HintButton = null;
 
   if (directIndex) {
-    hintButton = <button onClick={() => handleHint()}>Hint</button>;
+    HintButton = (
+      <Button variant="ghost" onClick={() => handleHint()}>
+        Hint
+      </Button>
+    );
   }
   return (
     <div
-      className="user_input"
       tabIndex={0}
       onKeyDown={(e) => handleKeyPress(e)}
       autoFocus={true}
+      className="w-full h-1/3 flex items-center flex-col"
     >
-      <p>Turns Remaining: {turnsRemaining}</p>
-      <div>{showInputs}</div>
+      <div className="w-full h-1/3 flex justify-center">{showInputs}</div>
 
-      <div>
-        {clickEntries}
-        <button onClick={() => handleClick(BACKSPACE)}>Delete Previous</button>
-      </div>
+      <div className="w-full h-1/3 flex justify-center">{clickEntries}</div>
 
-      <div>
-        {submitButton}
-        {hintButton}
+      <div className="w-full h-1/3 flex justify-center">
+        {DeleteButton}
+        {SubmitButton}
+        {HintButton}
       </div>
     </div>
   );
@@ -164,6 +178,6 @@ UserInput.propTypes = {
   maxDigits: PropTypes.number,
   submitGuess: PropTypes.func,
   gameDifficulty: PropTypes.object,
-  turnsRemaining: PropTypes.number,
+  isWinner: PropTypes.bool,
   code: PropTypes.array,
 };

@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 import { LoginOrCreateUserPage } from "../components/LoginOrCreateUserPage";
-import { createUser, loginUser } from "../actions/actions";
+import { createUser, hideLogin, loginUser } from "../actions/actions";
 import { casearCypher } from "../../scrambleString";
 
 function mapStateToProps(state) {
@@ -20,6 +20,9 @@ function mapDispatchToProps(dispatch) {
     },
     loginAction: (username, password, confirmLogin) => {
       dispatch(loginUser(username, password, confirmLogin));
+    },
+    hideLogin: () => {
+      dispatch(hideLogin());
     },
   };
 }

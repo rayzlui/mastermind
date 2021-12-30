@@ -22,7 +22,7 @@ import {
   HIDE_LOGIN,
 } from "./actionTypes";
 
-function setMastermindCode(code) {
+export function setMastermindCode(code) {
   return { type: SET_MASTERMIND_CODE, payload: code };
 }
 
@@ -53,16 +53,15 @@ export function weHaveAWinner() {
   return { type: WINNER, payload: true };
 }
 
-export function setDifficulty(codeLength, maxDigits, name) {
+export function setDifficulty(codeLength, maxDigit, name) {
   return {
     type: SET_DIFFICULTY,
-    payload: { codeLength, maxDigits, name: name },
+    payload: { codeLength, maxDigit, name: name },
   };
 }
 export function generateMastermindCode(codeLength, maxDigits) {
   return async (dispatch) => {
     let code = await generateCode(codeLength, maxDigits);
-    console.log(code);
     dispatch(setMastermindCode(code));
   };
 }

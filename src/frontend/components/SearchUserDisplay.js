@@ -11,10 +11,9 @@ export function SearchUserDisplay(props) {
   }
 
   return (
-    <>
-      <InputSearchUserContainer />
+    <div className="h-full">
       <ShowThisUser searchedUser={searchedUser} />
-    </>
+    </div>
   );
 }
 

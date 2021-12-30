@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 import { showLogin } from "../actions/actions";
-import { WelcomeScreen } from "../components/WelcomeComponent";
+import { GameModeSelect } from "../components/GameModeSelect";
 
 function mapStateToProps(state) {
   let { currentUser, displayingPage, gameType } = state;
@@ -18,7 +18,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export const WelcomeContainer = connect(
+export const GameModeSelectContainer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(WelcomeScreen);
+)(GameModeSelect);
