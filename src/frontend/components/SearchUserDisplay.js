@@ -2,10 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import { DISPLAY_USER } from "../actions/actionTypes";
 import { ShowThisUser } from "./ShowThisUser";
-import { InputSearchUserContainer } from "../containers/InputSearchUserContainer";
+import { useSelector } from "react-redux";
 
-export function SearchUserDisplay(props) {
-  let { displayingPage, searchedUser } = props;
+export function SearchUserDisplay() {
+  let displayingPage = useSelector((state) => state.displayingPage);
+  let searchedUser = useSelector((state) => state.searchedUser);
   if (displayingPage !== DISPLAY_USER) {
     return null;
   }

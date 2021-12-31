@@ -8,11 +8,16 @@ import {
   SET_TOURNAMENT,
 } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { showLogin } from "../actions/actions";
 
-export function GameModeSelect(props) {
-  let { currentUser, displayingPage, selectGameType, toggleLogin } = props;
+export function GameModeSelect() {
+  let dispatch = useDispatch();
+  let currentUser = useSelector((state) => state.currentUser);
+  let displayingPage = useSelector((state) => state.displayingPage);
+  let gameType = useSelector((state) => state.gameType);
+
   let [showGameDiff, toggleGameDiff] = useState(false);
-  let [selectedGameType, toggleGameType] = useState(null);
   if (displayingPage !== SELECT_DIFFICULTY) {
     return null;
   }
@@ -22,32 +27,31 @@ export function GameModeSelect(props) {
   function handleClick(select) {
     if (select !== SET_SINGLE_PLAYER && currentUser === null) {
       alert("Login to play online");
-      toggleLogin(true);
+      dispatch(showLogin("Login"));
     }
-    toggleGameType(select);
     toggleGameDiff(true);
-    selectGameType(select);
+    dispatch({ type: select });
   }
   return (
     <div className="flex flex-col h-full justify-center items-center">
       <div className="flex justify-center border">
         <Button
-          variant="ghost"
-          color={selectedGameType === SET_SINGLE_PLAYER ? "primary" : ""}
+          variant={gameType === SET_SINGLE_PLAYER ? "solid" : "ghost"}
+          color={gameType === SET_SINGLE_PLAYER ? "primary" : ""}
           onClick={() => handleClick(SET_SINGLE_PLAYER)}
         >
           Single Player
         </Button>
         <Button
-          variant="ghost"
-          color={selectedGameType === SET_PVP ? "primary" : ""}
+          variant={gameType === SET_PVP ? "solid" : "ghost"}
+          color={gameType === SET_PVP ? "primary" : ""}
           onClick={() => handleClick(SET_PVP)}
         >
           One on One
         </Button>
         <Button
-          variant="ghost"
-          color={selectedGameType === SET_TOURNAMENT ? "primary" : ""}
+          variant={gameType === SET_TOURNAMENT ? "solid" : "ghost"}
+          color={gameType === SET_TOURNAMENT ? "primary" : ""}
           onClick={() => handleClick(SET_TOURNAMENT)}
         >
           Tournament

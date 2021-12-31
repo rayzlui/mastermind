@@ -1,36 +1,135 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Button } from "@vechaiui/react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 const BACKSPACE = "BACKSPACE";
 
+function backSpace(arr) {
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (arr[i] !== null) {
+      arr[i] = null;
+      break;
+    }
+  }
+  return arr;
+}
+
+function addToCode(arr, val) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === null) {
+      arr[i] = val;
+      break;
+    }
+  }
+  return arr;
+}
+
+function CodeGuessDisplay(props) {
+  let { handleDirectIndexInput, codeLength, userGuess } = props;
+  let showInputs = [];
+  for (let i = 0; i < codeLength; i++) {
+    let inputValue = userGuess[i];
+    let displayValue;
+    if (!inputValue) {
+      displayValue = "Fill";
+    } else {
+      displayValue = inputValue;
+    }
+    showInputs.push(
+      <Tooltip.Root>
+        <Tooltip.Trigger>
+          <Button
+            size="xl"
+            variant="ghost"
+            key={`input${i}`}
+            className="border"
+            onClick={() => handleDirectIndexInput(i)}
+          >
+            {displayValue}
+          </Button>
+        </Tooltip.Trigger>
+        <Tooltip.Content className="bg-white text-black">
+          Click me to enter a number directly or to get access to a hint!
+        </Tooltip.Content>
+      </Tooltip.Root>
+    );
+  }
+  return showInputs;
+}
+
+CodeGuessDisplay.propTypes = {
+  handleDirectIndexInput: PropTypes.func,
+  codeLength: PropTypes.number,
+  userGuess: PropTypes.array,
+};
+
+function UserInputButtons(props) {
+  let { handleClick, maxDigit, hint, correctCodeAtIndex } = props;
+  let clickEntries = [];
+  let skips = {};
+  if (hint) {
+    let removeOneThird = Math.floor(maxDigit / 3);
+    let count = 0;
+    while (count < removeOneThird) {
+      let rand = Math.ceil(Math.random() * maxDigit);
+      if (rand != correctCodeAtIndex) {
+        skips[rand] = true;
+        count++;
+      }
+    }
+  }
+  for (let i = 1; i <= maxDigit; i++) {
+    if (skips[i] === undefined) {
+      clickEntries.push(
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            <Button
+              variant="ghost"
+              key={`click${i}`}
+              onClick={() => handleClick(i)}
+            >
+              {i}
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content className="bg-white text-black">
+            Click me to enter a number or you can just use your numeric
+            keyboard!
+          </Tooltip.Content>
+        </Tooltip.Root>
+      );
+    }
+  }
+
+  return clickEntries;
+}
+
+UserInputButtons.propTypes = {
+  handleClick: PropTypes.func,
+  maxDigit: PropTypes.number,
+  hint: PropTypes.bool,
+};
+
 export function UserInput(props) {
-  let { gameDifficulty, code, submitGuess, isWinner } = props;
+  let {
+    gameDifficulty,
+    code,
+    submitGuess,
+    hintsRemaining,
+    updateHintsAllowed,
+    isWinner,
+  } = props;
   let { codeLength, maxDigit } = gameDifficulty;
-  let [userGuess, updateGuess] = useState([]);
-  let [directIndex, updateIndex] = useState(null);
+  let [userGuess, updateGuess] = useState(new Array(codeLength).fill(null));
+  let [clickedIndex, updateIndex] = useState(null);
   let [hint, toggleHint] = useState(false);
+  let focusForKeyboard = useRef(null);
+
+  useEffect(() => {
+    focusForKeyboard.current.focus();
+  }, []);
+
   if (isWinner !== null) {
     return null;
-  }
-
-  function backSpace(arr) {
-    for (let i = arr.length - 1; i >= 0; i--) {
-      if (arr[i] !== null) {
-        arr[i] = null;
-        break;
-      }
-    }
-    return arr;
-  }
-
-  function addToCode(arr, val) {
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i] === null) {
-        arr[i] = val;
-        break;
-      }
-    }
-    return arr;
   }
 
   function handleKeyPress(event) {
@@ -41,8 +140,8 @@ export function UserInput(props) {
     if (value === DELETE_KEY_CODE) {
       copyUserGuess = backSpace(copyUserGuess);
     } else if (value <= 9 && value >= 1 && value <= maxDigit) {
-      if (directIndex !== null) {
-        copyUserGuess[directIndex] = value;
+      if (clickedIndex !== null) {
+        copyUserGuess[clickedIndex] = value;
       } else {
         copyUserGuess = addToCode(copyUserGuess, value);
       }
@@ -58,8 +157,8 @@ export function UserInput(props) {
     if (input === BACKSPACE) {
       copyUserGuess = backSpace(copyUserGuess);
     } else {
-      if (directIndex !== null) {
-        copyUserGuess[directIndex] = input;
+      if (clickedIndex !== null) {
+        copyUserGuess[clickedIndex] = input;
       } else {
         copyUserGuess = addToCode(copyUserGuess, input);
       }
@@ -76,54 +175,6 @@ export function UserInput(props) {
     return null;
   }
 
-  let showInputs = [];
-  for (let i = 0; i < codeLength; i++) {
-    let inputValue = userGuess[i];
-    let displayValue;
-    if (!inputValue) {
-      displayValue = "Fill";
-      userGuess[i] = null;
-    } else {
-      displayValue = inputValue;
-    }
-    showInputs.push(
-      <Button
-        size="xl"
-        variant="ghost"
-        key={`input${i}`}
-        className="border"
-        onClick={() => handleDirectIndexInput(i)}
-      >
-        {displayValue}
-      </Button>
-    );
-  }
-  let DeleteButton = (
-    <Button variant="ghost" onClick={() => handleClick(BACKSPACE)}>
-      Delete Previous
-    </Button>
-  );
-  let clickEntries = [];
-  for (let i = 1; i <= maxDigit; i++) {
-    clickEntries.push(
-      <Button variant="ghost" key={`click${i}`} onClick={() => handleClick(i)}>
-        {i}
-      </Button>
-    );
-  }
-  if (hint) {
-    let removeOneThird = codeLength / 3;
-    let count = 0;
-    let correctNumAtIndex = code[directIndex];
-    while (count < removeOneThird) {
-      let rand = Math.floor(Math.random() * codeLength);
-      if (rand !== correctNumAtIndex) {
-        clickEntries.splice(rand, 1);
-        count++;
-      }
-    }
-  }
-
   function handleSubmit(userGuess) {
     if (userGuess.some((x) => x === null)) {
       return;
@@ -135,49 +186,58 @@ export function UserInput(props) {
   }
 
   function handleHint() {
-    toggleHint(!hint);
+    toggleHint(true);
+    updateHintsAllowed();
     return null;
   }
 
-  let SubmitButton = (
-    <Button variant="ghost" onClick={() => handleSubmit(userGuess)}>
-      Submit Guess
-    </Button>
-  );
-
-  let HintButton = null;
-
-  if (directIndex) {
-    HintButton = (
-      <Button variant="ghost" onClick={() => handleHint()}>
-        Hint
-      </Button>
-    );
-  }
   return (
     <div
       tabIndex={0}
       onKeyDown={(e) => handleKeyPress(e)}
-      autoFocus={true}
-      className="w-full h-1/3 flex items-center flex-col"
+      ref={focusForKeyboard}
+      className="w-full h-1/3 flex items-center flex-col focus:outline-0"
     >
-      <div className="w-full h-1/3 flex justify-center">{showInputs}</div>
-
-      <div className="w-full h-1/3 flex justify-center">{clickEntries}</div>
+      <div className="w-full h-1/3 flex justify-center">
+        <CodeGuessDisplay
+          userGuess={userGuess}
+          handleDirectIndexInput={handleDirectIndexInput}
+          codeLength={codeLength}
+        />
+      </div>
 
       <div className="w-full h-1/3 flex justify-center">
-        {DeleteButton}
-        {SubmitButton}
-        {HintButton}
+        <UserInputButtons
+          handleClick={handleClick}
+          maxDigit={maxDigit}
+          hint={hint}
+          correctCodeAtIndex={hint ? code[clickedIndex] : null}
+        />
+      </div>
+
+      <div className="w-full h-1/3 flex justify-center">
+        <Button variant="solid" onClick={() => handleClick(BACKSPACE)}>
+          Delete Previous
+        </Button>
+        <Button variant="solid" onClick={() => handleSubmit(userGuess)}>
+          Submit Guess
+        </Button>
+        {clickedIndex !== null && hintsRemaining > 0 ? (
+          <Button variant="solid" onClick={() => handleHint()}>
+            Hint
+          </Button>
+        ) : null}
       </div>
     </div>
   );
 }
 UserInput.propTypes = {
   codeLength: PropTypes.number,
-  maxDigits: PropTypes.number,
+  maxDigit: PropTypes.number,
   submitGuess: PropTypes.func,
   gameDifficulty: PropTypes.object,
   isWinner: PropTypes.bool,
   code: PropTypes.array,
+  hintsRemaining: PropTypes.number,
+  updateHintsAllowed: PropTypes.func,
 };

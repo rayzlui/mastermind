@@ -1,9 +1,39 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { covertMillisecondsToMinutes } from "./TimerComponent";
+import { useSelector } from "react-redux";
+
+function PlayersInfo(props) {
+  let { arrayOfPlayers } = props;
+  return arrayOfPlayers.map((playerData) => {
+    let { name, moves, isWinner, time } = playerData;
+    let { minutes, seconds } = covertMillisecondsToMinutes(time);
+    let playerFinished = isWinner ? (
+      <p>
+        <span className="text-red-400">{name} </span>has finished with
+        <span className="text-green-400">
+          {minutes}:{seconds}
+        </span>
+        remaining!
+      </p>
+    ) : null;
+    return (
+      <div
+        key={`pvpPlayer-${name}`}
+        className="w-1/4 h-full bg-white flex flex-col items-center border rounded-4"
+      >
+        <h3 className="font-sans font-bold text-lg">{name}</h3>
+        <p className="text-md">Moves: {moves}</p>
+        {playerFinished}
+      </div>
+    );
+  });
+}
+
+PlayersInfo.propTypes = { arrayOfPlayers: PropTypes.array };
 
 export function ShowPVPInfo(props) {
-  let { opponentData } = props;
+  let opponentData = useSelector((state) => state.opponentData);
   let display;
   if (opponentData === null) {
     display = (
@@ -12,31 +42,13 @@ export function ShowPVPInfo(props) {
   } else {
     let { players } = opponentData;
     let arrayOfPlayers = Object.values(players);
-    let playersInfo = [];
-    arrayOfPlayers.forEach((data, index) => {
-      let { name, moves, finished } = data;
-      let { minutes, seconds } = covertMillisecondsToMinutes(finished);
-      let playerFinished = finished ? (
-        <p key={`player${index}`}>
-          <span className="text-red-400">{name} </span>has finished with{" "}
-          <span className="text-green-400">
-            {minutes}:{seconds}
-          </span>{" "}
-          remaining!
-        </p>
-      ) : null;
-      playersInfo.push(
-        <div className="w-1/4 h-full bg-white flex flex-col items-center border rounded-4">
-          <h3 className="font-sans font-bold text-lg">{name}</h3>
-          <p className="text-md">Moves: {moves}</p>
-          {playerFinished}
-        </div>
-      );
-    });
+
     display = (
       <>
-        <h1 className="font-sans mb-8  font-bold text-3xl">PvP Mode !1</h1>
-        <div className="flex justify-between w-full">{playersInfo}</div>
+        <h1 className="font-sans mb-8 font-bold text-3xl">PvP Mode !1</h1>
+        <div className="flex justify-between h-full w-full">
+          <PlayersInfo arrayOfPlayers={arrayOfPlayers} />
+        </div>
       </>
     );
   }

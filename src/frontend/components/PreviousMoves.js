@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { useSelector } from "react-redux";
 
-export function PreviousMoves(props) {
-  let { moveHistory } = props;
+export function PreviousMoves() {
+  let moveHistory = useSelector((state) => state.moveHistory);
 
   let previousMoves = [];
   for (let i = 0; i < moveHistory.length; i++) {

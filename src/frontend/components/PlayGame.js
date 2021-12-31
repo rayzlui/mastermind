@@ -3,13 +3,17 @@ import PropTypes from "prop-types";
 import { PLAY_GAME, SET_SINGLE_PLAYER } from "../actions/actionTypes";
 import { WinnerPageContainer } from "../containers/WinnerPageContainer";
 import { UserInputContainer } from "../containers/UserInputContainer";
-import { PreviousMoveContainer } from "../containers/PreviousMoveContainer";
-import { ShowPVPContainer } from "../containers/ShowPVPContainer";
 import { TimerContainer } from "../containers/TimerContainer";
 import { TurnsRemaining } from "./TurnsRemaining";
+import { HintsRemaining } from "./HintsRemaining";
+import { useSelector } from "react-redux";
+import { PreviousMoves } from "./PreviousMoves";
+import { ShowPVPInfo } from "./ShowPvPInfo";
 
-export function PlayGame(props) {
-  let { displayingPage, gameType, opponentData } = props;
+export function PlayGame() {
+  let displayingPage = useSelector((state) => state.displayingPage);
+  let gameType = useSelector((state) => state.gameType);
+  let opponentData = useSelector((state) => state.opponentData);
   if (displayingPage !== PLAY_GAME) {
     return null;
   }
@@ -21,12 +25,12 @@ export function PlayGame(props) {
     );
   }
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-white">
       <div className="border-r-2 h-full w-1/5">
-        <PreviousMoveContainer />
+        <PreviousMoves />
       </div>
       <div className="w-3/5 h-full">
-        <ShowPVPContainer />
+        <ShowPVPInfo />
         <WinnerPageContainer />
         <UserInputContainer />
       </div>
@@ -34,6 +38,7 @@ export function PlayGame(props) {
         <h1 className="mb-8 font-bold text-xl">Remaining</h1>
         <TurnsRemaining />
         <TimerContainer />
+        <HintsRemaining />
       </div>
     </div>
   );

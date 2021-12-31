@@ -32,3 +32,4 @@ export const SHOW_LOGIN = "SHOW_LOGIN";
 export const HIDE_LOGIN = "HIDE_LOGIN";
 export const RESET = "RESET";
 export const LOSER = "LOSER";
+export const USED_HINT = "USED_HINT";

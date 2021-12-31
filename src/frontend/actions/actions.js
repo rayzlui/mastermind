@@ -147,9 +147,7 @@ export function logUserHistory(user, code, time, difficulty, callback) {
   };
 }
 
-export function updateDataBaseForPvP(gameid, userid, finished, time) {
-  console.log(gameid, userid, finished, time);
-
+export function updateDataBaseForPvP(gameid, userid, isWinner, time) {
   return async (dispatch) => {
     let request = await fetch(`http://localhost:3001/api/game/${gameid}`, {
       method: "post",
@@ -159,8 +157,8 @@ export function updateDataBaseForPvP(gameid, userid, finished, time) {
       body: JSON.stringify({
         gameid,
         userid,
-        finished: finished,
-        time: time,
+        isWinner,
+        time,
       }),
     });
     let data = await request.json();

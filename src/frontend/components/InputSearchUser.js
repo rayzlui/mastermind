@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Input, Button } from "@vechaiui/react";
+import { useDispatch } from "react-redux";
+import { searchUser } from "../actions/actions";
 
-export function InputSearchUser(props) {
+export function InputSearchUser() {
   let [searchInput, updateSearchInput] = useState();
-  let { searchUser } = props;
-
+  let dispatch = useDispatch();
   return (
     <div className="flex justify-center">
       <Input
@@ -13,7 +14,7 @@ export function InputSearchUser(props) {
         type="text"
         onChange={(e) => updateSearchInput(e.target.value)}
       />
-      <Button variant="light" onClick={() => searchUser(searchInput)}>
+      <Button variant="light" onClick={() => dispatch(searchUser(searchInput))}>
         Search
       </Button>
     </div>

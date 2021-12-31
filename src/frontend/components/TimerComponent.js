@@ -16,19 +16,23 @@ export function covertMillisecondsToMinutes(milli) {
 export function TimerComponent(props) {
   let { isWinner, endGame, updateDataBaseForPvP, time, setWinTime } = props;
   let [gameTimer, updateGameTimer] = useState(time);
-  //time is three minutes
+  //if game is reset in state
   useEffect(() => {
     updateGameTimer(time);
   }, [time]);
+
+  //timer ends game if it runs out, or if game is over before timer ends, timer will stop.
   useEffect(() => {
     let countdown = setInterval(() => {
       updateGameTimer(gameTimer - 1000);
     }, 1000);
+
     if (gameTimer <= 0) {
       endGame();
       updateDataBaseForPvP();
       clearInterval(countdown);
     }
+
     if (isWinner !== null) {
       setWinTime(gameTimer);
       updateDataBaseForPvP(gameTimer);
@@ -38,7 +42,9 @@ export function TimerComponent(props) {
       clearInterval(countdown);
     };
   }, [gameTimer, isWinner]);
+
   let { minutes, seconds } = covertMillisecondsToMinutes(gameTimer);
+
   return (
     <div className="flex mt-10 flex-col items-center">
       <p className="font-bold text-md">Time:</p>

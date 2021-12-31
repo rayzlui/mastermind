@@ -6,6 +6,7 @@ import {
   showThisUser,
   logoutUser,
   showLogin,
+  reset,
 } from "../actions/actions";
 import { PLAY_GAME } from "../actions/actionTypes";
 
@@ -19,7 +20,9 @@ function mapDispatchToProps(dispatch) {
     changePageTo: (page) => dispatch(changePageTo(page)),
     showThisUser: (user) => dispatch(showThisUser(user)),
     toggleLogin: (type) => dispatch(showLogin(type)),
-    logOut: () => dispatch(logoutUser()),
+    logOut: () => {
+      dispatch(logoutUser());
+    },
   };
 }
 
@@ -29,6 +32,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
   let { changePageTo } = mapDispatchToProps;
   return {
     currentUser,
+    displayingPage,
     changePageTo: (page) => {
       let leaveGame = true;
       if (turnsRemaining && isWinner === null && displayingPage === PLAY_GAME) {

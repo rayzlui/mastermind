@@ -6,6 +6,7 @@ import {
   weHaveAWinner,
   weHaveALoser,
 } from "../actions/actions";
+import { USED_HINT } from "../actions/actionTypes";
 import { UserInput } from "../components/UserInput";
 import { compareCode } from "../gameLogic/compareCode";
 
@@ -24,6 +25,9 @@ function mapDispatchToProps(dispatch) {
     dispatchWeHaveALoser: () => {
       dispatch(weHaveALoser());
     },
+    updateHintsAllowed: () => {
+      dispatch({ type: USED_HINT });
+    },
   };
 }
 
@@ -35,6 +39,7 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     opponentData,
     currentUser,
     winTime,
+    hintsRemaining,
     turnsRemaining,
   } = mapStateToProps;
   let gameid = opponentData?._id;
@@ -45,10 +50,13 @@ function mergeProps(mapStateToProps, mapDispatchToProps) {
     dispatchWeHaveAWinner,
     updatePvP,
     dispatchWeHaveALoser,
+    updateHintsAllowed,
   } = mapDispatchToProps;
   return {
     gameDifficulty,
     turnsRemaining,
+    hintsRemaining,
+    updateHintsAllowed,
     isWinner,
     code: mastermindCode?.nums,
     submitGuess: (code) => {

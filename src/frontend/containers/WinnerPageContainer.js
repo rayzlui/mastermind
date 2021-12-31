@@ -34,10 +34,10 @@ function mapDispatchToProps(dispatch) {
   return {
     playAgain: (gameData) => {
       let { gameDifficulty, gameType, currentUser } = gameData;
-      let { codeLength, maxDigits } = gameDifficulty;
+      let { codeLength, maxDigit } = gameDifficulty;
       dispatch(reset());
       if (gameType === SET_SINGLE_PLAYER) {
-        dispatch(generateMastermindCode(codeLength, maxDigits));
+        dispatch(generateMastermindCode(codeLength, maxDigit));
       } else {
         let type = "tournament";
         if (gameType === SET_PVP) {

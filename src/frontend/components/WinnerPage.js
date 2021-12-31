@@ -3,6 +3,25 @@ import PropTypes from "prop-types";
 import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
 
+function PlayAgainButton(props) {
+  let { playAgain, confirmSave } = props;
+  return (
+    <Button
+      variant="solid"
+      onClick={() => {
+        confirmSave(null);
+        playAgain();
+      }}
+    >
+      Play Again?
+    </Button>
+  );
+}
+PlayAgainButton.propTypes = {
+  playAgain: PropTypes.func,
+  confirmSave: PropTypes.func,
+};
+
 export function WinnerPage(props) {
   let {
     opponentData,
@@ -13,56 +32,44 @@ export function WinnerPage(props) {
     isWinner,
     toggleLogin,
   } = props;
-  let [saved, confirmSave] = useState(null);
 
-  function PlayAgainButton() {
-    return (
-      <Button
-        variant="ghost"
-        onClick={() => {
-          confirmSave(null);
-          playAgain();
-        }}
-      >
-        Play Again?
-      </Button>
-    );
-  }
+  let [savedToLeaderboard, confirmSave] = useState(null);
+
   if (isWinner == null) {
     return null;
   }
+
   if (isWinner === false) {
     return (
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-xl font-bold">YOU LOSE HAHAHA</h1>
-        <PlayAgainButton />
+        <PlayAgainButton playAgain={playAgain} confirmSave={confirmSave} />
       </div>
     );
   }
-  let input;
+
+  let display;
   if (gameType === SET_SINGLE_PLAYER) {
     if (currentUser === null) {
-      input = (
+      display = (
         <>
-          <h3>
-            Login or create an account to upload your time to leader board
-          </h3>
-          <Button variant="ghost" onClick={() => toggleLogin()}>
+          <h3>Login or create an account to upload your time to leaderboard</h3>
+          <Button variant="solid" onClick={() => toggleLogin()}>
             Login
           </Button>
         </>
       );
     } else {
-      switch (saved) {
+      switch (savedToLeaderboard) {
         case true:
-          input = <h3>Saved!</h3>;
+          display = <h3>Saved!</h3>;
           break;
         case false:
-          input = (
+          display = (
             <>
               <h3>Unable To Save</h3>
               <Button
-                variant="ghost"
+                variant="solid"
                 onClick={() => uploadGameInfo(confirmSave)}
               >
                 Try Again?
@@ -71,11 +78,11 @@ export function WinnerPage(props) {
           );
           break;
         default:
-          input = (
+          display = (
             <>
               <h3>Upload Time To Leaderboard?</h3>
               <Button
-                variant="ghost"
+                variant="solid"
                 onClick={() => uploadGameInfo(confirmSave)}
               >
                 Yes
@@ -88,13 +95,13 @@ export function WinnerPage(props) {
   } else {
     let { players } = opponentData;
     let playersData = Object.values(players);
-    let amountOfWinners = playersData.reduce((acc, curr) => {
-      if (curr["finished"]) {
-        acc++;
+    let amountOfWinners = playersData.reduce((winningPlayers, player) => {
+      if (player.isWinner) {
+        winningPlayers++;
       }
-      return acc;
+      return winningPlayers;
     }, 0);
-    input = (
+    display = (
       <>
         <p>
           Well done, you placed {amountOfWinners} out of {playersData.length}
@@ -106,8 +113,8 @@ export function WinnerPage(props) {
   return (
     <div className="flex flex-col items-center justify items">
       <h1 className="text-xl font-bold">Congratulations! You broke the code</h1>
-      {input}
-      <PlayAgainButton />
+      {display}
+      <PlayAgainButton confirmSave={confirmSave} playAgain={playAgain} />
     </div>
   );
 }

@@ -2,17 +2,26 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { DISPLAY_USER } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  changePageTo,
+  logoutUser,
+  showLogin,
+  showThisUser,
+} from "../actions/actions";
 
 export function HeaderComponent(props) {
-  let { changePageTo, currentUser, showThisUser, logOut, toggleLogin } = props;
   let [showLoggedInOptions, toggleLoggedIn] = useState(false);
+  let currentUser = useSelector((state) => state.currentUser);
+  let dispatch = useDispatch();
+
   let loggedInOptions = showLoggedInOptions ? (
     <>
       <Button
         variant="light"
         onClick={() => {
-          showThisUser(currentUser);
-          changePageTo(DISPLAY_USER);
+          dispatch(showThisUser(currentUser));
+          dispatch(changePageTo(DISPLAY_USER));
           toggleLoggedIn(false);
         }}
       >
@@ -21,7 +30,7 @@ export function HeaderComponent(props) {
       <Button
         variant="light"
         onClick={() => {
-          logOut();
+          dispatch(logoutUser());
           toggleLoggedIn(false);
         }}
       >
@@ -44,7 +53,7 @@ export function HeaderComponent(props) {
       <Button
         variant="light"
         onClick={() => {
-          toggleLogin("Login");
+          dispatch(showLogin("Login"));
         }}
       >
         Login
@@ -52,7 +61,7 @@ export function HeaderComponent(props) {
       <Button
         variant="light"
         onClick={() => {
-          toggleLogin("Create an account");
+          dispatch(showLogin("Create an account"));
         }}
       >
         Create an account
@@ -66,10 +75,3 @@ export function HeaderComponent(props) {
     </>
   );
 }
-HeaderComponent.propTypes = {
-  changePageTo: PropTypes.func,
-  currentUser: PropTypes.object,
-  logOut: PropTypes.func,
-  showThisUser: PropTypes.func,
-  toggleLogin: PropTypes.func,
-};

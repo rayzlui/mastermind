@@ -7,7 +7,7 @@ function HideUntilClick(props) {
   let { beforeClick, afterClick } = props;
   let [show, toggleShow] = useState(false);
   if (show) {
-    return <p>{afterClick}</p>;
+    return <p onClick={() => toggleShow(false)}>{afterClick}</p>;
   }
   return (
     <Tooltip.Root>
@@ -25,16 +25,10 @@ HideUntilClick.propTypes = {
   afterClick: PropTypes.string,
 };
 
-export function ShowThisUser(props) {
-  let { searchedUser } = props;
-  if (searchedUser === null) {
-    return null;
-  }
-  let { username, gameHistory, dateJoined } = searchedUser;
-  dateJoined = dateJoined || "2021-08-19TTTTT";
-  let showGameHistory = gameHistory.map((game, index) => {
+function ShowGameHistory(props) {
+  let { gameHistory } = props;
+  return gameHistory.map((game, index) => {
     let { difficulty, time, code } = game;
-    difficulty = difficulty || "custom";
     let { nums } = code;
     let { minutes, seconds } = covertMillisecondsToMinutes(time);
     return (
@@ -46,6 +40,18 @@ export function ShowThisUser(props) {
       </section>
     );
   });
+}
+
+ShowGameHistory.propTypes = {
+  gameHistory: PropTypes.array,
+};
+
+export function ShowThisUser(props) {
+  let { searchedUser } = props;
+  if (searchedUser === null) {
+    return null;
+  }
+  let { username, gameHistory, dateJoined } = searchedUser;
   return (
     <div className="flex h-full">
       <div className="w-1/3 h-full border-r-2">
@@ -54,7 +60,9 @@ export function ShowThisUser(props) {
       </div>
       <div className="w-2/3">
         <h3 className="text-md mb-10 font-bold">Game History</h3>
-        <div className="flex flex-wrap justify-between">{showGameHistory}</div>
+        <div className="flex flex-wrap justify-between">
+          <ShowGameHistory gameHistory={gameHistory} />
+        </div>
       </div>
     </div>
   );

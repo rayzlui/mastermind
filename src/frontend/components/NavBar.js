@@ -1,45 +1,52 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
+import { InputSearchUser } from "./InputSearchUser";
 import {
   DISPLAY_USER,
   VIEW_LEADERBOARD,
   SELECT_DIFFICULTY,
+  PLAY_GAME,
 } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
-import { InputSearchUserContainer } from "../containers/InputSearchUserContainer";
 
 export function NavBar(props) {
-  let { changePageTo } = props;
-  let [selectedNavType, toggleNavType] = useState(SELECT_DIFFICULTY);
+  let { changePageTo, displayingPage } = props;
   function handleClick(type) {
     changePageTo(type);
-    toggleNavType(type);
   }
   let display;
 
-  if (selectedNavType === DISPLAY_USER) {
-    display = <InputSearchUserContainer />;
+  if (displayingPage === DISPLAY_USER) {
+    display = <InputSearchUser />;
   }
   return (
     <>
       <nav className="flex justify-center w-full border">
         <Button
-          variant="light"
-          color={selectedNavType === SELECT_DIFFICULTY ? "primary" : ""}
+          variant={
+            displayingPage === SELECT_DIFFICULTY || displayingPage === PLAY_GAME
+              ? "solid"
+              : "light"
+          }
+          color={
+            displayingPage === SELECT_DIFFICULTY || displayingPage === PLAY_GAME
+              ? "primary"
+              : ""
+          }
           onClick={() => handleClick(SELECT_DIFFICULTY)}
         >
           Play
         </Button>
         <Button
-          variant="light"
-          color={selectedNavType === DISPLAY_USER ? "primary" : ""}
+          variant={displayingPage === DISPLAY_USER ? "solid" : "light"}
+          color={displayingPage === DISPLAY_USER ? "primary" : ""}
           onClick={() => handleClick(DISPLAY_USER)}
         >
           Search User
         </Button>
         <Button
-          variant="light"
-          color={selectedNavType === VIEW_LEADERBOARD ? "primary" : ""}
+          variant={displayingPage === VIEW_LEADERBOARD ? "solid" : "light"}
+          color={displayingPage === VIEW_LEADERBOARD ? "primary" : ""}
           onClick={() => handleClick(VIEW_LEADERBOARD)}
         >
           Leaderboard
@@ -52,4 +59,5 @@ export function NavBar(props) {
 
 NavBar.propTypes = {
   changePageTo: PropTypes.func,
+  displayingPage: PropTypes.string,
 };

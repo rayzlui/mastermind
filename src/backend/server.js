@@ -85,8 +85,8 @@ app.post("/api/user/create", jsonParser, (req, res) => {
             res.status(418).send("Unable to create account");
           } else {
             console.log(`Success, created new user ${newUser}`);
-            let { _id, gameHistory } = newUser;
-            res.send({ username, _id, gameHistory });
+            let { _id, gameHistory, dateJoined } = newUser;
+            res.send({ username, _id, gameHistory, dateJoined });
           }
         });
       } else {
@@ -128,9 +128,9 @@ app.post("/api/user/login", jsonParser, (req, res) => {
         res.status(418).send({ error: "Please create an account" });
       } else {
         console.log("Found account");
-        let { passwordHash, _id, gameHistory } = user;
+        let { passwordHash, _id, gameHistory, dateJoined } = user;
         if (passwordHash === password) {
-          res.send({ username, _id, gameHistory });
+          res.send({ username, _id, gameHistory, dateJoined });
         } else {
           res
             .status(403)
@@ -163,6 +163,7 @@ app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
 });
 
 //find
+//maybe we should have two different user models, one thats public for other users to search and one to login, so we don't accidentially share passwords.
 app.get("/api/users/:name", (req, res) => {
   let username = req.params.name;
   UserModel.findOne({ name: username }, (err, data) => {
@@ -204,10 +205,9 @@ let emitter = new EventEmitter();
 let oneOnOneMatchMaking = new OneOnOneMatchMaker();
 
 app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
-  let name = req.params.name;
-  let id = req.params.id;
+  let { name, id, difficulty } = req.params;
+
   let user = { name, id };
-  let difficulty = req.params.difficulty;
   oneOnOneMatchMaking.addToThisQueue(difficulty, user);
   if (oneOnOneMatchMaking.getQueueFrom(difficulty).length < 2) {
     return emitter.once(`match${user}`, (newPvpMatch) => {
@@ -286,10 +286,24 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
         game.numCompletedGames++;
         if (isWinner) {
           players[userid].time = time;
+          players[userid].isWinner = true;
+        } else {
+          players[userid].isWinner = false;
         }
       } else {
         players[userid].moves = players[userid].moves + 1;
       }
+      //if game still active server responds with updated info
+      game[players] = players;
+      game.markModified("players");
+      game.save((err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("update success");
+          res.json(game);
+        }
+      });
       //if everyone has finished server deletes the game
       if (game.numCompletedGames === game.numOfPlayers) {
         PvPModel.deleteOne(_id, (err, game) => {
@@ -297,18 +311,6 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
             console.log("Unable to delete game");
           } else {
             console.log(`Game completed. Deleting ${game}`);
-          }
-        });
-      } else {
-        //if game still active server responds with updated info
-        game[players] = players;
-        game.markModified("players");
-        game.save((err) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("update success");
-            res.json(game);
           }
         });
       }
