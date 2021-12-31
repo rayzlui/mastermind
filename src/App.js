@@ -11,12 +11,15 @@ import { LoginOrCreateUserPage } from "./frontend/components/LoginOrCreateUserPa
 import { HeaderComponent } from "./frontend/components/HeaderComponent";
 import { NavBar } from "./frontend/components/NavBar";
 import { ViewLeaderboard } from "./frontend/components/ViewLeaderboard";
+import { AlertMessage } from "./frontend/components/AlertMessage";
+
 function App() {
   let store = configureStore();
   return (
     <div className="flex flex-col bg-zinc-200 h-screen items-center ">
       <VechaiProvider>
         <Provider store={store}>
+          <AlertMessage />
           <div className="h-1/6 grid items-center justify-items-center w-screen bg-white">
             <HeaderComponent />
           </div>

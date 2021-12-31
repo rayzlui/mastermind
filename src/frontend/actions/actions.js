@@ -1,4 +1,4 @@
-import scramblePassword from "../../backend/scramblePass";
+import scramblePassword from "../../ignore/scramblePass";
 import { generateCode } from "../gameLogic/generateCode";
 import {
   ADD_USER_MOVE_HISTORY,
@@ -10,7 +10,7 @@ import {
   SET_DIFFICULTY,
   SET_MASTERMIND_CODE,
   SET_TURNS,
-  UPDATE_OPPONENT,
+  UPDATE_PVP_INFO,
   USER_SUBMIT,
   SET_WIN_TIME,
   SAVE_COMPLETE,
@@ -23,6 +23,7 @@ import {
   SET_SINGLE_PLAYER,
   SET_PVP,
   PLAY_GAME,
+  SET_ALERT_MESSAGE,
 } from "./actionTypes";
 
 import { compareCode } from "../gameLogic/compareCode";
@@ -58,21 +59,51 @@ export function weHaveAWinner() {
   return { type: WINNER, payload: true };
 }
 
+export function updatePvpInfo(data) {
+  return { type: UPDATE_PVP_INFO, payload: data };
+}
+
 export function setDifficulty(codeLength, maxDigit, name) {
   return {
     type: SET_DIFFICULTY,
-    payload: { codeLength, maxDigit, name: name },
-  };
-}
-export function generateMastermindCode(codeLength, maxDigits) {
-  return async (dispatch) => {
-    let code = await generateCode(codeLength, maxDigits);
-    dispatch(setMastermindCode(code));
+    payload: { codeLength, maxDigit, name },
   };
 }
 
-export function updateOpponent(data) {
-  return { type: UPDATE_OPPONENT, payload: data };
+export function setCurrentUser(data) {
+  return { type: LOGIN_USER, payload: data };
+}
+
+export function showThisUser(data) {
+  return { type: USER_FOUND, payload: data };
+}
+
+export function showLogin(type) {
+  return { type: SHOW_LOGIN, payload: type };
+}
+
+export function hideLogin() {
+  return { type: HIDE_LOGIN };
+}
+
+export function changePageTo(page) {
+  return { type: page };
+}
+
+export function weHaveALoser() {
+  return { type: LOSER };
+}
+
+export function logoutUser() {
+  sessionStorage.removeItem("currentUser");
+  return { type: LOGOUT_USER };
+}
+
+export function generateMastermindCode(codeLength, maxDigit) {
+  return async (dispatch) => {
+    let code = await generateCode(codeLength, maxDigit);
+    dispatch(setMastermindCode(code));
+  };
 }
 
 export function requestPvpMatch(difficulty, type, user) {
@@ -85,7 +116,7 @@ export function requestPvpMatch(difficulty, type, user) {
     let { players, code, _id, winner } = await data;
     dispatch(setMastermindCode(code));
     dispatch(
-      updateOpponent({
+      updatePvpInfo({
         players,
         _id,
         winner,
@@ -102,12 +133,9 @@ export function searchUser(username) {
       dispatch(showThisUser(data));
       dispatch(changePageTo(DISPLAY_USER));
     } else {
-      alert("Unable to find user");
+      dispatch({ type: SET_ALERT_MESSAGE, payload: "Unable to find user" });
     }
   };
-}
-export function showThisUser(data) {
-  return { type: USER_FOUND, payload: data };
 }
 
 export function logUserHistory(user, code, time, difficulty, callback) {
@@ -169,20 +197,11 @@ export function updateDataBaseForPvP(gameid, userid, isWinner, time) {
     let data = await request.json();
     let { players } = await data;
     dispatch(
-      updateOpponent({
+      updatePvpInfo({
         players,
       })
     );
   };
-}
-
-export function setCurrentUser(data) {
-  return { type: LOGIN_USER, payload: data };
-}
-
-export function logoutUser() {
-  sessionStorage.removeItem("currentUser");
-  return { type: LOGOUT_USER };
 }
 
 export function createUser(username, password, key, callback) {
@@ -214,13 +233,6 @@ export function createUser(username, password, key, callback) {
   };
 }
 
-export function showLogin(type) {
-  return { type: SHOW_LOGIN, payload: type };
-}
-
-export function hideLogin() {
-  return { type: HIDE_LOGIN };
-}
 export function loginUser(username, password, callback) {
   return async (dispatch) => {
     let requestKey = await fetch(
@@ -255,14 +267,6 @@ export function loginUser(username, password, callback) {
   };
 }
 
-export function changePageTo(page) {
-  return { type: page };
-}
-
-export function weHaveALoser() {
-  return { type: LOSER };
-}
-
 function translateDiffToNums(difficulty) {
   let codeLength;
   let maxDigit;
@@ -288,7 +292,10 @@ export function createGameWithDetails(gameDetails) {
     let { codeLength, maxDigit, difficulty } = gameDetails;
     let { gameType, currentUser } = getStore();
     if (gameType !== SET_SINGLE_PLAYER && currentUser === null) {
-      alert("Please login to play online");
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Please login to play online",
+      });
       dispatch(showLogin("Login"));
       return;
     }
@@ -317,17 +324,12 @@ export function createGameWithDetails(gameDetails) {
 
 export function specialUpdatePvPForTimer(gameTimer) {
   return (dispatch, getStore) => {
-    let { opponentData, currentUser, isWinner } = getStore();
-    if (opponentData === null) {
+    let { pvpData, currentUser, isWinner } = getStore();
+    if (pvpData === null) {
       return;
     }
     dispatch(
-      updateDataBaseForPvP(
-        opponentData._id,
-        currentUser._id,
-        isWinner,
-        gameTimer
-      )
+      updateDataBaseForPvP(pvpData._id, currentUser._id, isWinner, gameTimer)
     );
   };
 }
@@ -366,10 +368,10 @@ export function uploadTimeToLeaderboard(feedbackCallback) {
 
 export function userSubmitCodeForCheck(code) {
   return (dispatch, getStore) => {
-    let { mastermindCode, opponentData, currentUser, winTime, turnsRemaining } =
+    let { mastermindCode, pvpData, currentUser, winTime, turnsRemaining } =
       getStore();
 
-    let gameid = opponentData?._id;
+    let gameid = pvpData?._id;
     let userid = currentUser?._id;
     let checkCode = compareCode(code, mastermindCode);
     let { redPeg, whitePeg } = checkCode;
@@ -382,7 +384,7 @@ export function userSubmitCodeForCheck(code) {
       //updatePvP(gameid, userid, true, winTime);
       //WHY IS THE TIMER COMPONENT THE ONE TELLING THE SERVER WHO WON....
     } else {
-      if (opponentData) {
+      if (pvpData) {
         dispatch(updateDataBaseForPvP(gameid, userid, null, winTime));
       }
       if (turnsRemaining <= 1) {

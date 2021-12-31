@@ -13,11 +13,11 @@ import { UserInput } from "./UserInput";
 export function PlayGame() {
   let displayingPage = useSelector((state) => state.displayingPage);
   let gameType = useSelector((state) => state.gameType);
-  let opponentData = useSelector((state) => state.opponentData);
+  let pvpData = useSelector((state) => state.pvpData);
   if (displayingPage !== PLAY_GAME) {
     return null;
   }
-  if (gameType !== SET_SINGLE_PLAYER && opponentData === null) {
+  if (gameType !== SET_SINGLE_PLAYER && pvpData === null) {
     return (
       <div className="flex flex-col justify-center items-center">
         <h1>Matching...</h1>
@@ -26,15 +26,15 @@ export function PlayGame() {
   }
   return (
     <div className="flex h-full bg-white">
-      <div className="border-r-2 h-full w-1/5">
+      <div className="border-r-2 h-full w-1/5 overflow-scroll">
         <PreviousMoves />
       </div>
-      <div className="w-3/5 h-full">
+      <div className="w-3/5 h-full overflow-scroll">
         <ShowPVPInfo />
         <WinnerPage />
         <UserInput />
       </div>
-      <div className="w-1/5 border-l-2 flex flex-col justify-items items-center">
+      <div className="w-1/5 border-l-2 flex flex-col justify-items items-center overflow-scroll">
         <h1 className="mb-8 font-bold text-xl">Remaining</h1>
         <TurnsRemaining />
         <TimerComponent />
@@ -47,5 +47,5 @@ export function PlayGame() {
 PlayGame.propTypes = {
   displayingPage: PropTypes.string,
   gameType: PropTypes.string,
-  opponentData: PropTypes.object,
+  pvpData: PropTypes.object,
 };

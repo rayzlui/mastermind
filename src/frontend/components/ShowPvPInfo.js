@@ -20,7 +20,7 @@ function PlayersInfo(props) {
     return (
       <div
         key={`pvpPlayer-${name}`}
-        className="w-1/4 h-full bg-white flex flex-col items-center border rounded-4"
+        className="w-1/4 h-auto bg-gray-100 flex flex-col items-center border overflow-scroll rounded-4"
       >
         <h3 className="font-sans font-bold text-lg">{name}</h3>
         <p className="text-md">Moves: {moves}</p>
@@ -32,15 +32,15 @@ function PlayersInfo(props) {
 
 PlayersInfo.propTypes = { arrayOfPlayers: PropTypes.array };
 
-export function ShowPVPInfo(props) {
-  let opponentData = useSelector((state) => state.opponentData);
+export function ShowPVPInfo() {
+  let pvpData = useSelector((state) => state.pvpData);
   let display;
-  if (opponentData === null) {
+  if (pvpData === null) {
     display = (
       <h1 className="font-sans mb-8  font-bold text-3xl">Single Player!</h1>
     );
   } else {
-    let { players } = opponentData;
+    let { players } = pvpData;
     let arrayOfPlayers = Object.values(players);
 
     display = (
@@ -59,7 +59,7 @@ export function ShowPVPInfo(props) {
 }
 
 ShowPVPInfo.propTypes = {
-  opponentData: PropTypes.object,
+  pvpData: PropTypes.object,
   player1: PropTypes.string,
   player2: PropTypes.string,
   player1Moves: PropTypes.number,

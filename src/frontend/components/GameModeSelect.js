@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import {
   SELECT_DIFFICULTY,
+  SET_ALERT_MESSAGE,
   SET_PVP,
   SET_SINGLE_PLAYER,
   SET_TOURNAMENT,
@@ -26,7 +27,7 @@ export function GameModeSelect() {
 
   function handleClick(select) {
     if (select !== SET_SINGLE_PLAYER && currentUser === null) {
-      alert("Login to play online");
+      dispatch({ type: SET_ALERT_MESSAGE, payload: "Login to play online" });
       dispatch(showLogin("Login"));
     }
     toggleGameDiff(true);

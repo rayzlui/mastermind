@@ -33,7 +33,7 @@ export function WinnerPage(props) {
   let isWinner = useSelector((state) => state.isWinner);
   let gameType = useSelector((state) => state.gameType);
   let currentUser = useSelector((state) => state.currentUser);
-  let opponentData = useSelector((state) => state.opponentData);
+  let pvpData = useSelector((state) => state.pvpData);
   let [savedToLeaderboard, confirmSave] = useState(null);
 
   let playAgain = () => dispatch(playGameAgain());
@@ -92,7 +92,7 @@ export function WinnerPage(props) {
       }
     }
   } else {
-    let { players } = opponentData;
+    let { players } = pvpData;
     let playersData = Object.values(players);
     let amountOfWinners = playersData.reduce((winningPlayers, player) => {
       if (player.isWinner) {

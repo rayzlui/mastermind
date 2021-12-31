@@ -28,21 +28,34 @@ app.use(function (req, res, next) {
   next();
 });
 
-function matchMakerWithCodeGenerator(codeGenerator) {
+function difficultyTranslateValues(string) {
+  switch (string) {
+    case "easy":
+      return { codeLength: 4, maxDigit: 5 };
+    case "hard":
+      return { codeLength: 7, maxDigit: 9 };
+    default:
+      return { codeLength: 4, maxDigit: 8 };
+  }
+}
+
+function createPlayerInfo(players) {
+  return players.reduce((acc, player) => {
+    let { id, name } = player;
+    acc[id] = { name, moves: 0, time: 0, isWinner: null };
+    return acc;
+  }, {});
+}
+
+function matchMakerWithCodeGenerator(
+  codeGeneratorCb,
+  createPlayerInfoCb,
+  difficultyTranslateValuesCb
+) {
   return async (players, difficulty) => {
-    let difficultyTranslateValues = {};
-    difficultyTranslateValues["easy"] = [4, 4];
-    difficultyTranslateValues["normal"] = [4, 7];
-    difficultyTranslateValues["hard"] = [7, 9];
-
-    let playersMatched = players.reduce((acc, player) => {
-      let { id, name } = player;
-      acc[id] = { name, moves: 0, time: 0, isWinner: null };
-      return acc;
-    }, {});
-
-    let [codeLength, maxDigits] = difficultyTranslateValues[difficulty];
-    let code = await codeGenerator(codeLength, maxDigits);
+    let playersMatched = createPlayerInfoCb(players);
+    let { codeLength, maxDigit } = difficultyTranslateValuesCb(difficulty);
+    let code = await codeGeneratorCb(codeLength, maxDigit);
     let newPvpMatch = await new PvPModel({
       players: playersMatched,
       code,
@@ -55,7 +68,11 @@ function matchMakerWithCodeGenerator(codeGenerator) {
   };
 }
 
-const createMatch = matchMakerWithCodeGenerator(generateCode);
+const createMatch = matchMakerWithCodeGenerator(
+  generateCode,
+  createPlayerInfo,
+  difficultyTranslateValues
+);
 
 //User routes
 
@@ -173,7 +190,7 @@ app.get("/api/users/:name", (req, res) => {
       );
       res.status(404).send("Unable to find user");
     } else {
-      if (data.length < 1) {
+      if (data === null) {
         console.log(`Unable to find user ${username}`);
         res.status(404).send({ error: "Unable to save game" });
       } else {
@@ -214,9 +231,9 @@ app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
       res.send(newPvpMatch);
     });
   } else {
-    let fromQueue = oneOnOneMatchMaking.removeTwoFrom(difficulty);
-    let newMatch = await createMatch(fromQueue, difficulty);
-    emitter.emit(`match${fromQueue[0]}`, newMatch);
+    let playersInQueue = oneOnOneMatchMaking.removeTwoFrom(difficulty);
+    let newMatch = await createMatch(playersInQueue, difficulty);
+    emitter.emit(`match${playersInQueue[0]}`, newMatch);
     res.send(newMatch);
   }
 });
@@ -233,6 +250,13 @@ TournamentQueue.prototype.addToThisQueue = function (difficulty, user) {
   this[difficulty].push(user);
 };
 
+TournamentQueue.prototype.getFromThisQueue = function (difficulty) {
+  return this[difficulty];
+};
+
+TournamentQueue.prototype.resetThisQueue = function (difficulty) {
+  this[difficulty] = [];
+};
 let tournamentMatchMakingQueue = new TournamentQueue();
 
 //server checks every 10 seconds to see if we can make a tournament match.
@@ -243,11 +267,11 @@ async function tournamentMatchMaker(
   createMatchCallBack
 ) {
   for (let difficulty in matchMakingQueue) {
-    let queue = matchMakingQueue[difficulty];
+    let queue = matchMakingQueue.getFromThisQueue(difficulty);
     if (queue.length > 2) {
       let newMatch = await createMatchCallBack(queue, difficulty);
-      emitter.emit("tournament start", newMatch);
-      matchMakingQueue[difficulty] = [];
+      emitter.emit(`tournament-start-${difficulty}`, newMatch);
+      matchMakingQueue.resetThisQueue(difficulty);
     }
   }
 }
@@ -257,12 +281,10 @@ setInterval(
 );
 
 app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
-  let name = req.params.name;
-  let id = req.params.id;
+  let { name, id, difficulty } = req.params;
   let user = { name, id };
-  let difficulty = req.params.difficulty;
   tournamentMatchMakingQueue.addToThisQueue(difficulty, user);
-  return emitter.once("tournament start", (newMatch) => {
+  return emitter.once(`tournament-start-${difficulty}`, (newMatch) => {
     res.send(newMatch);
   });
 });
