@@ -6,10 +6,12 @@ import {
   REQUEST_ACCOUNT_CREATE,
   DISPLAY_CURRENT_USER,
   SELECT_DIFFICULTY,
+  LOGOUT_USER,
 } from "../actions/actionTypes";
 
 export function pageNavigatorReducer(state = SELECT_DIFFICULTY, action) {
   switch (action.type) {
+    case LOGOUT_USER:
     case SELECT_DIFFICULTY:
       return SELECT_DIFFICULTY;
     case PLAY_GAME:

@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
 import { Button, Input } from "@vechaiui/react";
+import { createGameWithDetails } from "../actions/actions";
+import { useSelector, useDispatch } from "react-redux";
 
 function DifficultyButtons(props) {
-  let { buttonAction, gameType } = props;
+  let { selectGame, gameType } = props;
   return ["easy", "normal", "hard"].map((difficulty) => {
     return (
       <Button
         key={`button-${difficulty}`}
         variant="light"
-        onClick={() => buttonAction({ difficulty, gameType })}
+        onClick={() => selectGame({ difficulty, gameType })}
       >
         {difficulty}
       </Button>
@@ -19,12 +21,12 @@ function DifficultyButtons(props) {
 }
 
 DifficultyButtons.propTypes = {
-  buttonAction: PropTypes.func,
+  selectGame: PropTypes.func,
   gameType: PropTypes.string,
 };
 
 function CustomDifficultyRange(props) {
-  let { buttonAction } = props;
+  let { selectGame } = props;
 
   let [customDigits, updateDigits] = useState(4);
   let [customCodeLength, updateLength] = useState(7);
@@ -71,10 +73,10 @@ function CustomDifficultyRange(props) {
       <Button
         variant="ghost"
         onClick={() => {
-          buttonAction({
+          selectGame({
             codeLength: customCodeLength,
             maxDigit: customDigits,
-            SET_SINGLE_PLAYER,
+            gameType: SET_SINGLE_PLAYER,
           });
         }}
       >
@@ -87,17 +89,22 @@ function CustomDifficultyRange(props) {
 CustomDifficultyRange.propTypes = {
   updateDigits: PropTypes.func,
   updateLength: PropTypes.func,
-  buttonAction: PropTypes.func,
+  selectGame: PropTypes.func,
   gameType: PropTypes.string,
 };
 
-export function SelectDifficultyComponent(props) {
-  let { gameType, buttonAction } = props;
+export function SelectDifficultyComponent() {
   let [showCustom, toggleCustom] = useState(false);
+  let gameType = useSelector((state) => state.gameType);
+  let dispatch = useDispatch();
+
+  let selectGame = (gameDetails) => {
+    dispatch(createGameWithDetails(gameDetails));
+  };
 
   let CustomRange =
     showCustom && gameType === SET_SINGLE_PLAYER ? (
-      <CustomDifficultyRange buttonAction={buttonAction} />
+      <CustomDifficultyRange selectGame={selectGame} />
     ) : null;
   let CustomButton =
     gameType === SET_SINGLE_PLAYER ? (
@@ -109,7 +116,7 @@ export function SelectDifficultyComponent(props) {
   return (
     <div className="flex flex-col items-center">
       <div>
-        <DifficultyButtons buttonAction={buttonAction} gameType={gameType} />
+        <DifficultyButtons selectGame={selectGame} gameType={gameType} />
         {CustomButton}
       </div>
       <div className="flex flex-col">{CustomRange}</div>
@@ -120,5 +127,5 @@ export function SelectDifficultyComponent(props) {
 SelectDifficultyComponent.propTypes = {
   toggleDifficulty: PropTypes.func,
   gameType: PropTypes.string,
-  buttonAction: PropTypes.func,
+  createGameWithDetails: PropTypes.func,
 };

@@ -24,7 +24,7 @@ export function PreviousMoves() {
   return (
     <>
       <h1 className="text-xl font-bold">Your Mooooooo-ves</h1>
-      <table className="mt-8 w-full">
+      <table className="mt-8 w-full border">
         <thead>
           <tr>
             <th>

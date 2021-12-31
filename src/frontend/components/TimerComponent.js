@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setWinTime,
+  specialUpdatePvPForTimer,
+  weHaveALoser,
+} from "../actions/actions";
 
 export function covertMillisecondsToMinutes(milli) {
   let totalSeconds = milli / 1000;
@@ -13,10 +19,13 @@ export function covertMillisecondsToMinutes(milli) {
   return { minutes, seconds };
 }
 
-export function TimerComponent(props) {
-  let { isWinner, endGame, updateDataBaseForPvP, time, setWinTime } = props;
-  let [gameTimer, updateGameTimer] = useState(time);
+export function TimerComponent() {
+  let isWinner = useSelector((state) => state.isWinner);
+  let time = useSelector((state) => state.time);
+  let dispatch = useDispatch();
+  let [gameTimer, updateGameTimer] = useState(10000);
   //if game is reset in state
+
   useEffect(() => {
     updateGameTimer(time);
   }, [time]);
@@ -28,14 +37,12 @@ export function TimerComponent(props) {
     }, 1000);
 
     if (gameTimer <= 0) {
-      endGame();
-      updateDataBaseForPvP();
+      dispatch(weHaveALoser());
+      dispatch(specialUpdatePvPForTimer());
       clearInterval(countdown);
-    }
-
-    if (isWinner !== null) {
-      setWinTime(gameTimer);
-      updateDataBaseForPvP(gameTimer);
+    } else if (isWinner !== null) {
+      dispatch(setWinTime(gameTimer));
+      dispatch(specialUpdatePvPForTimer(gameTimer));
       clearInterval(countdown);
     }
     return () => {

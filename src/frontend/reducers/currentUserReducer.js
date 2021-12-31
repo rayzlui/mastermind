@@ -8,7 +8,6 @@ export function currentUserReducer(state = initialState, action) {
     case LOGIN_USER:
       return payload;
     case LOGOUT_USER:
-      sessionStorage.removeItem("currentUser");
       return null;
     default:
       return state;

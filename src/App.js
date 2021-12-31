@@ -2,9 +2,6 @@ import "./App.css";
 import React from "react";
 import { Provider } from "react-redux";
 import { configureStore } from "./frontend/configureStore";
-import { ViewLeaderboardContainer } from "./frontend/containers/ViewLeaderboardContainer";
-
-import { NavBarContainer } from "./frontend/containers/NavContainer";
 import { VechaiProvider } from "@vechaiui/react";
 import { PlayGame } from "./frontend/components/PlayGame";
 import { SearchUserDisplay } from "./frontend/components/SearchUserDisplay";
@@ -12,6 +9,8 @@ import { UserPage } from "./frontend/components/UserPage";
 import { GameModeSelect } from "./frontend/components/GameModeSelect";
 import { LoginOrCreateUserPage } from "./frontend/components/LoginOrCreateUserPage";
 import { HeaderComponent } from "./frontend/components/HeaderComponent";
+import { NavBar } from "./frontend/components/NavBar";
+import { ViewLeaderboard } from "./frontend/components/ViewLeaderboard";
 function App() {
   let store = configureStore();
   return (
@@ -22,13 +21,13 @@ function App() {
             <HeaderComponent />
           </div>
           <div className="h-1/8 w-4/5">
-            <NavBarContainer />
+            <NavBar />
           </div>
           <div className="w-4/5 h-4/6 mb-8 overflow-scroll border bg-gray-100 rounded">
             <GameModeSelect />
             <UserPage />
             <SearchUserDisplay />
-            <ViewLeaderboardContainer />
+            <ViewLeaderboard />
             <PlayGame />
             <LoginOrCreateUserPage />
           </div>

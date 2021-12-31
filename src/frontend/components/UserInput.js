@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Button } from "@vechaiui/react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { useDispatch, useSelector } from "react-redux";
+import { userSubmitCodeForCheck } from "../actions/actions";
+import { USED_HINT } from "../actions/actionTypes";
 const BACKSPACE = "BACKSPACE";
 
 function backSpace(arr) {
@@ -48,7 +51,7 @@ function CodeGuessDisplay(props) {
             {displayValue}
           </Button>
         </Tooltip.Trigger>
-        <Tooltip.Content className="bg-white text-black">
+        <Tooltip.Content className="bg-slate-300 text-neutral w-24 text-sm">
           Click me to enter a number directly or to get access to a hint!
         </Tooltip.Content>
       </Tooltip.Root>
@@ -91,7 +94,7 @@ function UserInputButtons(props) {
               {i}
             </Button>
           </Tooltip.Trigger>
-          <Tooltip.Content className="bg-white text-black">
+          <Tooltip.Content className="bg-slate-300 text-neutral w-24 text-sm">
             Click me to enter a number or you can just use your numeric
             keyboard!
           </Tooltip.Content>
@@ -110,20 +113,22 @@ UserInputButtons.propTypes = {
 };
 
 export function UserInput(props) {
-  let {
-    gameDifficulty,
-    code,
-    submitGuess,
-    hintsRemaining,
-    updateHintsAllowed,
-    isWinner,
-  } = props;
+  let dispatch = useDispatch();
+
+  let gameDifficulty = useSelector((state) => state.gameDifficulty);
+  let code = useSelector((state) => state.mastermindCode?.nums);
+  let hintsRemaining = useSelector((state) => state.hintsRemaining);
+  let isWinner = useSelector((state) => state.isWinner);
+
+  let updateHintsAllowed = () => dispatch({ type: USED_HINT });
+  let submitGuess = (code) => dispatch(userSubmitCodeForCheck(code));
+
   let { codeLength, maxDigit } = gameDifficulty;
   let [userGuess, updateGuess] = useState(new Array(codeLength).fill(null));
   let [clickedIndex, updateIndex] = useState(null);
   let [hint, toggleHint] = useState(false);
-  let focusForKeyboard = useRef(null);
 
+  let focusForKeyboard = useRef(null);
   useEffect(() => {
     focusForKeyboard.current.focus();
   }, []);

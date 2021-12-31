@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
+import {
+  playGameAgain,
+  showLogin,
+  uploadTimeToLeaderboard,
+} from "../actions/actions";
+import { useDispatch, useSelector } from "react-redux";
 
 function PlayAgainButton(props) {
   let { playAgain, confirmSave } = props;
@@ -23,17 +29,16 @@ PlayAgainButton.propTypes = {
 };
 
 export function WinnerPage(props) {
-  let {
-    opponentData,
-    currentUser,
-    gameType,
-    uploadGameInfo,
-    playAgain,
-    isWinner,
-    toggleLogin,
-  } = props;
-
+  let dispatch = useDispatch();
+  let isWinner = useSelector((state) => state.isWinner);
+  let gameType = useSelector((state) => state.gameType);
+  let currentUser = useSelector((state) => state.currentUser);
+  let opponentData = useSelector((state) => state.opponentData);
   let [savedToLeaderboard, confirmSave] = useState(null);
+
+  let playAgain = () => dispatch(playGameAgain());
+  let uploadGameInfo = () => dispatch(uploadTimeToLeaderboard(confirmSave));
+  let toggleLogin = () => dispatch(showLogin("Login"));
 
   if (isWinner == null) {
     return null;
@@ -68,10 +73,7 @@ export function WinnerPage(props) {
           display = (
             <>
               <h3>Unable To Save</h3>
-              <Button
-                variant="solid"
-                onClick={() => uploadGameInfo(confirmSave)}
-              >
+              <Button variant="solid" onClick={() => uploadGameInfo()}>
                 Try Again?
               </Button>
             </>
@@ -81,10 +83,7 @@ export function WinnerPage(props) {
           display = (
             <>
               <h3>Upload Time To Leaderboard?</h3>
-              <Button
-                variant="solid"
-                onClick={() => uploadGameInfo(confirmSave)}
-              >
+              <Button variant="solid" onClick={() => uploadGameInfo()}>
                 Yes
               </Button>
             </>
@@ -118,14 +117,3 @@ export function WinnerPage(props) {
     </div>
   );
 }
-
-WinnerPage.propTypes = {
-  opponentData: PropTypes.object,
-  currentUser: PropTypes.object,
-  gameInfo: PropTypes.object,
-  gameType: PropTypes.string,
-  uploadGameInfo: PropTypes.func,
-  playAgain: PropTypes.func,
-  isWinner: PropTypes.bool,
-  toggleLogin: PropTypes.func,
-};

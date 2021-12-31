@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { SelectDifficultyContainer } from "../containers/SelectDifficultyContainer";
 import {
   SELECT_DIFFICULTY,
   SET_PVP,
@@ -10,6 +9,7 @@ import {
 import { Button } from "@vechaiui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { showLogin } from "../actions/actions";
+import { SelectDifficultyComponent } from "./SelectDifficultyComponent";
 
 export function GameModeSelect() {
   let dispatch = useDispatch();
@@ -22,7 +22,7 @@ export function GameModeSelect() {
     return null;
   }
 
-  let GameDiff = showGameDiff ? <SelectDifficultyContainer /> : null;
+  let GameDiff = showGameDiff ? <SelectDifficultyComponent /> : null;
 
   function handleClick(select) {
     if (select !== SET_SINGLE_PLAYER && currentUser === null) {

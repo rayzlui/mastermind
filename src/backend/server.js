@@ -282,6 +282,7 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
     } else {
       let { _id, players } = game;
       //isWinner will have three states. true === player has won, false === player has lost, null === game is still active
+      players[userid].moves = players[userid].moves + 1;
       if (isWinner !== null) {
         game.numCompletedGames++;
         if (isWinner) {
@@ -290,8 +291,6 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
         } else {
           players[userid].isWinner = false;
         }
-      } else {
-        players[userid].moves = players[userid].moves + 1;
       }
       //if game still active server responds with updated info
       game[players] = players;

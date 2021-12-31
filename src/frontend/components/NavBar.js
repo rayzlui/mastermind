@@ -8,11 +8,20 @@ import {
   PLAY_GAME,
 } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
+import { useDispatch, useSelector } from "react-redux";
+import { changePageTo } from "../actions/actions";
 
-export function NavBar(props) {
-  let { changePageTo, displayingPage } = props;
+export function NavBar() {
+  let dispatch = useDispatch();
+  let displayingPage = useSelector((state) => state.displayingPage);
+
   function handleClick(type) {
-    changePageTo(type);
+    if (displayingPage === PLAY_GAME) {
+      if (!confirm("Are you sure you want to leave game?")) {
+        return null;
+      }
+    }
+    dispatch(changePageTo(type));
   }
   let display;
 

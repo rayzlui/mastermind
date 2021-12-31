@@ -20,7 +20,12 @@ import {
   DISPLAY_CURRENT_USER,
   SHOW_LOGIN,
   HIDE_LOGIN,
+  SET_SINGLE_PLAYER,
+  SET_PVP,
+  PLAY_GAME,
 } from "./actionTypes";
+
+import { compareCode } from "../gameLogic/compareCode";
 
 export function setMastermindCode(code) {
   return { type: SET_MASTERMIND_CODE, payload: code };
@@ -176,6 +181,7 @@ export function setCurrentUser(data) {
 }
 
 export function logoutUser() {
+  sessionStorage.removeItem("currentUser");
   return { type: LOGOUT_USER };
 }
 
@@ -255,4 +261,133 @@ export function changePageTo(page) {
 
 export function weHaveALoser() {
   return { type: LOSER };
+}
+
+function translateDiffToNums(difficulty) {
+  let codeLength;
+  let maxDigit;
+  switch (difficulty) {
+    case "easy":
+      codeLength = 4;
+      maxDigit = 4;
+      break;
+    case "hard":
+      codeLength = 7;
+      maxDigit = 9;
+      break;
+    default:
+      codeLength = 4;
+      maxDigit = 7;
+      break;
+  }
+  return [codeLength, maxDigit];
+}
+
+export function createGameWithDetails(gameDetails) {
+  return (dispatch, getStore) => {
+    let { codeLength, maxDigit, difficulty } = gameDetails;
+    let { gameType, currentUser } = getStore();
+    if (gameType !== SET_SINGLE_PLAYER && currentUser === null) {
+      alert("Please login to play online");
+      dispatch(showLogin("Login"));
+      return;
+    }
+    if (difficulty) {
+      [codeLength, maxDigit] = translateDiffToNums(difficulty);
+    }
+
+    dispatch(reset());
+    switch (gameType) {
+      case SET_SINGLE_PLAYER:
+        dispatch(generateMastermindCode(codeLength, maxDigit));
+        break;
+      case SET_PVP:
+        dispatch(requestPvpMatch(difficulty, "pvp", currentUser));
+        break;
+      default:
+        dispatch(requestPvpMatch(difficulty, "tournament", currentUser));
+        break;
+    }
+
+    dispatch(setDifficulty(codeLength, maxDigit, difficulty));
+    dispatch(changePageTo(PLAY_GAME));
+    dispatch(hideLogin());
+  };
+}
+
+export function specialUpdatePvPForTimer(gameTimer) {
+  return (dispatch, getStore) => {
+    let { opponentData, currentUser, isWinner } = getStore();
+    if (opponentData === null) {
+      return;
+    }
+    dispatch(
+      updateDataBaseForPvP(
+        opponentData._id,
+        currentUser._id,
+        isWinner,
+        gameTimer
+      )
+    );
+  };
+}
+
+export function playGameAgain() {
+  return (dispatch, getStore) => {
+    let { gameDifficulty, gameType, currentUser } = getStore();
+    let { codeLength, maxDigit } = gameDifficulty;
+    dispatch(reset());
+    if (gameType === SET_SINGLE_PLAYER) {
+      dispatch(generateMastermindCode(codeLength, maxDigit));
+    } else {
+      let type = "tournament";
+      if (gameType === SET_PVP) {
+        type = "pvp";
+      }
+      dispatch(requestPvpMatch(gameDifficulty.name, type, currentUser));
+    }
+  };
+}
+
+export function uploadTimeToLeaderboard(feedbackCallback) {
+  return (dispatch, getState) => {
+    let { currentUser, mastermindCode, time, gameDifficulty } = getState();
+    dispatch(
+      logUserHistory(
+        currentUser,
+        mastermindCode,
+        time,
+        gameDifficulty.name,
+        feedbackCallback
+      )
+    );
+  };
+}
+
+export function userSubmitCodeForCheck(code) {
+  return (dispatch, getStore) => {
+    let { mastermindCode, opponentData, currentUser, winTime, turnsRemaining } =
+      getStore();
+
+    let gameid = opponentData?._id;
+    let userid = currentUser?._id;
+    let checkCode = compareCode(code, mastermindCode);
+    let { redPeg, whitePeg } = checkCode;
+    let winner = redPeg === code.length;
+    //handle no turns remaining here.
+    dispatch(userSubmit());
+    dispatch(addMoveToHistory({ move: code, redPeg, whitePeg }));
+    if (winner) {
+      dispatch(weHaveAWinner());
+      //updatePvP(gameid, userid, true, winTime);
+      //WHY IS THE TIMER COMPONENT THE ONE TELLING THE SERVER WHO WON....
+    } else {
+      if (opponentData) {
+        dispatch(updateDataBaseForPvP(gameid, userid, null, winTime));
+      }
+      if (turnsRemaining <= 1) {
+        dispatch(weHaveALoser());
+      }
+    }
+  };
 }

@@ -1,27 +1,43 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import { covertMillisecondsToMinutes } from "./TimerComponent";
-import { VIEW_LEADERBOARD } from "../actions/actionTypes";
+import { PLAY_GAME, VIEW_LEADERBOARD } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  changePageTo,
+  searchUser,
+  setMastermindCode,
+  reset,
+} from "../actions/actions";
 
 function capitalize(string) {
   return string[0].toUpperCase() + string.slice(1);
 }
 
-export function ViewLeaderboard(props) {
-  let { displayingPage, viewPlayer, playThisCode } = props;
-  if (displayingPage !== VIEW_LEADERBOARD) {
-    return null;
-  }
+export function ViewLeaderboard() {
   let [leaderboard, setLeaderboard] = useState(null);
-  let [showDifficulty, toggleDifficulty] = useState("normal");
-
   useEffect(async () => {
     let request = await fetch(`http://localhost:3001/api/leaderboard`);
     let data = await request.json();
     setLeaderboard(data);
   }, []);
+  let displayingPage = useSelector((state) => state.displayingPage);
+  let dispatch = useDispatch();
+  let [showDifficulty, toggleDifficulty] = useState("normal");
+
+  if (displayingPage !== VIEW_LEADERBOARD) {
+    return null;
+  }
+
+  let playThisCode = (code) => {
+    dispatch(setMastermindCode(code));
+    dispatch(reset());
+    dispatch(changePageTo(PLAY_GAME));
+  };
+  let viewPlayer = (name) => {
+    dispatch(searchUser(name));
+  };
 
   if (leaderboard === null) {
     return (
@@ -97,8 +113,3 @@ export function ViewLeaderboard(props) {
     </div>
   );
 }
-ViewLeaderboard.propTypes = {
-  displayingPage: PropTypes.string,
-  playThisCode: PropTypes.func,
-  viewPlayer: PropTypes.func,
-};
