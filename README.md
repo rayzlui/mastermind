@@ -2,6 +2,8 @@
 
 A modern way to play the classic board game, with player vs player and tournament capablities. Connect with other Masterminders. See whose's really the master of Mastermind!
 
+---
+
 ## Technologies 
 
 This app is build using the following:
@@ -24,6 +26,8 @@ This app is build using the following:
         - Express
         - Mongoose
     - MongoDB
+
+---
 
 ## Installation
 
@@ -68,6 +72,7 @@ Then in another terminal, while in this project directory, type:
 
 And now you're able to "play online".
 
+---
 
 ## How To Play
 
@@ -157,6 +162,9 @@ That's it. You keep guessing until the time runs out, your turns run out or you 
 When the game complete, a page will appear showing if you've won or lost and in additon, will give you an option to play again. If you had won the game, there will also be an option to upload your time and code to the leaderboard.
 
 
+
+---
+
 ## Development Process
 
 ### Initial Thoughts
@@ -208,7 +216,7 @@ My plan on building out the project would be in this order:
 
 ### Building the Mastermind Game
 
-  I used Redux to store the state of the game. It holds: 
+  I used Redux to store the state of the game. It holds each as its own reducer/state: 
     - the Mastermind code
       - obtained using Javascript's fetch API
       - stored as a combo array and hash
@@ -225,7 +233,7 @@ My plan on building out the project would be in this order:
     - let the user know if the game was over
 
   
-  I created action functions that would change the state depending on the user's interaction
+  I created action functions that would change the state depending on the user's interaction:
     - check if the user's code was correct
       - provide feedback if it's incorrect
     - store user's move and feedback
@@ -284,11 +292,11 @@ My plan on building out the project would be in this order:
     - Adding additional logic to the user input component that would remove one-third of the options when hint is active
     - Adding a new reducer in the Redux state that would govern how many hints are remaining
 
-### Building Online Mode
+## Building Online Mode
 
   I wanted to construct a way for two users to play against each other simulataneously. To do so I would need to build a server and have a database.
 
-#### Initial Thoughts
+### Initial Thoughts
 
   I decided to keep it simple in online mode. 
 
@@ -307,17 +315,17 @@ My plan on building out the project would be in this order:
 
 
 
-#### Planning
+### Planning
 
   I would need a database to store games and a server to create/update/delete games.
 
-  ##### Technologies
+  #### Technologies
 
     I decided to use MongoDB as my database because it's ease of use and I had some familiarity with it. I decided on Mongoose.js to use to communicate with it for the same reasons. 
 
     I did some research on what would be the best way to send and receive game info for users. Websockets looked like a great choice, as it would allow the server to automatically send data to the user each time the database is updated, but my current understanding if it is incomplete. I decided to proceed with HTTP and choose Express.js to script my server as it's again, what I'm most familiar with.
 
-  ##### Organization
+  #### Organization
 
     Users will have to create an account to play online, to prevent possible naming clashes. (I considered just having players play anonymously as player1, player2 etc, and generating an id token from the front end for them, but it could lead to confusion of which player they are.) This will also give each user an user._id for tracking in games.
 
@@ -342,7 +350,7 @@ My plan on building out the project would be in this order:
     Once a player finishes, either guessed the code, ran out of time or turns, it will log in the game data. Once every player has completed the game, the game should delete it self.
 
 
-#### Setup Database
+### Setup Database
 
   The database is built with MongoDB and Mongoose.js to communicate it on Node.js.
 
@@ -358,7 +366,7 @@ My plan on building out the project would be in this order:
 
 
 
-#### Setup Server
+### Setup Server
 
   #### User API
 
@@ -380,6 +388,10 @@ My plan on building out the project would be in this order:
   The endpoint `/api/user/login` listens for a HTTP POST action. It expects username and password in its request body. It will search for an instance of the UserModel with the username. If not found, it will respond with error code 418 and message to create an account. 
   
   If found, it will compare password of the instance and password passed. If true, it will respond with the UserModel instance. If false, it will respond with code 403 and message username and password combo not found.
+
+  Note: The passwords sent to the Login User API and the one stored on the User Model instance will not be the password entered by the user. It will be modified by a scrambleString helper function on the frontend that uses the key passed from requestKey API.
+
+  #### Game API
 
   ##### Create Games API
 
@@ -419,11 +431,58 @@ My plan on building out the project would be in this order:
 
   #### Backend Extensions
 
-  #####
+  ##### Leaderboard API + Database
+
+  To make games more interesting for single players, I created a leaderboard for the winning single players to upload their time at completiton. There is a leaderboard for each difficulty except custom.
+
+  I created a Leaderboard Model for the database and two endpoints in the server. 
+
+  The endpoint `/api/leaderboard/` listens for a HTTP POST action. It expects user, time, code and difficulty in its request body. It creates a new Leaderboard Model instance with the request body info and saves it.
+
+  The endpoint `/api/leaderboard/` listens for a HTTP GET post. It expects nothing to be passed. It will get all Leaderboard Model instance, sort split them into three arrays based on the difficulty and sort it based on the highest time in the instance. It will respond with a object that contains the three arrays.
+
+  ##### Additional User API
+
+  Since the UserModel existed I decided to add a way for user to search other users.
+
+  The endpoint `/api/users/:name` listens for a HTTP GET action. It expects a username in it's params. It will search the UserModel for an instance with the username. If found, will respond with the username, gameHistory and dateJoined from the instance. If not found, it will respond with 404 with message not found.
+
+  I also decided to add a gameHistory to the UserModel. It will allow users to save their winning game times. It's almost like a badges type situation.
+
+  The endpoint `api/userhistory/add/:id` listens for a HTTP PUT action. It expects a userid in it's params and code, time and difficulty in the request body. It will search for the UserModel instance with userid. If found, it will add the code, time and difficulty into the gameHistory of the instance. If not found, it will respond with 404.
+
+
+### Handling the Backend from the Front
+
+  The Mastermind game was developed to be able to work in single player mode or multiplayer without much refactoring.
+
+  I created the following user interface components to correspond with their backend:
+    - a Login/Create User component that would allow users to login or create an account
+    - a ViewLeaderboard component that would display the leaderboard
+      - it also calls the Leaderboard API directly
+    - a Search User Input component that would let users input a username to search for
+    - a Searched User component that would display the user searched
+    - a User Page component that would show the details of the current logged in user
+    - a PvP info component that showed the game data for all the players in  One on One match or Tournament mach
   
+  I added the following into existing components:
+    - into the WinnerPage I added a button for the user to upload their game to their history 
+  
+  I created the following reducers/states to correspond with their backend:
+    - pvpData stores the data received from the Game APIs
+    - currentUser stores the data received from the User APIs logging in and creating user
+    - searchedUser stores the data received from the User APIs search user
+  
+  I created the following actions to communicate with the backend:
+    - request game action that called the Create Game APIs endpoints (both One on One and Tournament)
+    - update game action that called the Update Game API
+    - search user action that called the User API for searching
+    - logging and create user action that called the User API for logging in or searching
+    - upload game history action that called the User API for adding to user's game history and Leaderboard API for uploading times
 
+  Since the app was no longer just a game, I added an additional reducer/state that would govern what is being displayed by the app. 
 
-
+  I also created a nav bar to allow users to change between playing game, searching users and viewing leaderboard.
 
 
 ### Styling
@@ -433,6 +492,8 @@ My plan on building out the project would be in this order:
   I used the TailwindCSS library because of it's ease of use for styling. It allows you to style components directly by defining what the style is in the class name. It helps maintain consistency in styling and prevented class name clashes.
 
   I used the VechaiUI library, which was built on top of TailWindCSS for simple components to maintain consistency throughout the app.
+
+  I created additional visual components for error popups and confirmation dialogs.
 
 
 ### Testing
