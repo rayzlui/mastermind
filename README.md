@@ -8,24 +8,24 @@ A modern way to play the classic board game, with player vs player and tournamen
 
 This app is build using the following:
 
-  - Node.js Javascript runtime environment
+- Node.js Javascript runtime environment
 
-  - Frontend
-    - HTML
-    - CSS
-    - Javascript
-      - Libraries:
-        - React
-        - Redux
-        - TailwindCSS
-        - Vechai UI
+- Frontend
+  - HTML
+  - CSS
+  - Javascript
+    - Libraries:
+      - React
+      - Redux
+      - TailwindCSS
+      - Vechai UI
 
-  - Backend
-    - Javascript
-      - Libraries: 
-        - Express
-        - Mongoose
-    - MongoDB
+- Backend
+  - Javascript
+    - Libraries: 
+      - Express
+      - Mongoose
+  - MongoDB
 
 ---
 
@@ -174,11 +174,11 @@ When the game complete, a page will appear showing if you've won or lost and in 
 
 A Mastermind game has 5 stages:
   
-    1. The secret code is set
-    2. The user inputs their guess
-    3. The guess gets checked
-    4. Repeat 2 and 3 if guess is incorrect and turns remain
-    5. Gameover (win or loss)
+1. The secret code is set
+2. The user inputs their guess
+3. The guess gets checked
+4. Repeat 2 and 3 if guess is incorrect and turns remain
+5. Gameover (win or loss)
 
 #### Goals
 
@@ -188,8 +188,9 @@ For this project I wanted to try something that I haven't before. I wanted to ad
 #### Conclusion
 
 I wanted accomplish the following with the project: 
-  - Create a Mastermind game
-  - Add player vs player capability
+
+- Create a Mastermind game
+- Add player vs player capability
 
 ### Planning
 
@@ -206,299 +207,299 @@ For the backend I chose to use Express.js, Mongoose.js and MongoDB because they 
 
 My plan on building out the project would be in this order:
 
-  1. Build a Mastermind game that met the required parameters
-  2. Add extensions that would make the game more interesting
-    - Hints
-    - Timer
-  3. Build the backend for player vs player
-  4. Style 
-  5. Testing
+1. Build a Mastermind game that met the required parameters
+2. Add extensions that would make the game more interesting
+  - Hints
+  - Timer
+3. Build the backend for player vs player
+4. Style 
+5. Testing
 
 ### Building the Mastermind Game
 
-  I used Redux to store the state of the game. It holds each as its own reducer/state: 
-    - the Mastermind code
-      - obtained using Javascript's fetch API
-      - stored as a combo array and hash
-    - how many turns are remaining
-    - user's previous moves
-    - if the game was over
+I used Redux to store the state of the game. It holds each as its own reducer/state: 
+- the Mastermind code
+  - obtained using Javascript's fetch API
+  - stored as a combo array and hash
+- how many turns are remaining
+- user's previous moves
+- if the game was over
 
-  I used React to build the user interface. I created components that would:
-    - show the user their current guess
-      - I stored the user guess as an array in the local state of the component
-      - I used buttons to display the user's guess, so they could click directly on an index to enter a number directly
-    - options for the user to select their guess
-    - show the user their previous moves and turns remaining
-    - let the user know if the game was over
+I used React to build the user interface. I created components that would:
+- show the user their current guess
+  - I stored the user guess as an array in the local state of the component
+  - I used buttons to display the user's guess, so they could click directly on an index to enter a number directly
+- options for the user to select their guess
+- show the user their previous moves and turns remaining
+- let the user know if the game was over
 
-  
-  I created action functions that would change the state depending on the user's interaction:
-    - check if the user's code was correct
-      - provide feedback if it's incorrect
-    - store user's move and feedback
-    - deduct a turn
 
-  I linked the action functions into a submit button on the user interface that would run when a user submitted their guess.
+I created action functions that would change the state depending on the user's interaction:
+- check if the user's code was correct
+  - provide feedback if it's incorrect
+- store user's move and feedback
+- deduct a turn
 
-  I created helper functions that would:
-    - compare user's code with mastermind code and return feedback for the guess 
-    - add/delete numbers from user guess and store it in the user guess component state
-    - call the Random API and process the numbers into the data structure I wanted it and store it in Redux
+I linked the action functions into a submit button on the user interface that would run when a user submitted their guess.
 
-  I placed all the components into a container component and added some logic into the container component that would render the game components or the gameover component.
+I created helper functions that would:
+- compare user's code with mastermind code and return feedback for the guess 
+- add/delete numbers from user guess and store it in the user guess component state
+- call the Random API and process the numbers into the data structure I wanted it and store it in Redux
 
-  I created an event handler for the container to listen for number keyboard inputs, so the user could use the numberpad on their keyboard to enter the code as well.
+I placed all the components into a container component and added some logic into the container component that would render the game components or the gameover component.
 
-  For additional information on the logic behind the check function, why I stored the mastermind code as combo array and hash, and the reasoning behind using buttons as the user interface see:
+I created an event handler for the container to listen for number keyboard inputs, so the user could use the numberpad on their keyboard to enter the code as well.
 
-    https://github.com/rayzlui/new_mastermind#creating-the-check-function
-    https://github.com/rayzlui/new_mastermind#structuring-the-mastermind-code
-    https://github.com/rayzlui/new_mastermind#2-setting-up-working-skeleton 
+For additional information on the logic behind the check function, why I stored the mastermind code as combo array and hash, and the reasoning behind using buttons as the user interface see:
+
+  https://github.com/rayzlui/new_mastermind#creating-the-check-function
+  https://github.com/rayzlui/new_mastermind#structuring-the-mastermind-code
+  https://github.com/rayzlui/new_mastermind#2-setting-up-working-skeleton 
 
 
 ### Adding Extensions
 
-  My intention was to use the same Mastermind for both single player and multiplayer modes, so I added simple extensions that would work for both modes.
+My intention was to use the same Mastermind for both single player and multiplayer modes, so I added simple extensions that would work for both modes.
 
 
 #### Custom Difficulty
 
-  I created the ability for users in Single Player mode to select their own difficulty.
+I created the ability for users in Single Player mode to select their own difficulty.
 
-  It was accomplished by:
-     
-     - adding creating a component that held inputs and input ranges for the code length and maximum kinds of digits
-     - refactored the helper function that would call the Random API and allow it to receive parameters for the requests
-     - tied a submit button to the helper function from the component and pass the custom difficulty inputs
+It was accomplished by:
+
+- adding creating a component that held inputs and input ranges for the code length and maximum kinds of digits
+- refactored the helper function that would call the Random API and allow it to receive parameters for the requests
+- tied a submit button to the helper function from the component and pass the custom difficulty inputs
 
 #### Countdown Timer
 
-  I created a timer component that would end the game if it ran down to zero or store the time if the user won. 
+I created a timer component that would end the game if it ran down to zero or store the time if the user won. 
 
-  It was accomplished by:
+It was accomplished by:
 
-    - Creating a visual component with React that held the time in local state and a setInterval that deducted a second every second
-    - An end game event action that would trigger when the time ran out and inform the Redux state
-    - A set time action that would trigger when informed by the Redux state that the user had won the game and let the Redux state know what the time was
+- Creating a visual component with React that held the time in local state and a setInterval that deducted a second every second
+- An end game event action that would trigger when the time ran out and inform the Redux state
+- A set time action that would trigger when informed by the Redux state that the user had won the game and let the Redux state know what the time was
 
 #### Hints
 
-  I created a hint component that would remove one-third of the possible options for the user to guess at a specific index
+I created a hint component that would remove one-third of the possible options for the user to guess at a specific index
 
-  It was accomplished by:
+It was accomplished by:
 
-    - Adding a hint button that would appear only when a user selected an index
-    - Adding additional logic to the user input component that would remove one-third of the options when hint is active
-    - Adding a new reducer in the Redux state that would govern how many hints are remaining
+- Adding a hint button that would appear only when a user selected an index
+- Adding additional logic to the user input component that would remove one-third of the options when hint is active
+- Adding a new reducer in the Redux state that would govern how many hints are remaining
 
 ## Building Online Mode
 
-  I wanted to construct a way for two users to play against each other simulataneously. To do so I would need to build a server and have a database.
+I wanted to construct a way for two users to play against each other simulataneously. To do so I would need to build a server and have a database.
 
 ### Initial Thoughts
 
-  I decided to keep it simple in online mode. 
+I decided to keep it simple in online mode. 
 
-  There would be two online modes, a one on one and a tournament mode.
+There would be two online modes, a one on one and a tournament mode.
 
-  The one on one would be between two players, tournament mode would be more than 2.
-  
-  Users would all have the same Mastermind code to guess.
-  
-  It would rank the users based on the time they finished. The first person to finish would be first, second would be second etc. 
+The one on one would be between two players, tournament mode would be more than 2.
 
-  The users would still have a timer and number of turns. If there's no timer, some games might never technically end, and if there's no number of turns, it would come down to whoever spams guesses faster. It, therefore, is technically would be possible for there to be no winners in an online mode game.
+Users would all have the same Mastermind code to guess.
 
-  Users would be able to select what difficulty they wanted for online mode
+It would rank the users based on the time they finished. The first person to finish would be first, second would be second etc. 
+
+The users would still have a timer and number of turns. If there's no timer, some games might never technically end, and if there's no number of turns, it would come down to whoever spams guesses faster. It, therefore, is technically would be possible for there to be no winners in an online mode game.
+
+Users would be able to select what difficulty they wanted for online mode
 
 
 
 
 ### Planning
 
-  I would need a database to store games and a server to create/update/delete games.
+I would need a database to store games and a server to create/update/delete games.
 
-  #### Technologies
+#### Technologies
 
-    I decided to use MongoDB as my database because it's ease of use and I had some familiarity with it. I decided on Mongoose.js to use to communicate with it for the same reasons. 
+I decided to use MongoDB as my database because it's ease of use and I had some familiarity with it. I decided on Mongoose.js to use to communicate with it for the same reasons. 
 
-    I did some research on what would be the best way to send and receive game info for users. Websockets looked like a great choice, as it would allow the server to automatically send data to the user each time the database is updated, but my current understanding if it is incomplete. I decided to proceed with HTTP and choose Express.js to script my server as it's again, what I'm most familiar with.
+I did some research on what would be the best way to send and receive game info for users. Websockets looked like a great choice, as it would allow the server to automatically send data to the user each time the database is updated, but my current understanding if it is incomplete. I decided to proceed with HTTP and choose Express.js to script my server as it's again, what I'm most familiar with.
 
-  #### Organization
+#### Organization
 
-    Users will have to create an account to play online, to prevent possible naming clashes. (I considered just having players play anonymously as player1, player2 etc, and generating an id token from the front end for them, but it could lead to confusion of which player they are.) This will also give each user an user._id for tracking in games.
+Users will have to create an account to play online, to prevent possible naming clashes. (I considered just having players play anonymously as player1, player2 etc, and generating an id token from the front end for them, but it could lead to confusion of which player they are.) This will also give each user an user._id for tracking in games.
 
-    Each online game would need the following info:
-      - Players
-        - Number of moves they've made
-        - If they've completed the game
-        - The time which they won the game
-      - Mastermind Code
-      - The number of players where the game has ended
+Each online game would need the following info:
+- Players
+  - Number of moves they've made
+  - If they've completed the game
+  - The time which they won the game
+- Mastermind Code
+- The number of players where the game has ended
 
-    The server will have two queue objects. One queue will be for One on One, the other queue for Tournament.
-    
-    The queue objects will have three different difficulties in them, one for easy, normal, and hard. 
+The server will have two queue objects. One queue will be for One on One, the other queue for Tournament.
 
-    The server will place users in the queue for the game they request and create games when conditions are met.
+The queue objects will have three different difficulties in them, one for easy, normal, and hard. 
 
-    Once a game is created, it will send the game data to the users. Theoretically, every player should start the game at the same time, but having a local timer should give every player the same amount of time.
+The server will place users in the queue for the game they request and create games when conditions are met.
 
-    Each time a user submits a guess, it would call the server with an HTTP PUT call and update their game. They will also receive the updated game data in the same call. 
+Once a game is created, it will send the game data to the users. Theoretically, every player should start the game at the same time, but having a local timer should give every player the same amount of time.
 
-    Once a player finishes, either guessed the code, ran out of time or turns, it will log in the game data. Once every player has completed the game, the game should delete it self.
+Each time a user submits a guess, it would call the server with an HTTP PUT call and update their game. They will also receive the updated game data in the same call. 
+
+Once a player finishes, either guessed the code, ran out of time or turns, it will log in the game data. Once every player has completed the game, the game should delete it self.
 
 
 ### Setup Database
 
-  The database is built with MongoDB and Mongoose.js to communicate it on Node.js.
+The database is built with MongoDB and Mongoose.js to communicate it on Node.js.
 
-  There are two models necessary for the game, a User model and a PvP (Game) model.
+There are two models necessary for the game, a User model and a PvP (Game) model.
 
-  The User model will store the user's info. It stores their name, the dateJoined and their passwordHash and a key to unhash the password. I later would add a gameHistory as an additional extensions for the backend. The User model was created for each user to have an unique id for the PvP model.
+The User model will store the user's info. It stores their name, the dateJoined and their passwordHash and a key to unhash the password. I later would add a gameHistory as an additional extensions for the backend. The User model was created for each user to have an unique id for the PvP model.
 
-  Note: The passwordHash and key are not very secure. I just did not think it would be a good practice to send someones password over the internet.
+Note: The passwordHash and key are not very secure. I just did not think it would be a good practice to send someones password over the internet.
 
-  The PvP model will store the players, the Mastermind code and number of players who finished for each game. 
-  
-  The players Schema type of the PvP model is stored as a Javascript object/hashmap, with each player's user id as the key. This design was to make it easy to search and update each player's game data. Each player value is also a Javascript object/hashmap, that stores their moves made, if they've completed the game and the time, (if they won), they won at. This determine the placement ranking of the players.
+The PvP model will store the players, the Mastermind code and number of players who finished for each game. 
+
+The players Schema type of the PvP model is stored as a Javascript object/hashmap, with each player's user id as the key. This design was to make it easy to search and update each player's game data. Each player value is also a Javascript object/hashmap, that stores their moves made, if they've completed the game and the time, (if they won), they won at. This determine the placement ranking of the players.
 
 
 
 ### Setup Server
 
-  #### User API
+#### User API
 
-  ##### Create User API
+##### Create User API
 
-  The an endpoint `/api/user/create` listens for a HTTP POST action and will expect a request with a body containing a username, password and key. It will verify there is a username and a password passed. If they are missing, it will respond with 404 and message letting user know they need to provide those required information.
-  
-  It then search for an instance of the username in the UserModel. 
-  
-  If found, it will respond with a 418 and message letting user know the username is taken. 
-  If not found, it create a new UserModel instance with data passed from request body and respond with the new UserModel instance.
+The an endpoint `/api/user/create` listens for a HTTP POST action and will expect a request with a body containing a username, password and key. It will verify there is a username and a password passed. If they are missing, it will respond with 404 and message letting user know they need to provide those required information.
 
-  ##### Request Key API
+It then search for an instance of the username in the UserModel. 
 
-  The endpount `/api/getKey/login/:username` listens for a HTTP GET action. It expects a username in its params. It will search UserModel for an instance and if found, will respond with the UserModel instances key value. This is intended for login situations for the user.
+If found, it will respond with a 418 and message letting user know the username is taken. 
+If not found, it create a new UserModel instance with data passed from request body and respond with the new UserModel instance.
 
-  ##### Login User API
+##### Request Key API
 
-  The endpoint `/api/user/login` listens for a HTTP POST action. It expects username and password in its request body. It will search for an instance of the UserModel with the username. If not found, it will respond with error code 418 and message to create an account. 
-  
-  If found, it will compare password of the instance and password passed. If true, it will respond with the UserModel instance. If false, it will respond with code 403 and message username and password combo not found.
+The endpount `/api/getKey/login/:username` listens for a HTTP GET action. It expects a username in its params. It will search UserModel for an instance and if found, will respond with the UserModel instances key value. This is intended for login situations for the user.
 
-  Note: The passwords sent to the Login User API and the one stored on the User Model instance will not be the password entered by the user. It will be modified by a scrambleString helper function on the frontend that uses the key passed from requestKey API.
+##### Login User API
 
-  #### Game API
+The endpoint `/api/user/login` listens for a HTTP POST action. It expects username and password in its request body. It will search for an instance of the UserModel with the username. If not found, it will respond with error code 418 and message to create an account. 
 
-  ##### Create Games API
+If found, it will compare password of the instance and password passed. If true, it will respond with the UserModel instance. If false, it will respond with code 403 and message username and password combo not found.
 
-  The server has two objects on it, one of the OneOnOneQueue class and one of TournamentQueue class. These objects will store the queues for each online mode type based on the user's selected difficulty.
+Note: The passwords sent to the Login User API and the one stored on the User Model instance will not be the password entered by the user. It will be modified by a scrambleString helper function on the frontend that uses the key passed from requestKey API.
 
-  There is a createMatch helper function that receives players and difficulties and creates a new PvPModel instance and saves it. There are additional helper functions that create player infos for each PvPModel player Schema.
+#### Game API
 
-  There are two game request endpoints.
+##### Create Games API
 
-  The end point `/api/game/pvp/:difficulty/:name/:id` listens for a HTTP GET action and will expect the a difficulty selection, the user's name and the user's userid as it's params. It will place the caller's id and user name into the OneOnOneQueue object instance based on the difficulty passed. 
-  
-  It was then check if the queue they were placed in has at least two players. If there is less than two players in the queue, the server will return an event listener with their user name. The event listener will return a response to the user when it receives it's trigger. 
-  
-  If there are more than two players in the queue, the endpoint will remove the first two players from the queue and pass the players into a createMatch that will create a match for the players. It was also trigger the event listener with the first player removed from the queue and send the game data to both players. The game data will be the PvPModel instance created with the two players info and new Mastermind Code.
+The server has two objects on it, one of the OneOnOneQueue class and one of TournamentQueue class. These objects will store the queues for each online mode type based on the user's selected difficulty.
 
-  The endpoint `/api/game/tournament/:difficulty/:name/:id` listens for a HTTP GET action and will expect the a difficulty selection, the user's name and the user's userid as it's params. It will place the caller's id and user name into the TournamentQueue object instance based on the difficulty passed. It will return an event listener that listens for a tournament to start. When the listener is called it will respond with the PvPModel instance that is passed through.
+There is a createMatch helper function that receives players and difficulties and creates a new PvPModel instance and saves it. There are additional helper functions that create player infos for each PvPModel player Schema.
 
-  There is a setInterval on the server that will trigger a TournamentMatchMaker helper function every 10 seconds. The TournamentMatchMaker will check each difficulty in the TournamentQueue object instance and if the conditions are met for each queue, pass all the players in the difficulty queue to the createMatch helper function to create a match. It will then reset the queue and emit a event action to trigger the tournament start listerns. 
+There are two game request endpoints.
 
-  ##### Update Games API
+The end point `/api/game/pvp/:difficulty/:name/:id` listens for a HTTP GET action and will expect the a difficulty selection, the user's name and the user's userid as it's params. It will place the caller's id and user name into the OneOnOneQueue object instance based on the difficulty passed. 
 
-  The server has an end point `/api/game/:gameid` listens for a HTTP PUT action and will expect gameid in params and a userid, time and isWinner boolean in the request body. The end point is going update a game in database based on the gameid passed. 
-  
-  It will search for the game from the PvPModel database and if found, will search for the players ID in the game data returned. 
-  
-  It will add one to the moves value for the user id passed in the players portion of the PvPModel instance.
+It was then check if the queue they were placed in has at least two players. If there is less than two players in the queue, the server will return an event listener with their user name. The event listener will return a response to the user when it receives it's trigger. 
 
-    Code looks like `PvPModelInstance.userid.moves + 1` 
-  
-  It will check if the isWinner passed in request boolean is true, false or null. If isWinner is null, it means the game is still being played and it will return a response with the updated PvPModel. 
-  
-  If it is false, the player has lost and will add one to the PvPModel instance's numCompletedGames and set the player's isWinner value to false on the PvPModel instance. If it is true, it will set the player's isWinner value to true on the PvPModel instance and set the time on the instance equal to the time that was sent in the request body. This will mark the time it took for the winning player to win the game.
+If there are more than two players in the queue, the endpoint will remove the first two players from the queue and pass the players into a createMatch that will create a match for the players. It was also trigger the event listener with the first player removed from the queue and send the game data to both players. The game data will be the PvPModel instance created with the two players info and new Mastermind Code.
 
-    Code looks like `PvpModelInstance.userid.times = request.body.time`
+The endpoint `/api/game/tournament/:difficulty/:name/:id` listens for a HTTP GET action and will expect the a difficulty selection, the user's name and the user's userid as it's params. It will place the caller's id and user name into the TournamentQueue object instance based on the difficulty passed. It will return an event listener that listens for a tournament to start. When the listener is called it will respond with the PvPModel instance that is passed through.
 
-  If isWinner is true or false, the endpoint will also check if the PvPModel instance's numCompletedGames is equal to the PvPModel instance's numOfPlayers. If they are equal, that means all players have completed their games, win or lose, and will then delete the instance. 
+There is a setInterval on the server that will trigger a TournamentMatchMaker helper function every 10 seconds. The TournamentMatchMaker will check each difficulty in the TournamentQueue object instance and if the conditions are met for each queue, pass all the players in the difficulty queue to the createMatch helper function to create a match. It will then reset the queue and emit a event action to trigger the tournament start listerns. 
 
-  #### Backend Extensions
+##### Update Games API
 
-  ##### Leaderboard API + Database
+The server has an end point `/api/game/:gameid` listens for a HTTP PUT action and will expect gameid in params and a userid, time and isWinner boolean in the request body. The end point is going update a game in database based on the gameid passed. 
 
-  To make games more interesting for single players, I created a leaderboard for the winning single players to upload their time at completiton. There is a leaderboard for each difficulty except custom.
+It will search for the game from the PvPModel database and if found, will search for the players ID in the game data returned. 
 
-  I created a Leaderboard Model for the database and two endpoints in the server. 
+It will add one to the moves value for the user id passed in the players portion of the PvPModel instance.
 
-  The endpoint `/api/leaderboard/` listens for a HTTP POST action. It expects user, time, code and difficulty in its request body. It creates a new Leaderboard Model instance with the request body info and saves it.
+  Code looks like `PvPModelInstance.userid.moves + 1` 
 
-  The endpoint `/api/leaderboard/` listens for a HTTP GET post. It expects nothing to be passed. It will get all Leaderboard Model instance, sort split them into three arrays based on the difficulty and sort it based on the highest time in the instance. It will respond with a object that contains the three arrays.
+It will check if the isWinner passed in request boolean is true, false or null. If isWinner is null, it means the game is still being played and it will return a response with the updated PvPModel. 
 
-  ##### Additional User API
+If it is false, the player has lost and will add one to the PvPModel instance's numCompletedGames and set the player's isWinner value to false on the PvPModel instance. If it is true, it will set the player's isWinner value to true on the PvPModel instance and set the time on the instance equal to the time that was sent in the request body. This will mark the time it took for the winning player to win the game.
 
-  Since the UserModel existed I decided to add a way for user to search other users.
+  Code looks like `PvpModelInstance.userid.times = request.body.time`
 
-  The endpoint `/api/users/:name` listens for a HTTP GET action. It expects a username in it's params. It will search the UserModel for an instance with the username. If found, will respond with the username, gameHistory and dateJoined from the instance. If not found, it will respond with 404 with message not found.
+If isWinner is true or false, the endpoint will also check if the PvPModel instance's numCompletedGames is equal to the PvPModel instance's numOfPlayers. If they are equal, that means all players have completed their games, win or lose, and will then delete the instance. 
 
-  I also decided to add a gameHistory to the UserModel. It will allow users to save their winning game times. It's almost like a badges type situation.
+#### Backend Extensions
 
-  The endpoint `api/userhistory/add/:id` listens for a HTTP PUT action. It expects a userid in it's params and code, time and difficulty in the request body. It will search for the UserModel instance with userid. If found, it will add the code, time and difficulty into the gameHistory of the instance. If not found, it will respond with 404.
+##### Leaderboard API + Database
+
+To make games more interesting for single players, I created a leaderboard for the winning single players to upload their time at completiton. There is a leaderboard for each difficulty except custom.
+
+I created a Leaderboard Model for the database and two endpoints in the server. 
+
+The endpoint `/api/leaderboard/` listens for a HTTP POST action. It expects user, time, code and difficulty in its request body. It creates a new Leaderboard Model instance with the request body info and saves it.
+
+The endpoint `/api/leaderboard/` listens for a HTTP GET post. It expects nothing to be passed. It will get all Leaderboard Model instance, sort split them into three arrays based on the difficulty and sort it based on the highest time in the instance. It will respond with a object that contains the three arrays.
+
+##### Additional User API
+
+Since the UserModel existed I decided to add a way for user to search other users.
+
+The endpoint `/api/users/:name` listens for a HTTP GET action. It expects a username in it's params. It will search the UserModel for an instance with the username. If found, will respond with the username, gameHistory and dateJoined from the instance. If not found, it will respond with 404 with message not found.
+
+I also decided to add a gameHistory to the UserModel. It will allow users to save their winning game times. It's almost like a badges type situation.
+
+The endpoint `api/userhistory/add/:id` listens for a HTTP PUT action. It expects a userid in it's params and code, time and difficulty in the request body. It will search for the UserModel instance with userid. If found, it will add the code, time and difficulty into the gameHistory of the instance. If not found, it will respond with 404.
 
 
 ### Handling the Backend from the Front
 
-  The Mastermind game was developed to be able to work in single player mode or multiplayer without much refactoring.
+The Mastermind game was developed to be able to work in single player mode or multiplayer without much refactoring.
 
-  I created the following user interface components to correspond with their backend:
-    - a Login/Create User component that would allow users to login or create an account
-    - a ViewLeaderboard component that would display the leaderboard
-      - it also calls the Leaderboard API directly
-    - a Search User Input component that would let users input a username to search for
-    - a Searched User component that would display the user searched
-    - a User Page component that would show the details of the current logged in user
-    - a PvP info component that showed the game data for all the players in  One on One match or Tournament mach
-  
-  I added the following into existing components:
-    - into the WinnerPage I added a button for the user to upload their game to their history 
-  
-  I created the following reducers/states to correspond with their backend:
-    - pvpData stores the data received from the Game APIs
-    - currentUser stores the data received from the User APIs logging in and creating user
-    - searchedUser stores the data received from the User APIs search user
-  
-  I created the following actions to communicate with the backend:
-    - request game action that called the Create Game APIs endpoints (both One on One and Tournament)
-    - update game action that called the Update Game API
-    - search user action that called the User API for searching
-    - logging and create user action that called the User API for logging in or searching
-    - upload game history action that called the User API for adding to user's game history and Leaderboard API for uploading times
+I created the following user interface components to correspond with their backend:
+- a Login/Create User component that would allow users to login or create an account
+- a ViewLeaderboard component that would display the leaderboard
+  - it also calls the Leaderboard API directly
+- a Search User Input component that would let users input a username to search for
+- a Searched User component that would display the user searched
+- a User Page component that would show the details of the current logged in user
+- a PvP info component that showed the game data for all the players in  One on One match or Tournament mach
 
-  Since the app was no longer just a game, I added an additional reducer/state that would govern what is being displayed by the app. 
+I added the following into existing components:
+- into the WinnerPage I added a button for the user to upload their game to their history 
 
-  I also created a nav bar to allow users to change between playing game, searching users and viewing leaderboard.
+I created the following reducers/states to correspond with their backend:
+- pvpData stores the data received from the Game APIs
+- currentUser stores the data received from the User APIs logging in and creating user
+- searchedUser stores the data received from the User APIs search user
+
+I created the following actions to communicate with the backend:
+- request game action that called the Create Game APIs endpoints (both One on One and Tournament)
+- update game action that called the Update Game API
+- search user action that called the User API for searching
+- logging and create user action that called the User API for logging in or searching
+- upload game history action that called the User API for adding to user's game history and Leaderboard API for uploading times
+
+Since the app was no longer just a game, I added an additional reducer/state that would govern what is being displayed by the app. 
+
+I also created a nav bar to allow users to change between playing game, searching users and viewing leaderboard.
 
 
 ### Styling
 
-  I know you're probably thinking, what style? I tried lol.
+I know you're probably thinking, what style? I tried lol.
 
-  I used the TailwindCSS library because of it's ease of use for styling. It allows you to style components directly by defining what the style is in the class name. It helps maintain consistency in styling and prevented class name clashes.
+I used the TailwindCSS library because of it's ease of use for styling. It allows you to style components directly by defining what the style is in the class name. It helps maintain consistency in styling and prevented class name clashes.
 
-  I used the VechaiUI library, which was built on top of TailWindCSS for simple components to maintain consistency throughout the app.
+I used the VechaiUI library, which was built on top of TailWindCSS for simple components to maintain consistency throughout the app.
 
-  I created additional visual components for error popups and confirmation dialogs.
+I created additional visual components for error popups and confirmation dialogs.
 
 
 ### Testing
 
-    I tested the essential functions for playing the Mastermind game. The compareCode and generateCode functions are core the game working. The testing stragety was to make sure the compareCode produced the right feedback regardless of if numbers input. Edge cases were all same numbers in the Mastermind code and all different numbers. generateCode testing was 
+I tested the essential functions for playing the Mastermind game. The compareCode and generateCode functions are core the game working. The testing stragety was to make sure the compareCode produced the right feedback regardless of if numbers input. Edge cases were all same numbers in the Mastermind code and all different numbers. generateCode testing was 
 
 
 
