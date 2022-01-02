@@ -101,7 +101,6 @@ app.post("/api/user/create", jsonParser, (req, res) => {
             console.log(`Unable to create new user ${error}`);
             res.status(418).send("Unable to create account");
           } else {
-            console.log(`Success, created new user ${newUser}`);
             let { _id, gameHistory, dateJoined } = newUser;
             res.send({ username, _id, gameHistory, dateJoined });
           }
@@ -118,14 +117,13 @@ app.get(`/api/getKey/login/:username`, (req, res) => {
   let username = req.params.username;
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
-      console.log("Error accessing database");
+      console.log("Error accessing data for find user");
       res.status(404).send({ error: "Unable to find user" });
     } else {
       if (user === null) {
         res.status(404).send({ error: "Unable to find user" });
       } else {
         let { coolstring } = user;
-        console.log("Found user, sending key");
         res.json(coolstring);
       }
     }
@@ -137,14 +135,12 @@ app.post("/api/user/login", jsonParser, (req, res) => {
   let { username, password } = req.body;
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
-      console.log("Error accessing data");
+      console.log("Error accessing data for logging in user");
       res.status(404).send({ error: "User not found" });
     } else {
       if (user === null) {
-        console.log("Unable to find account");
         res.status(418).send({ error: "Please create an account" });
       } else {
-        console.log("Found account");
         let { passwordHash, _id, gameHistory, dateJoined } = user;
         if (passwordHash === password) {
           res.send({ username, _id, gameHistory, dateJoined });
@@ -163,16 +159,19 @@ app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
   let userid = req.params.id;
   let { code, time, difficulty } = req.body;
   UserModel.findOne({ _id: userid }, (err, user) => {
+    if (user === null) {
+      res.status(404).send("Unable to find user");
+    }
     if (err) {
-      console.log(`Unable to access user ${userid}`);
+      console.log(
+        `Error, unable to access user database for updating user history for: ${userid}`
+      );
     }
     user.gameHistory.push({ code, time, difficulty });
     user.save((err) => {
       if (err) {
-        console.log("Unable to save user history");
         res.status(404).send("Unable to save");
       } else {
-        console.log(`Saved data to ${user._id}`);
         res.status(200).send("Saved");
       }
     });
@@ -191,10 +190,8 @@ app.get("/api/users/:name", (req, res) => {
       res.status(404).send("Unable to find user");
     } else {
       if (data === null) {
-        console.log(`Unable to find user ${username}`);
         res.status(404).send({ error: "Unable to save game" });
       } else {
-        console.log(`Found user: ${data}`);
         let { gameHistory, dateJoined } = data;
         res.status(200).send({ username, gameHistory, dateJoined });
       }
@@ -203,23 +200,23 @@ app.get("/api/users/:name", (req, res) => {
 });
 
 //matchmaking
-function OneOnOneMatchMaker() {
+function OneOnOneQueue() {
   this.easy = [];
   this.normal = [];
   this.hard = [];
 }
-OneOnOneMatchMaker.prototype.addToThisQueue = function (diff, id) {
+OneOnOneQueue.prototype.addToThisQueue = function (diff, id) {
   this[diff] = [...this[diff], id];
 };
-OneOnOneMatchMaker.prototype.getQueueFrom = function (diff) {
+OneOnOneQueue.prototype.getQueueFrom = function (diff) {
   return this[diff];
 };
 
-OneOnOneMatchMaker.prototype.removeTwoFrom = function (diff) {
+OneOnOneQueue.prototype.removeTwoFrom = function (diff) {
   return this[diff].splice(0, 2);
 };
 let emitter = new EventEmitter();
-let oneOnOneMatchMaking = new OneOnOneMatchMaker();
+let oneOnOneMatchMaking = new OneOnOneQueue();
 
 app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
   let { name, id, difficulty } = req.params;
@@ -290,7 +287,7 @@ app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
 });
 
 //Handler for all active online matches
-app.post("/api/game/:gameid", jsonParser, (req, res) => {
+app.put("/api/game/:gameid", jsonParser, (req, res) => {
   let gameid = `${req.params.gameid}`;
   let { userid, isWinner, time } = req.body;
   PvPModel.findById(gameid, function (err, game) {
@@ -299,7 +296,6 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
       res.send(err);
     }
     if (game === null) {
-      console.log(`Could not find game id: ${gameid}`);
       res.sendStatus(404);
     } else {
       let { _id, players } = game;
@@ -319,9 +315,8 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
       game.markModified("players");
       game.save((err) => {
         if (err) {
-          console.log(err);
+          console.log(`Error saving game ${err}`);
         } else {
-          console.log("update success");
           res.json(game);
         }
       });
@@ -330,8 +325,6 @@ app.post("/api/game/:gameid", jsonParser, (req, res) => {
         PvPModel.deleteOne(_id, (err, game) => {
           if (err) {
             console.log("Unable to delete game");
-          } else {
-            console.log(`Game completed. Deleting ${game}`);
           }
         });
       }
@@ -355,7 +348,7 @@ app.post("/api/leaderboard/", jsonParser, (req, res) => {
   });
   entryToLeaderboard.save((err) => {
     if (err) {
-      console.log("Unable to save time");
+      console.log("Unable to save time for leaderboard");
       res.status(404).send("Unable to save time");
     } else {
       res.status(200).send(`Saved to leaderboard ${entryToLeaderboard}`);

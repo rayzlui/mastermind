@@ -57,11 +57,3 @@ export function ShowPVPInfo() {
     <div className="flex flex-col h-1/4 items-center w-full">{display}</div>
   );
 }
-
-ShowPVPInfo.propTypes = {
-  pvpData: PropTypes.object,
-  player1: PropTypes.string,
-  player2: PropTypes.string,
-  player1Moves: PropTypes.number,
-  player2Moves: PropTypes.number,
-};

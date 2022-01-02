@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { covertMillisecondsToMinutes } from "./TimerComponent";
-import { PLAY_GAME, VIEW_LEADERBOARD } from "../actions/actionTypes";
+import {
+  PLAY_GAME,
+  VIEW_LEADERBOARD,
+  SET_ALERT_MESSAGE,
+} from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useSelector, useDispatch } from "react-redux";
@@ -17,18 +21,26 @@ function capitalize(string) {
 
 export function ViewLeaderboard() {
   let [leaderboard, setLeaderboard] = useState(null);
-  useEffect(async () => {
-    let request = await fetch(`http://localhost:3001/api/leaderboard`);
-    let data = await request.json();
-    setLeaderboard(data);
-  }, []);
+  let [showDifficulty, toggleDifficulty] = useState("normal");
   let displayingPage = useSelector((state) => state.displayingPage);
   let dispatch = useDispatch();
-  let [showDifficulty, toggleDifficulty] = useState("normal");
 
-  if (displayingPage !== VIEW_LEADERBOARD) {
-    return null;
-  }
+  useEffect(async () => {
+    if (displayingPage !== VIEW_LEADERBOARD) {
+      return null;
+    }
+    try {
+      let request = await fetch(`http://localhost:3001/api/leaderboard`);
+      let data = await request.json();
+      setLeaderboard(data);
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
+      setLeaderboard(false);
+    }
+  }, [displayingPage]);
 
   let playThisCode = (code) => {
     dispatch(setMastermindCode(code));
@@ -38,11 +50,21 @@ export function ViewLeaderboard() {
   let viewPlayer = (name) => {
     dispatch(searchUser(name));
   };
+  if (displayingPage !== VIEW_LEADERBOARD) {
+    return null;
+  }
 
   if (leaderboard === null) {
     return (
       <div className="flex flex-col items-center justify-center">
         <h1>Retrieving leaderboard</h1>
+      </div>
+    );
+  }
+  if (leaderboard === false) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <h1>Unable to retrieve leaderboard</h1>
       </div>
     );
   }

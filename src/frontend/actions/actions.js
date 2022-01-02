@@ -1,5 +1,10 @@
-import scramblePassword from "../../ignore/scramblePass";
-import { generateCode } from "../gameLogic/generateCode";
+import { generateCode } from "../logicFunctions/generateCode";
+import { createAction } from "@reduxjs/toolkit";
+import {
+  casearCypher,
+  scramblePassword,
+} from "../logicFunctions/scrambleString";
+
 import {
   ADD_USER_MOVE_HISTORY,
   RESET,
@@ -26,72 +31,24 @@ import {
   SET_ALERT_MESSAGE,
 } from "./actionTypes";
 
-import { compareCode } from "../gameLogic/compareCode";
-
-export function setMastermindCode(code) {
-  return { type: SET_MASTERMIND_CODE, payload: code };
-}
-
-export function setWinTime(time) {
-  return { type: SET_WIN_TIME, payload: time };
-}
-
-export function displayCurrentUser() {
-  return { type: DISPLAY_CURRENT_USER };
-}
-
-export function userSubmit() {
-  return { type: USER_SUBMIT };
-}
-export function addMoveToHistory(move) {
-  return { type: ADD_USER_MOVE_HISTORY, payload: move };
-}
-
-export function setTurns(turns) {
-  return { type: SET_TURNS, payload: turns };
-}
-
-export function reset() {
-  return { type: RESET };
-}
-
-export function weHaveAWinner() {
-  return { type: WINNER, payload: true };
-}
-
-export function updatePvpInfo(data) {
-  return { type: UPDATE_PVP_INFO, payload: data };
-}
-
-export function setDifficulty(codeLength, maxDigit, name) {
-  return {
-    type: SET_DIFFICULTY,
-    payload: { codeLength, maxDigit, name },
-  };
-}
-
-export function setCurrentUser(data) {
-  return { type: LOGIN_USER, payload: data };
-}
-
-export function showThisUser(data) {
-  return { type: USER_FOUND, payload: data };
-}
-
-export function showLogin(type) {
-  return { type: SHOW_LOGIN, payload: type };
-}
-
-export function hideLogin() {
-  return { type: HIDE_LOGIN };
-}
-
+import { compareCode } from "../logicFunctions/compareCode";
+export const setMastermindCode = createAction(SET_MASTERMIND_CODE);
+export const setWinTime = createAction(SET_WIN_TIME);
+export const displayCurrentUser = createAction(DISPLAY_CURRENT_USER);
+export const userSubmit = createAction(USER_SUBMIT);
+export const addMoveToHistory = createAction(ADD_USER_MOVE_HISTORY);
+export const setTurns = createAction(SET_TURNS);
+export const reset = createAction(RESET);
+export const weHaveAWinner = createAction(WINNER);
+export const updatePvpInfo = createAction(UPDATE_PVP_INFO);
+export const setDifficulty = createAction(SET_DIFFICULTY);
+export const setCurrentUser = createAction(LOGIN_USER);
+export const showThisUser = createAction(USER_FOUND);
+export const showLogin = createAction(SHOW_LOGIN);
+export const hideLogin = createAction(HIDE_LOGIN);
+export const weHaveALoser = createAction(LOSER);
 export function changePageTo(page) {
   return { type: page };
-}
-
-export function weHaveALoser() {
-  return { type: LOSER };
 }
 
 export function logoutUser() {
@@ -99,41 +56,59 @@ export function logoutUser() {
   return { type: LOGOUT_USER };
 }
 
-export function generateMastermindCode(codeLength, maxDigit) {
+export function generateMastermindCode(
+  codeLength,
+  maxDigit,
+  generateCodeCallback
+) {
   return async (dispatch) => {
-    let code = await generateCode(codeLength, maxDigit);
-    dispatch(setMastermindCode(code));
+    let code = await generateCodeCallback(codeLength, maxDigit);
+    await dispatch(setMastermindCode(code));
   };
 }
 
 export function requestPvpMatch(difficulty, type, user) {
   let { username } = user;
   return async (dispatch) => {
-    let request = await fetch(
-      `http://localhost:3001/api/game/${type}/${difficulty}/${username}/${user._id}`
-    );
-    let data = await request.json();
-    let { players, code, _id, winner } = await data;
-    dispatch(setMastermindCode(code));
-    dispatch(
-      updatePvpInfo({
-        players,
-        _id,
-        winner,
-      })
-    );
+    try {
+      let request = await fetch(
+        `http://localhost:3001/api/game/${type}/${difficulty}/${username}/${user._id}`
+      );
+      let data = await request.json();
+      let { players, code, _id } = await data;
+      dispatch(setMastermindCode(code));
+      dispatch(
+        updatePvpInfo({
+          players,
+          _id,
+        })
+      );
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
+      dispatch({ type: SET_SINGLE_PLAYER });
+    }
   };
 }
 
 export function searchUser(username) {
   return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/api/users/${username}`);
-    if (request.status === 200) {
-      let data = await request.json();
-      dispatch(showThisUser(data));
-      dispatch(changePageTo(DISPLAY_USER));
-    } else {
-      dispatch({ type: SET_ALERT_MESSAGE, payload: "Unable to find user" });
+    try {
+      let request = await fetch(`http://localhost:3001/api/users/${username}`);
+      if (request.status === 200) {
+        let data = await request.json();
+        dispatch(showThisUser(data));
+        dispatch(changePageTo(DISPLAY_USER));
+      } else {
+        dispatch({ type: SET_ALERT_MESSAGE, payload: "Unable to find user" });
+      }
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
     }
   };
 }
@@ -141,128 +116,158 @@ export function searchUser(username) {
 export function logUserHistory(user, code, time, difficulty, callback) {
   let { _id } = user;
   return async function (dispatch) {
-    let putToUserHistory = await fetch(
-      `http://localhost:3001/api/userhistory/add/${_id}`,
-      {
-        method: "put",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code,
-          time,
-          difficulty,
-        }),
+    try {
+      let putToUserHistory = await fetch(
+        `http://localhost:3001/api/userhistory/add/${_id}`,
+        {
+          method: "put",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            code,
+            time,
+            difficulty,
+          }),
+        }
+      );
+      let postToLeaderBoard = await fetch(
+        `http://localhost:3001/api/leaderboard/`,
+        {
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user,
+            code,
+            time,
+            difficulty,
+          }),
+        }
+      );
+      if (putToUserHistory.status !== 200 || postToLeaderBoard.status !== 200) {
+        dispatch({ type: UNABLE_TO_SAVE });
+        callback(false);
+      } else {
+        dispatch({ type: SAVE_COMPLETE });
+        callback(true);
       }
-    );
-    let postToLeaderBoard = await fetch(
-      `http://localhost:3001/api/leaderboard/`,
-      {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user,
-          code,
-          time,
-          difficulty,
-        }),
-      }
-    );
-    if (putToUserHistory.status !== 200 || postToLeaderBoard.status !== 200) {
-      dispatch({ type: UNABLE_TO_SAVE });
-      callback(false);
-    } else {
-      dispatch({ type: SAVE_COMPLETE });
-      callback(true);
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
     }
   };
 }
 
 export function updateDataBaseForPvP(gameid, userid, isWinner, time) {
   return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/api/game/${gameid}`, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        gameid,
-        userid,
-        isWinner,
-        time,
-      }),
-    });
-    let data = await request.json();
-    let { players } = await data;
-    dispatch(
-      updatePvpInfo({
-        players,
-      })
-    );
-  };
-}
-
-export function createUser(username, password, key, callback) {
-  return async (dispatch) => {
-    let request = await fetch(`http://localhost:3001/api/user/create`, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-        key,
-      }),
-    });
-
-    let response = await request.json();
-    if (request.status === 200) {
-      dispatch(setCurrentUser(response));
-      dispatch(hideLogin());
-      sessionStorage.setItem("currentUser", JSON.stringify(response));
-    } else {
-      //unable to create user, they gotta do it again
-      if (request.status === 418) {
-        callback(await response.error);
-      }
-      //need to redo recreate account
+    try {
+      let request = await fetch(`http://localhost:3001/api/game/${gameid}`, {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          gameid,
+          userid,
+          isWinner,
+          time,
+        }),
+      });
+      let data = await request.json();
+      let { players } = await data;
+      dispatch(
+        updatePvpInfo({
+          players,
+        })
+      );
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
     }
   };
 }
 
-export function loginUser(username, password, callback) {
+export function createUser(username, string, callback) {
+  let scramble = casearCypher(string);
+  let [password, key] = scramble;
   return async (dispatch) => {
-    let requestKey = await fetch(
-      `http://localhost:3001/api/getKey/login/${username}`
-    );
-
-    let keyResponse = await requestKey.json();
-    if (requestKey.status === 200) {
-      let scrambled = await scramblePassword(password, keyResponse);
-      let request = await fetch(`http://localhost:3001/api/user/login`, {
+    try {
+      let request = await fetch(`http://localhost:3001/api/user/create`, {
         method: "post",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username,
-          password: scrambled,
+          password,
+          key,
         }),
       });
+
       let response = await request.json();
       if (request.status === 200) {
         dispatch(setCurrentUser(response));
-        sessionStorage.setItem("currentUser", JSON.stringify(response));
         dispatch(hideLogin());
+        sessionStorage.setItem("currentUser", JSON.stringify(response));
       } else {
-        callback(response.error);
+        //unable to create user, they gotta do it again
+        if (request.status === 418) {
+          callback(await response.error);
+        }
+        //need to redo recreate account
       }
-    } else {
-      //user not found
-      callback(keyResponse.error);
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
+    }
+  };
+}
+
+export function loginUser(username, password, callback) {
+  return async (dispatch) => {
+    try {
+      let requestKey = await fetch(
+        `http://localhost:3001/api/getKey/login/${username}`
+      );
+
+      let keyResponse = await requestKey.json();
+      if (requestKey.status === 200) {
+        let scrambled = await scramblePassword(password, keyResponse);
+        let request = await fetch(`http://localhost:3001/api/user/login`, {
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password: scrambled,
+          }),
+        });
+        let response = await request.json();
+        if (request.status === 200) {
+          dispatch(setCurrentUser(response));
+          sessionStorage.setItem("currentUser", JSON.stringify(response));
+          dispatch(hideLogin());
+        } else {
+          callback(response.error);
+        }
+      } else {
+        //user not found
+        callback(keyResponse.error);
+      }
+    } catch (error) {
+      dispatch({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
     }
   };
 }
@@ -281,7 +286,7 @@ function translateDiffToNums(difficulty) {
       break;
     default:
       codeLength = 4;
-      maxDigit = 7;
+      maxDigit = 8;
       break;
   }
   return [codeLength, maxDigit];
@@ -306,7 +311,7 @@ export function createGameWithDetails(gameDetails) {
     dispatch(reset());
     switch (gameType) {
       case SET_SINGLE_PLAYER:
-        dispatch(generateMastermindCode(codeLength, maxDigit));
+        dispatch(generateMastermindCode(codeLength, maxDigit, generateCode));
         break;
       case SET_PVP:
         dispatch(requestPvpMatch(difficulty, "pvp", currentUser));
@@ -316,7 +321,7 @@ export function createGameWithDetails(gameDetails) {
         break;
     }
 
-    dispatch(setDifficulty(codeLength, maxDigit, difficulty));
+    dispatch(setDifficulty({ difficulty, codeLength, maxDigit }));
     dispatch(changePageTo(PLAY_GAME));
     dispatch(hideLogin());
   };
@@ -337,16 +342,16 @@ export function specialUpdatePvPForTimer(gameTimer) {
 export function playGameAgain() {
   return (dispatch, getStore) => {
     let { gameDifficulty, gameType, currentUser } = getStore();
-    let { codeLength, maxDigit } = gameDifficulty;
+    let { codeLength, maxDigit, difficulty } = gameDifficulty;
     dispatch(reset());
     if (gameType === SET_SINGLE_PLAYER) {
-      dispatch(generateMastermindCode(codeLength, maxDigit));
+      dispatch(generateMastermindCode(codeLength, maxDigit, generateCode));
     } else {
       let type = "tournament";
       if (gameType === SET_PVP) {
         type = "pvp";
       }
-      dispatch(requestPvpMatch(gameDifficulty.name, type, currentUser));
+      dispatch(requestPvpMatch(difficulty, type, currentUser));
     }
   };
 }

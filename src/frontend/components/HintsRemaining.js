@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 
 export function HintsRemaining() {
@@ -11,7 +10,3 @@ export function HintsRemaining() {
     </div>
   );
 }
-
-HintsRemaining.propTypes = {
-  hintsRemaining: PropTypes.number,
-};

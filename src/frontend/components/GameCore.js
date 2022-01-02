@@ -28,7 +28,7 @@ function addToCode(arr, val) {
 }
 
 function CodeGuessDisplay(props) {
-  let { handleDirectIndexInput, codeLength, userGuess } = props;
+  let { handleDirectIndexInput, codeLength, userGuess, clickedIndex } = props;
   let showInputs = [];
   for (let i = 0; i < codeLength; i++) {
     let inputValue = userGuess[i];
@@ -39,13 +39,14 @@ function CodeGuessDisplay(props) {
       displayValue = inputValue;
     }
     showInputs.push(
-      <Tooltip.Root>
+      <Tooltip.Root key={`input${i}`}>
         <Tooltip.Trigger>
           <Button
             size="xl"
             variant="ghost"
-            key={`input${i}`}
-            className="border"
+            className={`border ${
+              clickedIndex === i ? "border-fuchsia-900 border-4" : ""
+            }`}
             onClick={() => handleDirectIndexInput(i)}
           >
             {displayValue}
@@ -84,13 +85,9 @@ function UserInputButtons(props) {
   for (let i = 1; i <= maxDigit; i++) {
     if (skips[i] === undefined) {
       clickEntries.push(
-        <Tooltip.Root>
+        <Tooltip.Root key={`click${i}`}>
           <Tooltip.Trigger>
-            <Button
-              variant="ghost"
-              key={`click${i}`}
-              onClick={() => handleClick(i)}
-            >
+            <Button variant="ghost" onClick={() => handleClick(i)}>
               {i}
             </Button>
           </Tooltip.Trigger>
@@ -112,7 +109,7 @@ UserInputButtons.propTypes = {
   hint: PropTypes.bool,
 };
 
-export function UserInput(props) {
+export function GameCore() {
   let dispatch = useDispatch();
 
   let gameDifficulty = useSelector((state) => state.gameDifficulty);
@@ -128,7 +125,7 @@ export function UserInput(props) {
   let [clickedIndex, updateIndex] = useState(null);
   let [hint, toggleHint] = useState(false);
 
-  let focusForKeyboard = useRef(null);
+  let focusForKeyboard = useRef({ current: null });
   useEffect(() => {
     focusForKeyboard.current.focus();
   }, []);
@@ -203,14 +200,17 @@ export function UserInput(props) {
       ref={focusForKeyboard}
       className="w-full h-1/3 flex items-center flex-col focus:outline-0"
     >
+      <h3 className="font-bold text-xl font-sans">Your Guess</h3>
       <div className="w-full h-1/3 flex justify-center">
         <CodeGuessDisplay
           userGuess={userGuess}
           handleDirectIndexInput={handleDirectIndexInput}
           codeLength={codeLength}
+          clickedIndex={clickedIndex}
         />
       </div>
 
+      <h3 className="font-bold text-lg font-sans">Code Options</h3>
       <div className="w-full h-1/3 flex justify-center">
         <UserInputButtons
           handleClick={handleClick}
@@ -236,13 +236,3 @@ export function UserInput(props) {
     </div>
   );
 }
-UserInput.propTypes = {
-  codeLength: PropTypes.number,
-  maxDigit: PropTypes.number,
-  submitGuess: PropTypes.func,
-  gameDifficulty: PropTypes.object,
-  isWinner: PropTypes.bool,
-  code: PropTypes.array,
-  hintsRemaining: PropTypes.number,
-  updateHintsAllowed: PropTypes.func,
-};

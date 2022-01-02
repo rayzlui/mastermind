@@ -1,6 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import PropTypes from "prop-types";
 import {
   Button,
   Input,
@@ -10,9 +9,12 @@ import {
 } from "@vechaiui/react";
 import { Dialog } from "@headlessui/react";
 import { hideLogin, loginUser, createUser } from "../actions/actions";
-import { casearCypher } from "../../scrambleString";
 
 function verifyValidString(string, feedbackCallback) {
+  if (string.length < 9) {
+    feedbackCallback("Username and password must be longer than 8 characters");
+    return false;
+  }
   let downcaseString = string.toLowerCase();
   let validCharacters = "abcdefghijklmnopqrstuvwxyz1234567890"
     .split("")
@@ -20,10 +22,6 @@ function verifyValidString(string, feedbackCallback) {
       acc[char] = true;
       return acc;
     }, {});
-  if (string.length < 9) {
-    feedbackCallback("Username and password must be longer than 8 characters");
-    return false;
-  }
   for (let i = 0; i < downcaseString.length; i++) {
     let currentStringVal = downcaseString[i];
     if (validCharacters[currentStringVal] === undefined) {
@@ -36,15 +34,19 @@ function verifyValidString(string, feedbackCallback) {
   return true;
 }
 
-export function LoginOrCreateUserPage(props) {
+export function LoginOrCreateUserPage() {
   let currentUser = useSelector((state) => state.currentUser);
   let showLogin = useSelector((state) => state.showLogin);
   let dispatch = useDispatch();
   let [isLogin, toggleLogin] = useState(showLogin);
-  let [userName, updateUserName] = useState();
-  let [password, updatePassword] = useState();
+  let [userName, updateUserName] = useState("");
+  let [password, updatePassword] = useState("");
   let [feedback, toggleFeedback] = useState(null);
   let submitRef = useRef(null);
+
+  useEffect(() => {
+    toggleLogin(showLogin);
+  }, [showLogin]);
 
   if (currentUser || !showLogin) {
     return null;
@@ -59,9 +61,7 @@ export function LoginOrCreateUserPage(props) {
     type = "Create an account";
 
     userAction = (username, password, callback) => {
-      let scramble = casearCypher(password);
-      let [string, key] = scramble;
-      dispatch(createUser(username, string, key, callback));
+      dispatch(createUser(username, password, callback));
     };
   }
 
@@ -133,13 +133,3 @@ export function LoginOrCreateUserPage(props) {
     </Dialog>
   );
 }
-
-LoginOrCreateUserPage.propTypes = {
-  loginAction: PropTypes.func,
-  createUserAction: PropTypes.func,
-  type: PropTypes.string,
-  displayingPage: PropTypes.string,
-  currentUser: PropTypes.object,
-  showLogin: PropTypes.string,
-  hideLogin: PropTypes.func,
-};

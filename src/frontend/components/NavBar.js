@@ -1,5 +1,4 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React, { useState } from "react";
 import { InputSearchUser } from "./InputSearchUser";
 import {
   DISPLAY_USER,
@@ -10,63 +9,66 @@ import {
 import { Button } from "@vechaiui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { changePageTo } from "../actions/actions";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 export function NavBar() {
   let dispatch = useDispatch();
   let displayingPage = useSelector((state) => state.displayingPage);
+  let [showDialog, toggleDialog] = useState(false);
+  let [selectedNextPage, toggleSelectedNextPage] = useState(null);
 
   function handleClick(type) {
+    toggleSelectedNextPage(type);
     if (displayingPage === PLAY_GAME) {
-      if (!confirm("Are you sure you want to leave game?")) {
-        return null;
-      }
+      toggleDialog(true);
+    } else {
+      dispatch(changePageTo(type));
     }
-    dispatch(changePageTo(type));
   }
-  let display;
 
-  if (displayingPage === DISPLAY_USER) {
-    display = <InputSearchUser />;
-  }
   return (
     <>
-      <nav className="flex justify-center w-full border">
-        <Button
-          variant={
-            displayingPage === SELECT_DIFFICULTY || displayingPage === PLAY_GAME
-              ? "solid"
-              : "light"
-          }
-          color={
-            displayingPage === SELECT_DIFFICULTY || displayingPage === PLAY_GAME
-              ? "primary"
-              : ""
-          }
-          onClick={() => handleClick(SELECT_DIFFICULTY)}
-        >
-          Play
-        </Button>
-        <Button
-          variant={displayingPage === DISPLAY_USER ? "solid" : "light"}
-          color={displayingPage === DISPLAY_USER ? "primary" : ""}
-          onClick={() => handleClick(DISPLAY_USER)}
-        >
-          Search User
-        </Button>
-        <Button
-          variant={displayingPage === VIEW_LEADERBOARD ? "solid" : "light"}
-          color={displayingPage === VIEW_LEADERBOARD ? "primary" : ""}
-          onClick={() => handleClick(VIEW_LEADERBOARD)}
-        >
-          Leaderboard
-        </Button>
+      <ConfirmDialog
+        showDialog={showDialog}
+        confirmLeaveGame={() => dispatch(changePageTo(selectedNextPage))}
+        toggleDialog={toggleDialog}
+      />
+      <nav className="flex items-center flex-col h-1/2 w-full">
+        <div>
+          <Button
+            variant={
+              displayingPage === SELECT_DIFFICULTY ||
+              displayingPage === PLAY_GAME
+                ? "solid"
+                : "light"
+            }
+            color={
+              displayingPage === SELECT_DIFFICULTY ||
+              displayingPage === PLAY_GAME
+                ? "primary"
+                : ""
+            }
+            onClick={() => handleClick(SELECT_DIFFICULTY)}
+          >
+            Play
+          </Button>
+          <Button
+            variant={displayingPage === DISPLAY_USER ? "solid" : "light"}
+            color={displayingPage === DISPLAY_USER ? "primary" : ""}
+            onClick={() => handleClick(DISPLAY_USER)}
+          >
+            Search User
+          </Button>
+          <Button
+            variant={displayingPage === VIEW_LEADERBOARD ? "solid" : "light"}
+            color={displayingPage === VIEW_LEADERBOARD ? "primary" : ""}
+            onClick={() => handleClick(VIEW_LEADERBOARD)}
+          >
+            Leaderboard
+          </Button>
+        </div>
+        <InputSearchUser />
       </nav>
-      {display}
     </>
   );
 }
-
-NavBar.propTypes = {
-  changePageTo: PropTypes.func,
-  displayingPage: PropTypes.string,
-};

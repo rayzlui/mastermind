@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setWinTime,
@@ -63,11 +62,3 @@ export function TimerComponent() {
     </div>
   );
 }
-
-TimerComponent.propTypes = {
-  isWinner: PropTypes.bool,
-  endGame: PropTypes.func,
-  setWinTime: PropTypes.func,
-  updateDataBaseForPvP: PropTypes.func,
-  time: PropTypes.number,
-};

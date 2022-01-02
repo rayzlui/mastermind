@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useSelector } from "react-redux";
 
@@ -79,7 +78,3 @@ export function PreviousMoves() {
     </>
   );
 }
-
-PreviousMoves.propTypes = {
-  moveHistory: PropTypes.array,
-};

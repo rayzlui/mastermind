@@ -71,7 +71,7 @@ function CustomDifficultyRange(props) {
         </div>
       </div>
       <Button
-        variant="ghost"
+        variant="solid"
         onClick={() => {
           selectGame({
             codeLength: customCodeLength,
@@ -123,9 +123,3 @@ export function SelectDifficultyComponent() {
     </div>
   );
 }
-
-SelectDifficultyComponent.propTypes = {
-  toggleDifficulty: PropTypes.func,
-  gameType: PropTypes.string,
-  createGameWithDetails: PropTypes.func,
-};
