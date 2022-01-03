@@ -77,7 +77,19 @@ const createMatch = matchMakerWithCodeGenerator(
 //User routes
 
 //create
+
+function isInvalidUserCreation(data) {
+  let { username, password, key } = data;
+  return [username, password, key].some((entry) => entry === undefined);
+}
 app.post("/api/user/create", jsonParser, (req, res) => {
+  if (isInvalidUserCreation(req.body)) {
+    res
+      .status(404)
+      .send(
+        "Unable to create account. Please make sure you use alphanumeric characters and is at least 8 characters long"
+      );
+  }
   let { username, password, key } = req.body;
   if (username === undefined || password === undefined) {
     res.send(404).send("Need valid info");
@@ -131,7 +143,16 @@ app.get(`/api/getKey/login/:username`, (req, res) => {
 });
 
 //login
+
+function isInvalidUserLogin(data) {
+  let { username, password } = data;
+  return [username, password].some((entry) => entry === undefined);
+}
 app.post("/api/user/login", jsonParser, (req, res) => {
+  if (isInvalidUserLogin(req.body)) {
+    res.statusMessage(404).send("Missing login info");
+    return null;
+  }
   let { username, password } = req.body;
   UserModel.findOne({ name: username }, (err, user) => {
     if (err) {
@@ -154,11 +175,19 @@ app.post("/api/user/login", jsonParser, (req, res) => {
   });
 });
 
+function isInvalidGameHistory(data) {
+  let { code, time, difficulty, _id } = data;
+  return [code, time, difficulty, _id].some((entry) => entry === undefined);
+}
+
 //update user game history
-app.put("/api/userhistory/add/:id", jsonParser, (req, res) => {
-  let userid = req.params.id;
-  let { code, time, difficulty } = req.body;
-  UserModel.findOne({ _id: userid }, (err, user) => {
+app.put("/api/userhistory/add", jsonParser, (req, res) => {
+  if (isInvalidGameHistory(req.body)) {
+    res.status(404).res("Invalid game data");
+    return null;
+  }
+  let { code, time, difficulty, _id } = req.body;
+  UserModel.findOne({ _id }, (err, user) => {
     if (user === null) {
       res.status(404).send("Unable to find user");
     }
@@ -218,7 +247,16 @@ OneOnOneQueue.prototype.removeTwoFrom = function (diff) {
 let emitter = new EventEmitter();
 let oneOnOneMatchMaking = new OneOnOneQueue();
 
+function isInvalidGameRequest(data) {
+  let { name, id, difficulty } = data;
+  return [name, id, difficulty].some((entry) => entry === undefined);
+}
+
 app.get("/api/game/pvp/:difficulty/:name/:id", async (req, res) => {
+  if (isInvalidGameRequest(req.params)) {
+    res.status(404).send("Invalid game request");
+    return null;
+  }
   let { name, id, difficulty } = req.params;
 
   let user = { name, id };
@@ -278,6 +316,10 @@ setInterval(
 );
 
 app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
+  if (isInvalidGameRequest(req.params)) {
+    res.status(404).send("Invalid game request");
+    return null;
+  }
   let { name, id, difficulty } = req.params;
   let user = { name, id };
   tournamentMatchMakingQueue.addToThisQueue(difficulty, user);
@@ -286,17 +328,26 @@ app.get("/api/game/tournament/:difficulty/:name/:id", (req, res) => {
   });
 });
 
+function isInvalidGameData(data) {
+  let { userid, isWinner, time } = data;
+  return [userid, isWinner, time].some((entry) => entry === undefined);
+}
+
 //Handler for all active online matches
 app.put("/api/game/:gameid", jsonParser, (req, res) => {
-  let gameid = `${req.params.gameid}`;
+  let { gameid } = req.params;
+  if (gameid === undefined || isInvalidGameData(req.body)) {
+    res.status(404).send("Invalid game data");
+    return null;
+  }
   let { userid, isWinner, time } = req.body;
   PvPModel.findById(gameid, function (err, game) {
     if (err) {
       console.log(`Could not access database for game id: ${gameid}`);
-      res.send(err);
+      res.status(404).send("Unable to access server");
     }
     if (game === null) {
-      res.sendStatus(404);
+      res.status(404).send("Could not find game");
     } else {
       let { _id, players } = game;
       //isWinner will have three states. true === player has won, false === player has lost, null === game is still active
@@ -334,10 +385,24 @@ app.put("/api/game/:gameid", jsonParser, (req, res) => {
 
 //Leaderboard
 
+function isInvalidLeaderboardData(data) {
+  let { user, time, code, difficulty } = data;
+  let { countOfNums, nums } = code;
+  let { _id, username } = user;
+  return [_id, time, difficulty, username, countOfNums, nums].some(
+    (entry) => entry === undefined
+  );
+}
+
 //add to leaderboard
 app.post("/api/leaderboard/", jsonParser, (req, res) => {
+  if (isInvalidLeaderboardData(req.body)) {
+    res.status(403).send("Invalid game data");
+    return null;
+  }
   let { user, time, code, difficulty } = req.body;
   let { _id, username } = user;
+
   //on leaderboard page will show user name + time, but clicking user name => go to user page, clicking time => try and beat the code
   let entryToLeaderboard = new LeaderboardModel({
     name: username,
