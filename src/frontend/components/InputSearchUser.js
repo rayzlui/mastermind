@@ -5,12 +5,12 @@ import { searchUser } from "../actions/actions";
 import { DISPLAY_USER } from "../actions/actionTypes";
 
 export function InputSearchUser() {
-  let [searchInput, updateSearchInput] = useState();
+  let [searchInput, updateSearchInput] = useState("");
+  let dispatch = useDispatch();
   let displayingPage = useSelector((state) => state.displayingPage);
   if (displayingPage !== DISPLAY_USER) {
     return <div className="flex justify-center h-1/2">{null}</div>;
   }
-  let dispatch = useDispatch();
   return (
     <div className="flex justify-center h-1/2">
       <Input

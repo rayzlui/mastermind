@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { covertMillisecondsToMinutes } from "./TimerComponent";
+import { convertMillisecondsToMinutes } from "../helperFunctions/convertMillToMins";
 import { useSelector } from "react-redux";
 
 function PlayersInfo(props) {
   let { arrayOfPlayers } = props;
   return arrayOfPlayers.map((playerData) => {
     let { name, moves, isWinner, time } = playerData;
-    let { minutes, seconds } = covertMillisecondsToMinutes(time);
+    let { minutes, seconds } = convertMillisecondsToMinutes(time);
     let playerFinished = isWinner ? (
       <p>
         <span className="text-red-400">{name} </span>has finished with

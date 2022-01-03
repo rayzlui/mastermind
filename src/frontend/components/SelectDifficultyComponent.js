@@ -1,18 +1,38 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { SET_SINGLE_PLAYER } from "../actions/actionTypes";
+import { SINGLE_PLAYER } from "../actions/actionTypes";
 import { Button, Input } from "@vechaiui/react";
 import { createGameWithDetails } from "../actions/actions";
 import { useSelector, useDispatch } from "react-redux";
 
+function translateDifficultyToNums(name) {
+  let codeLength;
+  let maxDigit;
+  switch (name) {
+    case "easy":
+      codeLength = 4;
+      maxDigit = 4;
+      break;
+    case "hard":
+      codeLength = 7;
+      maxDigit = 9;
+      break;
+    default:
+      codeLength = 4;
+      maxDigit = 8;
+      break;
+  }
+  return { name, codeLength, maxDigit };
+}
+
 function DifficultyButtons(props) {
-  let { selectGame, gameType } = props;
+  let { selectGame } = props;
   return ["easy", "normal", "hard"].map((difficulty) => {
     return (
       <Button
         key={`button-${difficulty}`}
         variant="light"
-        onClick={() => selectGame({ difficulty, gameType })}
+        onClick={() => selectGame(translateDifficultyToNums(difficulty))}
       >
         {difficulty}
       </Button>
@@ -22,7 +42,6 @@ function DifficultyButtons(props) {
 
 DifficultyButtons.propTypes = {
   selectGame: PropTypes.func,
-  gameType: PropTypes.string,
 };
 
 function CustomDifficultyRange(props) {
@@ -57,7 +76,7 @@ function CustomDifficultyRange(props) {
           <input
             type="range"
             min="1"
-            max="15"
+            max="10"
             value={customCodeLength}
             onChange={(e) => updateLength(parseInt(e.target.value))}
           />
@@ -76,7 +95,7 @@ function CustomDifficultyRange(props) {
           selectGame({
             codeLength: customCodeLength,
             maxDigit: customDigits,
-            gameType: SET_SINGLE_PLAYER,
+            difficulty: "custom",
           });
         }}
       >
@@ -90,7 +109,6 @@ CustomDifficultyRange.propTypes = {
   updateDigits: PropTypes.func,
   updateLength: PropTypes.func,
   selectGame: PropTypes.func,
-  gameType: PropTypes.string,
 };
 
 export function SelectDifficultyComponent() {
@@ -103,11 +121,11 @@ export function SelectDifficultyComponent() {
   };
 
   let CustomRange =
-    showCustom && gameType === SET_SINGLE_PLAYER ? (
+    showCustom && gameType === SINGLE_PLAYER ? (
       <CustomDifficultyRange selectGame={selectGame} />
     ) : null;
   let CustomButton =
-    gameType === SET_SINGLE_PLAYER ? (
+    gameType === SINGLE_PLAYER ? (
       <Button variant="solid" onClick={() => toggleCustom(!showCustom)}>
         custom
       </Button>
@@ -116,7 +134,7 @@ export function SelectDifficultyComponent() {
   return (
     <div className="flex flex-col items-center">
       <div>
-        <DifficultyButtons selectGame={selectGame} gameType={gameType} />
+        <DifficultyButtons selectGame={selectGame} />
         {CustomButton}
       </div>
       <div className="flex flex-col">{CustomRange}</div>

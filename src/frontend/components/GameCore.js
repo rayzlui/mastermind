@@ -5,27 +5,8 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { useDispatch, useSelector } from "react-redux";
 import { userSubmitCodeForCheck } from "../actions/actions";
 import { USED_HINT } from "../actions/actionTypes";
+import { backSpace, addToCode } from "../helperFunctions/gameCoreHelper";
 const BACKSPACE = "BACKSPACE";
-
-function backSpace(arr) {
-  for (let i = arr.length - 1; i >= 0; i--) {
-    if (arr[i] !== null) {
-      arr[i] = null;
-      break;
-    }
-  }
-  return arr;
-}
-
-function addToCode(arr, val) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === null) {
-      arr[i] = val;
-      break;
-    }
-  }
-  return arr;
-}
 
 function CodeGuessDisplay(props) {
   let { handleDirectIndexInput, codeLength, userGuess, clickedIndex } = props;
@@ -118,7 +99,8 @@ export function GameCore() {
   let isWinner = useSelector((state) => state.isWinner);
 
   let updateHintsAllowed = () => dispatch({ type: USED_HINT });
-  let submitGuess = (code) => dispatch(userSubmitCodeForCheck(code));
+  let submitGuess = (guessedCode) =>
+    dispatch(userSubmitCodeForCheck(guessedCode));
 
   let { codeLength, maxDigit } = gameDifficulty;
   let [userGuess, updateGuess] = useState(new Array(codeLength).fill(null));
@@ -201,7 +183,7 @@ export function GameCore() {
       className="w-full h-1/3 flex items-center flex-col focus:outline-0"
     >
       <h3 className="font-bold text-xl font-sans">Your Guess</h3>
-      <div className="w-full h-1/3 flex justify-center">
+      <div className="w-full h-1/3 flex justify-center overflow-x">
         <CodeGuessDisplay
           userGuess={userGuess}
           handleDirectIndexInput={handleDirectIndexInput}

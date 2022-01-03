@@ -13,10 +13,6 @@ export function AlertMessage() {
     notification({
       title: message,
       position: "top",
-      undoText: "Undo",
-      onUndo: () => {
-        updateAlertMessage(null);
-      },
     });
   };
   if (message) {

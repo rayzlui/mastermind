@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { covertMillisecondsToMinutes } from "./TimerComponent";
+import { convertMillisecondsToMinutes } from "../helperFunctions/convertMillToMins";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
 function HideUntilClick(props) {
@@ -30,7 +30,7 @@ function ShowGameHistory(props) {
   return gameHistory.map((game, index) => {
     let { difficulty, time, code } = game;
     let { nums } = code;
-    let { minutes, seconds } = covertMillisecondsToMinutes(time);
+    let { minutes, seconds } = convertMillisecondsToMinutes(time);
     return (
       <section key={`user-history-${index}`} className="border w-24">
         <HideUntilClick beforeClick={difficulty} afterClick={nums} />

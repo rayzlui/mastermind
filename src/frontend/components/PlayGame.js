@@ -1,5 +1,5 @@
 import React from "react";
-import { PLAY_GAME, SET_SINGLE_PLAYER } from "../actions/actionTypes";
+import { PLAY_GAME, SINGLE_PLAYER } from "../actions/actionTypes";
 import { TurnsRemaining } from "./TurnsRemaining";
 import { HintsRemaining } from "./HintsRemaining";
 import { useSelector } from "react-redux";
@@ -16,7 +16,7 @@ export function PlayGame() {
   if (displayingPage !== PLAY_GAME) {
     return null;
   }
-  if (gameType !== SET_SINGLE_PLAYER && pvpData === null) {
+  if (gameType !== SINGLE_PLAYER && pvpData === null) {
     return (
       <div className="flex flex-col justify-center items-center">
         <h1>Matching...</h1>

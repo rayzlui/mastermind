@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { covertMillisecondsToMinutes } from "./TimerComponent";
+import { convertMillisecondsToMinutes } from "../helperFunctions/convertMillToMins";
 import {
   PLAY_GAME,
   VIEW_LEADERBOARD,
@@ -13,6 +13,7 @@ import {
   searchUser,
   setMastermindCode,
   reset,
+  setDifficulty,
 } from "../actions/actions";
 
 function capitalize(string) {
@@ -28,17 +29,18 @@ export function ViewLeaderboard() {
   useEffect(async () => {
     if (displayingPage !== VIEW_LEADERBOARD) {
       return null;
-    }
-    try {
-      let request = await fetch(`http://localhost:3001/api/leaderboard`);
-      let data = await request.json();
-      setLeaderboard(data);
-    } catch (error) {
-      dispatch({
-        type: SET_ALERT_MESSAGE,
-        payload: "Error accessing server, please check your connection",
-      });
-      setLeaderboard(false);
+    } else {
+      try {
+        let request = await fetch(`http://localhost:3001/api/leaderboard`);
+        let data = await request.json();
+        setLeaderboard(data);
+      } catch (error) {
+        dispatch({
+          type: SET_ALERT_MESSAGE,
+          payload: "Error accessing server, please check your connection",
+        });
+        setLeaderboard(false);
+      }
     }
   }, [displayingPage]);
 
@@ -46,6 +48,7 @@ export function ViewLeaderboard() {
     dispatch(setMastermindCode(code));
     dispatch(reset());
     dispatch(changePageTo(PLAY_GAME));
+    dispatch(setDifficulty({ name: showDifficulty }));
   };
   let viewPlayer = (name) => {
     dispatch(searchUser(name));
@@ -73,7 +76,7 @@ export function ViewLeaderboard() {
   let display = keysForDifficulty.reduce((acc, diff) => {
     acc[diff] = leaderboard[diff].map((player, index) => {
       let { user, code, time } = player;
-      let convertMilli = covertMillisecondsToMinutes(time);
+      let convertMilli = convertMillisecondsToMinutes(time);
       let { minutes, seconds } = convertMilli;
       return (
         <tr key={`row${index}`}>
