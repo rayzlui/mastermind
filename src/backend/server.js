@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
 function difficultyTranslateValues(string) {
   switch (string) {
     case "easy":
-      return { codeLength: 4, maxDigit: 5 };
+      return { codeLength: 4, maxDigit: 4 };
     case "hard":
       return { codeLength: 7, maxDigit: 9 };
     default:
