@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { DISPLAY_USER } from "../actions/actionTypes";
 import { ShowThisUser } from "./ShowThisUser";
 import { useSelector } from "react-redux";
@@ -17,8 +16,3 @@ export function SearchUserDisplay() {
     </div>
   );
 }
-
-SearchUserDisplay.propTypes = {
-  displayingPage: PropTypes.string,
-  searchedUser: PropTypes.object,
-};

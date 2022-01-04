@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
 import { DISPLAY_USER } from "../actions/actionTypes";
 import { Button } from "@vechaiui/react";
 import { useDispatch, useSelector } from "react-redux";

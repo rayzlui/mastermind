@@ -16,17 +16,17 @@ import { AlertMessage } from "./frontend/components/AlertMessage";
 function App() {
   let store = configureStore();
   return (
-    <div className="flex flex-col bg-zinc-200 h-screen items-center ">
+    <div className="flex flex-col bg-white h-screen items-center ">
       <VechaiProvider>
         <Provider store={store}>
           <AlertMessage />
-          <div className="h-1/6 grid items-center justify-items-center w-screen bg-white">
+          <div className="h-20 grid items-center justify-items-center w-screen bg-white border-b-gray-600 border-b">
             <HeaderComponent />
           </div>
           <div className="h-1/8 w-4/5">
             <NavBar />
           </div>
-          <div className="w-4/5 h-4/6 mb-8 overflow-scroll border bg-gray-100 rounded">
+          <div className="w-4/5 h-4/6 mb-8 overflow-scroll border border-gray-600 bg-white rounded">
             <GameModeSelect />
             <UserPage />
             <SearchUserDisplay />

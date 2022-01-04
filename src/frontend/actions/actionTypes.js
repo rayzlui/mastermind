@@ -1,18 +1,12 @@
 export const SET_TURNS = "SET_TURNS";
 export const USER_SUBMIT = "USER_SUBMIT";
-
 export const ADD_USER_MOVE_HISTORY = "ADD_USER_MOVE_HISTORY";
-
 export const SET_MASTERMIND_CODE = "SET_MASTERMIND_CODE";
-
 export const WINNER = "WINNER";
-
 export const SET_DIFFICULTY = "SET_DIFFICULTY";
-export const SET_SINGLE_PLAYER = "SET_SINGLE_PLAYER";
-export const SET_PVP = "SET_PVP";
-export const SET_TOURNAMENT = "SET_TOURNAMENT";
-export const TRY_MATCHMAKING = "TRY_MATCHMAKING";
-export const FINISH_MATCHMAKING = "FINISH_MATCHMAKING";
+export const SINGLE_PLAYER = "SINGLE_PLAYER";
+export const ONE_ON_ONE = "ONE_ON_ONE";
+export const TOURNAMENT = "TOURNAMENT";
 export const UPDATE_PVP_INFO = "UPDATE_PVP_INFO";
 export const LOGIN_USER = "LOGIN_USER";
 export const LOGOUT_USER = "LOGOUT_USER";

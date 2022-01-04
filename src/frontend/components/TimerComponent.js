@@ -1,23 +1,11 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  setWinTime,
+  setTime,
   specialUpdatePvPForTimer,
   weHaveALoser,
 } from "../actions/actions";
-
-export function covertMillisecondsToMinutes(milli) {
-  let totalSeconds = milli / 1000;
-  let minutes = Math.floor(totalSeconds / 60);
-  let seconds =
-    totalSeconds % 60 < 10 ? `0${totalSeconds % 60}` : totalSeconds % 60;
-  if (milli < 0) {
-    minutes = 0;
-    seconds = "00";
-  }
-  return { minutes, seconds };
-}
+import { convertMillisecondsToMinutes } from "../helperFunctions/convertMillToMins";
 
 export function TimerComponent() {
   let isWinner = useSelector((state) => state.isWinner);
@@ -28,6 +16,7 @@ export function TimerComponent() {
 
   useEffect(() => {
     updateGameTimer(time);
+    return null;
   }, [time]);
 
   //timer ends game if it runs out, or if game is over before timer ends, timer will stop.
@@ -39,9 +28,10 @@ export function TimerComponent() {
     if (gameTimer <= 0) {
       dispatch(weHaveALoser());
       dispatch(specialUpdatePvPForTimer());
+      dispatch(setTime(0));
       clearInterval(countdown);
     } else if (isWinner !== null) {
-      dispatch(setWinTime(gameTimer));
+      dispatch(setTime(gameTimer));
       dispatch(specialUpdatePvPForTimer(gameTimer));
       clearInterval(countdown);
     }
@@ -50,7 +40,7 @@ export function TimerComponent() {
     };
   }, [gameTimer, isWinner]);
 
-  let { minutes, seconds } = covertMillisecondsToMinutes(gameTimer);
+  let { minutes, seconds } = convertMillisecondsToMinutes(gameTimer);
 
   return (
     <div className="flex mt-10 flex-col items-center">
@@ -63,11 +53,3 @@ export function TimerComponent() {
     </div>
   );
 }
-
-TimerComponent.propTypes = {
-  isWinner: PropTypes.bool,
-  endGame: PropTypes.func,
-  setWinTime: PropTypes.func,
-  updateDataBaseForPvP: PropTypes.func,
-  time: PropTypes.number,
-};

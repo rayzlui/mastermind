@@ -61,7 +61,7 @@ The app is playable without the backend, however, if you would like to "play onl
 
 https://www.mongodb.com/try/download/community
 
-To run the backend, start MongoDB by typing in your command line type:
+To run the backend, start MongoDB by typing in your command line:
 
   `mongod`
 
@@ -142,7 +142,7 @@ For clarity, when guess code button is referenced below, it means the code you a
 
 Input buttons are the buttons that will have numbers on them at all times. These are the button you may use to enter your guess code.
 
-### How To Make Your Guess
+#### How To Make Your Guess
 
 To select your code you may either use the numbers 1 - 9 on your keypad or use the number input buttons on the screen. 
 
@@ -155,7 +155,7 @@ Additionally, when you click on a guess code button, it will allow the hint butt
 
 Once you fill out your code, you may click the submit button to see if your code is correct. The submit button will not work if your code isn't the proper length.
 
-### What Happens Next?
+#### What Happens Next?
 
 That's it. You keep guessing until the time runs out, your turns run out or you get the code correct.
 
@@ -192,10 +192,10 @@ I wanted accomplish the following with the project:
 - Create a Mastermind game
 - Add player vs player capability
 
-### Planning
+## Planning
 
 
-#### Choosing The Tech. 
+### Choosing The Tech. 
 
 I decided to use Javascript on this project because it's the language I am most familiar with. 
 
@@ -203,7 +203,7 @@ Since I'm using Javascript and this project needed a way for a user to interact 
 
 For the backend I chose to use Express.js, Mongoose.js and MongoDB because they are the techs I have some familarity with.
 
-#### Organization
+### Organization
 
 My plan on building out the project would be in this order:
 
@@ -311,7 +311,9 @@ It would rank the users based on the time they finished. The first person to fin
 
 The users would still have a timer and number of turns. If there's no timer, some games might never technically end, and if there's no number of turns, it would come down to whoever spams guesses faster. It, therefore, is technically would be possible for there to be no winners in an online mode game.
 
-Users would be able to select what difficulty they wanted for online mode
+Users would be able to select what difficulty they wanted for online mode.
+
+The user would get an update of the other players move each time they submitted a guess. The submit action would update the game data and get a new updated version of the game data. I debated if I wanted to do something where the user would be updated each time another user also submitted their guess to make it more intense. This would require something with Websockets which I'm not confident on at the moment or having a setInterval in the frontend which would call for game data every so and so seconds. I figured that would be expensive for both the user and the server.
 
 
 
@@ -371,7 +373,7 @@ The players Schema type of the PvP model is stored as a Javascript object/hashma
 
 #### User API
 
-##### Create User API
+#### Create User API
 
 The an endpoint `/api/user/create` listens for a HTTP POST action and will expect a request with a body containing a username, password and key. It will verify there is a username and a password passed. If they are missing, it will respond with 404 and message letting user know they need to provide those required information.
 
@@ -380,11 +382,11 @@ It then search for an instance of the username in the UserModel.
 If found, it will respond with a 418 and message letting user know the username is taken. 
 If not found, it create a new UserModel instance with data passed from request body and respond with the new UserModel instance.
 
-##### Request Key API
+#### Request Key API
 
 The endpount `/api/getKey/login/:username` listens for a HTTP GET action. It expects a username in its params. It will search UserModel for an instance and if found, will respond with the UserModel instances key value. This is intended for login situations for the user.
 
-##### Login User API
+#### Login User API
 
 The endpoint `/api/user/login` listens for a HTTP POST action. It expects username and password in its request body. It will search for an instance of the UserModel with the username. If not found, it will respond with error code 418 and message to create an account. 
 
@@ -392,9 +394,9 @@ If found, it will compare password of the instance and password passed. If true,
 
 Note: The passwords sent to the Login User API and the one stored on the User Model instance will not be the password entered by the user. It will be modified by a scrambleString helper function on the frontend that uses the key passed from requestKey API.
 
-#### Game API
+### Game API
 
-##### Create Games API
+#### Create Games API
 
 The server has two objects on it, one of the OneOnOneQueue class and one of TournamentQueue class. These objects will store the queues for each online mode type based on the user's selected difficulty.
 
@@ -412,7 +414,7 @@ The endpoint `/api/game/tournament/:difficulty/:name/:id` listens for a HTTP GET
 
 There is a setInterval on the server that will trigger a TournamentMatchMaker helper function every 10 seconds. The TournamentMatchMaker will check each difficulty in the TournamentQueue object instance and if the conditions are met for each queue, pass all the players in the difficulty queue to the createMatch helper function to create a match. It will then reset the queue and emit a event action to trigger the tournament start listerns. 
 
-##### Update Games API
+#### Update Games API
 
 The server has an end point `/api/game/:gameid` listens for a HTTP PUT action and will expect gameid in params and a userid, time and isWinner boolean in the request body. The end point is going update a game in database based on the gameid passed. 
 
@@ -430,9 +432,9 @@ If it is false, the player has lost and will add one to the PvPModel instance's 
 
 If isWinner is true or false, the endpoint will also check if the PvPModel instance's numCompletedGames is equal to the PvPModel instance's numOfPlayers. If they are equal, that means all players have completed their games, win or lose, and will then delete the instance. 
 
-#### Backend Extensions
+### Backend Extensions
 
-##### Leaderboard API + Database
+#### Leaderboard API + Database
 
 To make games more interesting for single players, I created a leaderboard for the winning single players to upload their time at completiton. There is a leaderboard for each difficulty except custom.
 
@@ -442,7 +444,7 @@ The endpoint `/api/leaderboard/` listens for a HTTP POST action. It expects user
 
 The endpoint `/api/leaderboard/` listens for a HTTP GET post. It expects nothing to be passed. It will get all Leaderboard Model instance, sort split them into three arrays based on the difficulty and sort it based on the highest time in the instance. It will respond with a object that contains the three arrays.
 
-##### Additional User API
+#### Additional User API
 
 Since the UserModel existed I decided to add a way for user to search other users.
 
@@ -453,7 +455,7 @@ I also decided to add a gameHistory to the UserModel. It will allow users to sav
 The endpoint `api/userhistory/add/:id` listens for a HTTP PUT action. It expects a userid in it's params and code, time and difficulty in the request body. It will search for the UserModel instance with userid. If found, it will add the code, time and difficulty into the gameHistory of the instance. If not found, it will respond with 404.
 
 
-### Handling the Backend from the Front
+## Handling the Backend from the Front
 
 The Mastermind game was developed to be able to work in single player mode or multiplayer without much refactoring.
 
@@ -486,7 +488,7 @@ Since the app was no longer just a game, I added an additional reducer/state tha
 I also created a nav bar to allow users to change between playing game, searching users and viewing leaderboard.
 
 
-### Styling
+## Styling
 
 I know you're probably thinking, what style? I tried lol.
 
@@ -497,7 +499,7 @@ I used the VechaiUI library, which was built on top of TailWindCSS for simple co
 I created additional visual components for error popups and confirmation dialogs.
 
 
-### Testing
+## Testing
 
 I tested the essential functions for playing the Mastermind game. The compareCode and generateCode functions are core the game working. The testing stragety was to make sure the compareCode produced the right feedback regardless of if numbers input. Edge cases were all same numbers in the Mastermind code and all different numbers. generateCode testing was 
 
