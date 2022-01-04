@@ -21,14 +21,19 @@ import {
   searchUser,
   showThisUser,
   uploadTimeToLeaderboard,
+  updateDataBaseForPvP,
+  setCurrentUser,
+  createUser,
 } from "./actions";
 import {
   DISPLAY_USER,
   ONE_ON_ONE,
   PLAY_GAME,
+  SAVE_COMPLETE,
   SET_ALERT_MESSAGE,
   SINGLE_PLAYER,
   TOURNAMENT,
+  UNABLE_TO_SAVE,
 } from "./actionTypes";
 
 import fetchMock from "fetch-mock";
@@ -653,7 +658,7 @@ describe("uploadTimeToLeaderboard", () => {
     uploadTimeThunk = uploadTimeToLeaderboard(feedbackCallback);
   });
 
-  describe("was custom difficulty", () => {
+  describe("is custom difficulty", () => {
     let mockStore = mockStoreGenerator(
       mockUser,
       mockCode,
@@ -703,6 +708,190 @@ describe("uploadTimeToLeaderboard", () => {
           "Content-Type": "application/json",
         },
         method: "post",
+      });
+
+      await expect(feedbackCallback).toHaveBeenCalledWith(true);
+      await expect(mockDispatch).toHaveBeenCalledWith({ type: SAVE_COMPLETE });
+    });
+    it("should handle rejection", async () => {
+      fetchMock.putOnce(historyUrl, { status: 418 });
+      fetchMock.postOnce(leaderUrl, { status: 418 });
+      await uploadTimeThunk(mockDispatch, mockStore);
+      await expect(mockDispatch).toHaveBeenCalledTimes(1);
+      let [historyMock, leaderMock] = fetchMock.calls();
+      await expect(historyMock[1]).toEqual({
+        body: JSON.stringify({
+          _id: mockUser._id,
+          code: mockCode,
+          time: 0,
+          difficulty: "easy",
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "put",
+      });
+      await expect(leaderMock[1]).toEqual({
+        body: JSON.stringify({
+          user: mockUser,
+          code: mockCode,
+          time: 0,
+          difficulty: "easy",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "post",
+      });
+
+      await expect(feedbackCallback).toHaveBeenCalledWith(false);
+      await expect(mockDispatch).toHaveBeenCalledWith({ type: UNABLE_TO_SAVE });
+    });
+  });
+  it("it should handle server down", async () => {
+    let mockStore = mockStoreGenerator(
+      mockUser,
+      mockCode,
+      0,
+      mockDiffGen("easy")
+    );
+    fetchMock.putOnce(historyUrl, null);
+    fetchMock.postOnce(leaderUrl, null);
+    await uploadTimeThunk(mockDispatch, mockStore);
+    await expect(mockDispatch).toHaveBeenCalledWith({
+      type: SET_ALERT_MESSAGE,
+      payload: "Error accessing server, please check your connection",
+    });
+  });
+});
+
+describe("updateDataBaseForPvP", () => {
+  let mockGameId = "8su8sdfjds09fs0d";
+  let mockUserid = "fda9dsufds0fdsf";
+  let mockisWinner = null;
+  let mockTime = 113200;
+  let updateDataBaseThunk;
+  let mockDispatch;
+  beforeEach(() => {
+    fetchMock.reset();
+    mockDispatch = jest.fn();
+    updateDataBaseThunk = updateDataBaseForPvP(
+      mockGameId,
+      mockUserid,
+      mockisWinner,
+      mockTime
+    );
+  });
+  let url = `http://localhost:3001/api/game/${mockGameId}`;
+  describe("it should handle server rejection", () => {
+    it("should dispatch fail handler", async () => {
+      fetchMock.putOnce(url, null);
+      await updateDataBaseThunk(mockDispatch);
+      await expect(mockDispatch).toHaveBeenCalledWith({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
+    });
+  });
+  describe("it should call url with proper info", () => {
+    it("should have the parameters in request", async () => {
+      let mockPlayers = {
+        players: {
+          "94109fwe": { username: "paul" },
+          d8fuds9fds: { username: "nick" },
+        },
+      };
+      fetchMock.putOnce(url, mockPlayers);
+      await updateDataBaseThunk(mockDispatch);
+      let [call] = await fetchMock.calls();
+      let callBody = call[1];
+      await expect(callBody).toEqual({
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          gameid: mockGameId,
+          userid: mockUserid,
+          isWinner: mockisWinner,
+          time: mockTime,
+        }),
+      });
+      await expect(mockDispatch).toHaveBeenCalledWith(
+        updatePvpInfo({ players: mockPlayers.players })
+      );
+    });
+  });
+});
+
+describe("createUser", () => {
+  let mockUserName = "jorge";
+  let string = "hello123";
+  let mockCallback;
+  let mockDispatch;
+  let createUserThunk;
+  let url = `http://localhost:3001/api/user/create`;
+
+  beforeEach(() => {
+    fetchMock.reset();
+    mockCallback = jest.fn();
+    mockDispatch = jest.fn();
+    createUserThunk = createUser(mockUserName, string, mockCallback);
+  });
+
+  it("should be a function", () => {
+    expect(typeof createUserThunk).toEqual("function");
+  });
+
+  describe("unable to request from server", () => {
+    it("should dispatch alert message", () => {
+      fetchMock.postOnce("url doesnt exist", null);
+      createUserThunk(mockDispatch);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
+      });
+    });
+  });
+  describe("able to request from server", () => {
+    it("should make request with body values", () => {
+      let mockResponse = { user: mockUserName, _id: "9uef9sdfsd9f8d" };
+      fetchMock.postOnce(url, mockResponse);
+      createUserThunk(mockDispatch);
+      let call = fetchMock.calls();
+      let [urlData, callData] = call[0];
+      expect(call.length).toEqual(1);
+      expect(callData.body).toBeTruthy();
+    });
+
+    it("should change string for password and pass username", () => {
+      let mockResponse = { user: mockUserName, _id: "9uef9sdfsd9f8d" };
+      fetchMock.postOnce(url, mockResponse);
+      createUserThunk(mockDispatch);
+      let call = fetchMock.calls();
+      let [urlData, callData] = call[0];
+      let { username, password } = JSON.parse(callData.body);
+      expect(password).not.toEqual(string);
+      expect(username).toEqual(mockUserName);
+    });
+
+    it("should dispatch setCurrentUser and hideLogin if success", async () => {
+      let mockResponse = { user: mockUserName, _id: "9uef9sdfsd9f8d" };
+      fetchMock.postOnce(url, mockResponse);
+      await createUserThunk(mockDispatch);
+      await expect(mockDispatch).toHaveBeenCalledTimes(2);
+      await expect(mockDispatch).toHaveBeenNthCalledWith(
+        1,
+        setCurrentUser(mockResponse)
+      );
+      await expect(mockDispatch).toHaveBeenNthCalledWith(2, hideLogin());
+    });
+  });
+  describe("server up, bad response", () => {
+    it("should run callback if failed", async () => {
+      fetchMock.postOnce(url, 404);
+      await createUserThunk(mockDispatch);
+      await expect(mockDispatch).toHaveBeenCalledWith({
+        type: SET_ALERT_MESSAGE,
+        payload: "Error accessing server, please check your connection",
       });
     });
   });
