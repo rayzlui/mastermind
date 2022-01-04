@@ -61,7 +61,7 @@ The app is playable without the backend, however, if you would like to "play onl
 
 https://www.mongodb.com/try/download/community
 
-To run the backend, start MongoDB by typing in your command line type:
+To run the backend, start MongoDB by typing in your command line:
 
   `mongod`
 
